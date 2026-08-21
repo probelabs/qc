@@ -1,0 +1,364 @@
+schema_version: 1
+branch: main
+generated_at: "2026-08-21T12:52:17Z"
+reviews:
+    - requirement: INT-REQ-001
+      artifact: src/store.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:8cc8c8aef2cc28512c3c2d81d919a440dd504aba79e00a70eebf4debcfc9d560
+      approval_fingerprint: sha256:5d8d353b9bbecae3631bd416b3793c45d5b323f0a264f28c709c7b45cdab8814
+      artifact_fingerprint: sha256:692579702b1c82ab5008fe3a110ad65aafa7932434af04345e9c869bda0329ed
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: INT-REQ-002
+      artifact: src/commands.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:df8f943ba950174275b453fccba90a0a5ba0cddd29f106506423dd9e351f5dc6
+      approval_fingerprint: sha256:90814e33607974814a0dc4990637b40a0fa2f4b552e1cf27f4faed7b671a8542
+      artifact_fingerprint: sha256:355c35bf98940239e7b814236424b59b534c0e02ebd20208b3b420c79f0f63bf
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: INT-REQ-002
+      artifact: src/store.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:df8f943ba950174275b453fccba90a0a5ba0cddd29f106506423dd9e351f5dc6
+      approval_fingerprint: sha256:90814e33607974814a0dc4990637b40a0fa2f4b552e1cf27f4faed7b671a8542
+      artifact_fingerprint: sha256:692579702b1c82ab5008fe3a110ad65aafa7932434af04345e9c869bda0329ed
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: INT-REQ-003
+      artifact: src/commands.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:f2bf677a8d188159c0cec172d73369aa8c204edf5a1f430887afd3598a9a62b7
+      approval_fingerprint: sha256:2528ec541edc59f7c3c57aa20078c4c2bae14733777dc069336cd07a1812f6eb
+      artifact_fingerprint: sha256:355c35bf98940239e7b814236424b59b534c0e02ebd20208b3b420c79f0f63bf
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: INT-REQ-004
+      artifact: src/digest.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:ed7c8a2dc7d7f3942ad45ed0d8b2fd5212b1d551afbbc86f130c7a9e05e85461
+      approval_fingerprint: sha256:ebcc3929bfae8a26b057518f5b9b9584de835fefb22a9d0c49eeca6c5b1e8c9a
+      artifact_fingerprint: sha256:7a75b5069a224330dee0eefcefe2129918c8797a0b2bb9198d4edd72758b8079
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: INT-REQ-004
+      artifact: src/globmatch.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:ed7c8a2dc7d7f3942ad45ed0d8b2fd5212b1d551afbbc86f130c7a9e05e85461
+      approval_fingerprint: sha256:ebcc3929bfae8a26b057518f5b9b9584de835fefb22a9d0c49eeca6c5b1e8c9a
+      artifact_fingerprint: sha256:a88afb4fbbe959c91659f748d5d5ef4c6ee724c39044d6b3dbe23523df2d2d02
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: INT-REQ-004
+      artifact: src/parser.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:ed7c8a2dc7d7f3942ad45ed0d8b2fd5212b1d551afbbc86f130c7a9e05e85461
+      approval_fingerprint: sha256:ebcc3929bfae8a26b057518f5b9b9584de835fefb22a9d0c49eeca6c5b1e8c9a
+      artifact_fingerprint: sha256:54123628cb41a0418c74ac20fdc111f392ea34e1551cb2749d8029bafe5b9d50
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: INT-REQ-004
+      artifact: src/util.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:ed7c8a2dc7d7f3942ad45ed0d8b2fd5212b1d551afbbc86f130c7a9e05e85461
+      approval_fingerprint: sha256:ebcc3929bfae8a26b057518f5b9b9584de835fefb22a9d0c49eeca6c5b1e8c9a
+      artifact_fingerprint: sha256:0f8a877af4186fc5d34071968e9876c1efb6d7518d1562840ad909466fe4825e
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: STK-REQ-002
+      artifact: src/templates.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:d81359d78979306dd8d65549deb17545199b1dc8cce4cd01164a0bcaeeac68cb
+      approval_fingerprint: sha256:377cd6d8af49aa52410c886223eab6836d0cdb7f5fc5693e9891d58f18737c16
+      artifact_fingerprint: sha256:96f749c235c2df54d7350008e24f2a930c741c6d97b5c01a5f2dc8f1efdcf613
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: STK-REQ-003
+      artifact: src/states.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:b7b270bb0d08d1c56c8213d8eea9397958c65b57ddc5883891efa326d958a9b4
+      approval_fingerprint: sha256:8138eeda89e77aa2e4ea23cbceedc0c1a57ac321ea4f65a97bcc0eae66bba429
+      artifact_fingerprint: sha256:c4df921a17e592219fef550098abd5a235766b09370d7e52f4ff3eedb7ef421f
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-001
+      artifact: src/states.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:8549a4d1a7646cdba6f9b8465e15f45dadd2177af71442f4071ea59319c4b8d3
+      approval_fingerprint: sha256:8521a8061cd14c011c50c9d663b1541afd7ffd2ae758ccd8699dd0075297f510
+      artifact_fingerprint: sha256:c4df921a17e592219fef550098abd5a235766b09370d7e52f4ff3eedb7ef421f
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-002
+      artifact: src/cli.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:da82e442121bf07909b8a61972f7c87d98ca84ff0b41dea662a253beb18b964f
+      approval_fingerprint: sha256:561f2d5c20a5b390b07ba1ee7f0a1994b7548b36514496e55c711c1bae738989
+      artifact_fingerprint: sha256:71c18dba740590fa4af10a32f3dfe345a0d8a1c97c940927e7698815e9167b51
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-002
+      artifact: src/commands.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:da82e442121bf07909b8a61972f7c87d98ca84ff0b41dea662a253beb18b964f
+      approval_fingerprint: sha256:561f2d5c20a5b390b07ba1ee7f0a1994b7548b36514496e55c711c1bae738989
+      artifact_fingerprint: sha256:355c35bf98940239e7b814236424b59b534c0e02ebd20208b3b420c79f0f63bf
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-002
+      artifact: src/templates.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:da82e442121bf07909b8a61972f7c87d98ca84ff0b41dea662a253beb18b964f
+      approval_fingerprint: sha256:561f2d5c20a5b390b07ba1ee7f0a1994b7548b36514496e55c711c1bae738989
+      artifact_fingerprint: sha256:96f749c235c2df54d7350008e24f2a930c741c6d97b5c01a5f2dc8f1efdcf613
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-002
+      artifact: src/util.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:da82e442121bf07909b8a61972f7c87d98ca84ff0b41dea662a253beb18b964f
+      approval_fingerprint: sha256:561f2d5c20a5b390b07ba1ee7f0a1994b7548b36514496e55c711c1bae738989
+      artifact_fingerprint: sha256:0f8a877af4186fc5d34071968e9876c1efb6d7518d1562840ad909466fe4825e
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-003
+      artifact: src/commands.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:e4d4a73f0347c4e9c93591536420429fe858f773407f0f741f870273a466d27b
+      approval_fingerprint: sha256:5b6753d2f0cff6063113ee938a79b08fb5ee068f35af61d6fe7e2961e8a1beb4
+      artifact_fingerprint: sha256:355c35bf98940239e7b814236424b59b534c0e02ebd20208b3b420c79f0f63bf
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-003
+      artifact: src/templates.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:e4d4a73f0347c4e9c93591536420429fe858f773407f0f741f870273a466d27b
+      approval_fingerprint: sha256:5b6753d2f0cff6063113ee938a79b08fb5ee068f35af61d6fe7e2961e8a1beb4
+      artifact_fingerprint: sha256:96f749c235c2df54d7350008e24f2a930c741c6d97b5c01a5f2dc8f1efdcf613
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-003
+      artifact: src/util.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:e4d4a73f0347c4e9c93591536420429fe858f773407f0f741f870273a466d27b
+      approval_fingerprint: sha256:5b6753d2f0cff6063113ee938a79b08fb5ee068f35af61d6fe7e2961e8a1beb4
+      artifact_fingerprint: sha256:0f8a877af4186fc5d34071968e9876c1efb6d7518d1562840ad909466fe4825e
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-004
+      artifact: src/commands.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:77a0c73a8004b5e909cf73b9c6d643c03364bc78461fe8c7d62e4c09f51c3720
+      approval_fingerprint: sha256:c92979602694eff2f8cb5cd6aa931ebd968bb61ab03e336a852a4983846a5a06
+      artifact_fingerprint: sha256:355c35bf98940239e7b814236424b59b534c0e02ebd20208b3b420c79f0f63bf
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-004
+      artifact: src/parser.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:77a0c73a8004b5e909cf73b9c6d643c03364bc78461fe8c7d62e4c09f51c3720
+      approval_fingerprint: sha256:c92979602694eff2f8cb5cd6aa931ebd968bb61ab03e336a852a4983846a5a06
+      artifact_fingerprint: sha256:54123628cb41a0418c74ac20fdc111f392ea34e1551cb2749d8029bafe5b9d50
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-004
+      artifact: src/util.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:77a0c73a8004b5e909cf73b9c6d643c03364bc78461fe8c7d62e4c09f51c3720
+      approval_fingerprint: sha256:c92979602694eff2f8cb5cd6aa931ebd968bb61ab03e336a852a4983846a5a06
+      artifact_fingerprint: sha256:0f8a877af4186fc5d34071968e9876c1efb6d7518d1562840ad909466fe4825e
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-005
+      artifact: src/parser.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:50c0518d2bdc2cdc2437fb85fab6d910ed6fca9f3be97bb4d5ae4073df36e835
+      approval_fingerprint: sha256:ded2092865b9ede2a9ebba355d2793d2aad8329f788694850c5f762b4b123257
+      artifact_fingerprint: sha256:54123628cb41a0418c74ac20fdc111f392ea34e1551cb2749d8029bafe5b9d50
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-005
+      artifact: src/util.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:50c0518d2bdc2cdc2437fb85fab6d910ed6fca9f3be97bb4d5ae4073df36e835
+      approval_fingerprint: sha256:ded2092865b9ede2a9ebba355d2793d2aad8329f788694850c5f762b4b123257
+      artifact_fingerprint: sha256:0f8a877af4186fc5d34071968e9876c1efb6d7518d1562840ad909466fe4825e
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-006
+      artifact: src/states.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:3ed480d8f41d907b314ded2b52872c4e58acac01095019e10d026a7bf268f727
+      approval_fingerprint: sha256:b05ae456d2ee7c6aaff4d25bdc5fde773a25a6a74fd7062763521ecaebf9264f
+      artifact_fingerprint: sha256:c4df921a17e592219fef550098abd5a235766b09370d7e52f4ff3eedb7ef421f
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-007
+      artifact: src/commands.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:63f3830de0e3cb6c67723b5467b0b1aed1ae447d838febac8158a881a318286a
+      approval_fingerprint: sha256:428ec2224c084d6c0446a4ebdaa01742bf60785d5738f9bf0bfc318a0b2f97f7
+      artifact_fingerprint: sha256:355c35bf98940239e7b814236424b59b534c0e02ebd20208b3b420c79f0f63bf
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-007
+      artifact: src/store.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:63f3830de0e3cb6c67723b5467b0b1aed1ae447d838febac8158a881a318286a
+      approval_fingerprint: sha256:428ec2224c084d6c0446a4ebdaa01742bf60785d5738f9bf0bfc318a0b2f97f7
+      artifact_fingerprint: sha256:692579702b1c82ab5008fe3a110ad65aafa7932434af04345e9c869bda0329ed
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SW-REQ-007
+      artifact: src/util.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:63f3830de0e3cb6c67723b5467b0b1aed1ae447d838febac8158a881a318286a
+      approval_fingerprint: sha256:428ec2224c084d6c0446a4ebdaa01742bf60785d5738f9bf0bfc318a0b2f97f7
+      artifact_fingerprint: sha256:0f8a877af4186fc5d34071968e9876c1efb6d7518d1562840ad909466fe4825e
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SYS-REQ-001
+      artifact: src/commands.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:53d16de9c86661e7b6e8b036c6c21eaf4cd130f663df97a407fa16dcf7644568
+      approval_fingerprint: sha256:d8da89b95c35b525db0e3435e1037949e15b5fbd67e7b5a588442dfea25bb597
+      artifact_fingerprint: sha256:355c35bf98940239e7b814236424b59b534c0e02ebd20208b3b420c79f0f63bf
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SYS-REQ-001
+      artifact: src/digest.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:53d16de9c86661e7b6e8b036c6c21eaf4cd130f663df97a407fa16dcf7644568
+      approval_fingerprint: sha256:d8da89b95c35b525db0e3435e1037949e15b5fbd67e7b5a588442dfea25bb597
+      artifact_fingerprint: sha256:7a75b5069a224330dee0eefcefe2129918c8797a0b2bb9198d4edd72758b8079
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SYS-REQ-001
+      artifact: src/states.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:53d16de9c86661e7b6e8b036c6c21eaf4cd130f663df97a407fa16dcf7644568
+      approval_fingerprint: sha256:d8da89b95c35b525db0e3435e1037949e15b5fbd67e7b5a588442dfea25bb597
+      artifact_fingerprint: sha256:c4df921a17e592219fef550098abd5a235766b09370d7e52f4ff3eedb7ef421f
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SYS-REQ-001
+      artifact: src/store.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:53d16de9c86661e7b6e8b036c6c21eaf4cd130f663df97a407fa16dcf7644568
+      approval_fingerprint: sha256:d8da89b95c35b525db0e3435e1037949e15b5fbd67e7b5a588442dfea25bb597
+      artifact_fingerprint: sha256:692579702b1c82ab5008fe3a110ad65aafa7932434af04345e9c869bda0329ed
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SYS-REQ-001
+      artifact: src/util.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:53d16de9c86661e7b6e8b036c6c21eaf4cd130f663df97a407fa16dcf7644568
+      approval_fingerprint: sha256:d8da89b95c35b525db0e3435e1037949e15b5fbd67e7b5a588442dfea25bb597
+      artifact_fingerprint: sha256:0f8a877af4186fc5d34071968e9876c1efb6d7518d1562840ad909466fe4825e
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SYS-REQ-002
+      artifact: src/templates.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:1b057b7cf94a34c1c95a813cd3a40c911b6a5cd67def8f27e56b6f0c622e24cf
+      approval_fingerprint: sha256:658ae29b1c8d13f7dfea86f0dd484e5f1131048e48f9f1bc7e78a272b720d929
+      artifact_fingerprint: sha256:96f749c235c2df54d7350008e24f2a930c741c6d97b5c01a5f2dc8f1efdcf613
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SYS-REQ-004
+      artifact: src/commands.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:8c400277da62737c71a990b64af68b183015621eb61875643d27323c8a0b837a
+      approval_fingerprint: sha256:03096e4ad2f823e013d73c5c585535c955916087a0988f6a346fed987efa0893
+      artifact_fingerprint: sha256:355c35bf98940239e7b814236424b59b534c0e02ebd20208b3b420c79f0f63bf
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SYS-REQ-004
+      artifact: src/states.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:8c400277da62737c71a990b64af68b183015621eb61875643d27323c8a0b837a
+      approval_fingerprint: sha256:03096e4ad2f823e013d73c5c585535c955916087a0988f6a346fed987efa0893
+      artifact_fingerprint: sha256:c4df921a17e592219fef550098abd5a235766b09370d7e52f4ff3eedb7ef421f
+      reviewed_at: "2026-08-21T12:52:17Z"
+    - requirement: SYS-REQ-006
+      artifact: src/states.c
+      decision: no-authored-change
+      reviewer: agent:qc-builder
+      reason: 'Initial product closeout: reviewed the 9 traced production files against their owning requirements; implementation matches already-authored contracts, no further spec change required.'
+      base: 4b825dc642cb6eb9a060e54bf8d69288fbee4904
+      requirement_fingerprint: sha256:fe3277d8750222cb837544a236293271640fa6523943acbdc6edbeb831792624
+      approval_fingerprint: sha256:41ed6af774270ee58485f4d59851edc4a76a5c08793337a0492ef3ba5cfcc463
+      artifact_fingerprint: sha256:c4df921a17e592219fef550098abd5a235766b09370d7e52f4ff3eedb7ef421f
+      reviewed_at: "2026-08-21T12:52:17Z"
