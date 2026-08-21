@@ -1,0 +1,79 @@
+id: SYS-REQ-004
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: the gate shall always satisfy (omitted_applicable = 0)
+description: The gate shall execute every @run item. The gate shall require an evidenced attestation for every applicable @attest item.
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: STK-REQ-003
+component: gate
+rationale: SPEC.md §1 and §6.1. The machine shall check machine work. The store shall record judgment. Refined by SW-REQ-004 (@run runner).
+tags:
+    - run
+    - attest
+variables:
+    - omitted_applicable
+references:
+    - type: document
+      id: SPEC.md#1-purpose-and-thesis
+traces:
+    satisfies:
+        - STK-REQ-003
+    reviewed_at: "2026-08-21T12:33:41.752497Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:8c400277da62737c71a990b64af68b183015621eb61875643d27323c8a0b837a
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:41.752497Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - specs/stakeholder/requirements/STK-REQ-003.req.yaml:92
+            - src/commands.c:277
+            - src/states.c:202
+            - tests/acceptance.sh:354
+            - tests/test_acceptance.c:85
+            - tests/test_kernel.c:99
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+    gaps_reviewed_at: "2026-08-21T12:26:11.243115Z"
+    gaps_reviewed_by: agent:qc-builder
+    gap_reviews:
+        - check: decomposition
+          issue_key: decomposition|SYS-REQ-004|omitted_applicable
+          reviewer: agent:qc-builder
+          reason: Children carry the parent nominal obligation as informal prose refinements; SW-REQ-003/005/007 now own nominal hazards and evidence triples.
+          reviewed_at: "2026-08-21T12:26:11.243115Z"
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:31:15Z"
+    last_modified_by: agent:qc-builder
+    last_modified_at: "2026-08-21T09:58:45Z"
+priority_level: critical
+obligation_checklist:
+    - error_handling
+    - malformed_input
+    - nominal
+obligation_hazards:
+    - class: error_handling
+      worst_case: A non-zero @run is not FAILED, so a broken machine-check is treated as attested and leaves the forced set.
+      severity: high
+    - class: malformed_input
+      worst_case: A malformed checklist item is skipped instead of executed or attested, so applicable work disappears from the forced set.
+      severity: high
+    - class: nominal
+      worst_case: One applicable @run or @attest item is silently omitted from evaluation, so the forced set is incomplete and verify can exit 0.
+      severity: high

@@ -1,0 +1,78 @@
+id: SYS-REQ-005
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: the state shall always satisfy stored_ok => line_parseable
+description: Each recorded answer shall be one .qcs line. A reviewer shall read the line in a git diff. The line shall not need escaping.
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: STK-REQ-004
+component: state
+rationale: SPEC.md §4.4. The state store is a review surface and a prompt. Refined by SW-REQ-005 (.qcs writer).
+tags:
+    - qcs
+variables:
+    - stored_ok
+    - line_parseable
+references:
+    - type: document
+      id: SPEC.md#44-the-state-store
+traces:
+    satisfies:
+        - STK-REQ-004
+    reviewed_at: "2026-08-21T12:33:42.011686Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:27e90698a80790a7514d127b68ee6c4576609f736f4fafb9f572daecde100239
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:42.011686Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - specs/stakeholder/requirements/STK-REQ-004.req.yaml:85
+            - tests/acceptance.sh:479
+            - tests/test_acceptance.c:122
+            - tests/test_kernel.c:54
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+    gaps_reviewed_at: "2026-08-21T12:26:11.243115Z"
+    gaps_reviewed_by: agent:qc-builder
+    gap_reviews:
+        - check: decomposition
+          issue_key: decomposition|SYS-REQ-005|line_parseable
+          reviewer: agent:qc-builder
+          reason: Children carry the parent nominal obligation as informal prose refinements; SW-REQ-003/005/007 now own nominal hazards and evidence triples.
+          reviewed_at: "2026-08-21T12:26:11.243115Z"
+        - check: decomposition
+          issue_key: decomposition|SYS-REQ-005|stored_ok
+          reviewer: agent:qc-builder
+          reason: Children carry the parent nominal obligation as informal prose refinements; SW-REQ-003/005/007 now own nominal hazards and evidence triples.
+          reviewed_at: "2026-08-21T12:26:11.243115Z"
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:31:15Z"
+    last_modified_by: agent:qc-builder
+    last_modified_at: "2026-08-21T09:58:45Z"
+priority_level: major
+obligation_checklist:
+    - malformed_input
+    - nominal
+obligation_hazards:
+    - class: nominal
+      worst_case: A sealed answer is stored as something other than one parseable .qcs line, so the reviewer cannot blame it in the PR diff.
+      severity: high
+    - class: malformed_input
+      worst_case: A .qcs line that needs escaping or is not parseable is stored as ok, so the reviewer cannot read the answer in a git diff.
+      severity: medium

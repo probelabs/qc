@@ -1,0 +1,27 @@
+component: gate
+variables:
+    - name: verdict
+      type: int
+      direction: output
+      description: verify exit code. 0 means all clear. 1 means open items. 2 means config error.
+      range:
+        max: 2
+        min: 0
+    - name: forced_item_count
+      type: int
+      direction: output
+      description: Count of applicable items that are forced or failed open. 0 means the gate may return exit 0.
+      range:
+        max: 384
+        min: 0
+    - name: ci_mode
+      type: int
+      direction: mode
+      description: verify mode. 0 is loop. 1 is staged. 2 is CI.
+      range:
+        max: 2
+        min: 0
+    - name: scratch_counted
+      type: bool
+      direction: internal
+      description: True when scratch lines enter the visible state store.

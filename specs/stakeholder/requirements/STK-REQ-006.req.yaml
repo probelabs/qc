@@ -1,0 +1,84 @@
+id: STK-REQ-006
+version: 1
+status: draft
+priority: shall
+category: constraint
+req_type: guarantee
+fretish: ""
+description: A missing tool shall not hide an applicable item. A missing checker shall fail as a blocking error. The error shall name the install command.
+formalization_strategy: informal
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: gate
+rationale: 'SPEC.md I8: fail open on applicability, fail loud on execution.'
+tags:
+    - i8
+    - fail-open
+variables: []
+references:
+    - type: document
+      id: SPEC.md#13-edge-case-ledger
+traces:
+    reviewed_at: "2026-08-21T12:33:40.249773Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:cd56a2cbfe75b3b2e367da1ca213b6280e47e8d9968ee0abfc8cc61de03ae870
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:40.249773Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - tests/acceptance.sh:18
+            - tests/test_acceptance.c:173
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:27:28Z"
+    last_modified_by: agent:qc-builder
+    last_modified_at: "2026-08-21T09:58:44Z"
+priority_level: major
+obligation_checklist:
+    - error_handling
+    - empty_input
+    - boundary
+obligation_hazards:
+    - class: boundary
+      worst_case: run_rc=127 is mapped to skip instead of FAILED, so the missing-tool edge does not block verify.
+      severity: high
+    - class: empty_input
+      worst_case: An empty @run command is treated as success, so a blank machine-check never fails the gate.
+      severity: high
+    - class: error_handling
+      worst_case: A missing @run binary is skipped or CLEAR, so a thin CI image hides applicable work.
+      severity: high
+acceptance_review:
+    reviewed_at: "2026-08-21T09:55:00Z"
+    reviewed_by: agent:ac-sweep
+    disposition: reviewed
+    templates_applied:
+        - AC-EMPTY
+    notes: 'gate.run_missing_fail: AC-EMPTY fail-closed missing @run binary (run_rc=127)'
+stakeholder:
+    persona: CI operator
+    story: As a CI operator, I want missing tools to fail loud so that a thin environment cannot hide work.
+    acceptance_criteria:
+        - id: AC-001
+          text: a missing @run binary is FAILED with an install command, never a skip
+          verification_method: test
+          derived_reqs:
+            - SYS-REQ-006
+        - id: AC-002
+          text: when an @run item names a missing binary, the item is FAILED with run_rc 127 and an install command, never skipped or CLEAR
+          verification_method: test
+          derived_reqs:
+            - SYS-REQ-006

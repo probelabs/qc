@@ -1,0 +1,154 @@
+{
+  "generated_at": "2026-08-21T09:35:54.948016Z",
+  "project_root": "/Users/buger/go/src/qc",
+  "scope": {
+    "groups": [
+      "cli",
+      "digest",
+      "gate",
+      "runtime",
+      "state"
+    ],
+    "partial": false
+  },
+  "rows": [
+    {
+      "surface_id": "cli.prompt_next",
+      "package": "cli",
+      "group": "cli",
+      "in_code": true,
+      "disposition": "pending",
+      "dual_surface": true,
+      "dual_derived": true,
+      "status": "GAP",
+      "status_reason": "dual-reachable (auto-derived: this site is claimed by another declared surface) and pending: needs an explicit disposition + reason so authz is reviewed on every path"
+    },
+    {
+      "surface_id": "digest.content_bind",
+      "package": "digest",
+      "group": "digest",
+      "in_code": true,
+      "disposition": "pending",
+      "dual_surface": true,
+      "status": "GAP",
+      "status_reason": "dual-surface pending: enforce≡project fidelity needs an explicit disposition + reason"
+    },
+    {
+      "surface_id": "gate.deny_evidence",
+      "package": "gate",
+      "group": "gate",
+      "in_code": true,
+      "disposition": "pending",
+      "dual_surface": true,
+      "dual_derived": true,
+      "status": "GAP",
+      "status_reason": "dual-reachable (auto-derived: this site is claimed by another declared surface) and pending: needs an explicit disposition + reason so authz is reviewed on every path"
+    },
+    {
+      "surface_id": "gate.evidence_no_secret",
+      "package": "gate",
+      "group": "gate",
+      "in_code": true,
+      "disposition": "pending",
+      "dual_surface": true,
+      "dual_derived": true,
+      "status": "GAP",
+      "status_reason": "dual-reachable (auto-derived: this site is claimed by another declared surface) and pending: needs an explicit disposition + reason so authz is reviewed on every path"
+    },
+    {
+      "surface_id": "gate.human_refuse",
+      "package": "gate",
+      "group": "gate",
+      "in_code": true,
+      "disposition": "pending",
+      "dual_surface": true,
+      "dual_derived": true,
+      "status": "GAP",
+      "status_reason": "dual-reachable (auto-derived: this site is claimed by another declared surface) and pending: needs an explicit disposition + reason so authz is reviewed on every path"
+    },
+    {
+      "surface_id": "gate.run_missing_fail",
+      "package": "gate",
+      "group": "gate",
+      "in_code": true,
+      "disposition": "pending",
+      "dual_surface": true,
+      "dual_derived": true,
+      "status": "GAP",
+      "status_reason": "dual-reachable (auto-derived: this site is claimed by another declared surface) and pending: needs an explicit disposition + reason so authz is reviewed on every path"
+    },
+    {
+      "surface_id": "gate.verdict",
+      "package": "gate",
+      "group": "gate",
+      "in_code": true,
+      "disposition": "pending",
+      "dual_surface": true,
+      "status": "GAP",
+      "status_reason": "dual-surface pending: enforce≡project fidelity needs an explicit disposition + reason"
+    },
+    {
+      "surface_id": "runtime.ape_no_fetch",
+      "package": "runtime",
+      "group": "runtime",
+      "in_code": false,
+      "disposition": "pending",
+      "dual_surface": false,
+      "status": "GAP",
+      "status_reason": "no disposition (set reviewed / not_applicable / accepted_risk with a reason)"
+    },
+    {
+      "surface_id": "state.ci_no_scratch",
+      "package": "state",
+      "group": "state",
+      "in_code": true,
+      "disposition": "pending",
+      "dual_surface": true,
+      "status": "GAP",
+      "status_reason": "dual-surface pending: enforce≡project fidelity needs an explicit disposition + reason"
+    },
+    {
+      "surface_id": "state.scratch_write",
+      "package": "state",
+      "group": "state",
+      "in_code": true,
+      "disposition": "pending",
+      "dual_surface": true,
+      "dual_derived": true,
+      "status": "GAP",
+      "status_reason": "dual-reachable (auto-derived: this site is claimed by another declared surface) and pending: needs an explicit disposition + reason so authz is reviewed on every path"
+    },
+    {
+      "surface_id": "state.seal_digest_eq",
+      "package": "state",
+      "group": "state",
+      "in_code": true,
+      "disposition": "pending",
+      "dual_surface": true,
+      "status": "GAP",
+      "status_reason": "dual-surface pending: enforce≡project fidelity needs an explicit disposition + reason"
+    },
+    {
+      "surface_id": "state.segment_new_file",
+      "package": "state",
+      "group": "state",
+      "in_code": true,
+      "disposition": "pending",
+      "dual_surface": true,
+      "dual_derived": true,
+      "status": "GAP",
+      "status_reason": "dual-reachable (auto-derived: this site is claimed by another declared surface) and pending: needs an explicit disposition + reason so authz is reviewed on every path"
+    }
+  ],
+  "summary": {
+    "total": 12,
+    "by_status": {
+      "GAP": 12
+    },
+    "gap": 12,
+    "debt": 0,
+    "ok": 0,
+    "dual_surface_gap": 11,
+    "dual_surface_residual": 0
+  }
+}

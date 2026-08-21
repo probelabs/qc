@@ -1,0 +1,5 @@
+component: digest
+no_interface:
+    declared: true
+    reason: "in-process digest kernel in the single APE; path sort and hashing are not a networked callee"
+variables: []

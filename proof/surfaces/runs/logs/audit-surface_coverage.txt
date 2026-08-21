@@ -1,0 +1,13 @@
+
+Requirements: 25 total
+
+  ━━━ VERIFICATION ━━━
+Refreshing trace index + annotations (25 requirements)…
+    ▶ running surface_coverage…
+    ✓ surface_coverage               surface_coverage: OK — 12 surface(s) (ok=12 debt=0 gap=0 dual_gap=0 dual_residual=0) — proof help surface-coverage  (6ms)
+
+  Errors: 0  Warnings: 0
+
+Help: proof help audit
+  Cache: 0 hits / 1 fresh / 1 stored (computed in 880ms)
+SC_EXIT:0

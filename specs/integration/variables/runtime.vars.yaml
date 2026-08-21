@@ -1,0 +1,5 @@
+component: runtime
+no_interface:
+    declared: true
+    reason: "in-process Cosmopolitan runtime in the single APE; no networked callee for artifact identity"
+variables: []

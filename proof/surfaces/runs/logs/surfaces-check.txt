@@ -1,0 +1,2 @@
+surface_coverage: OK — 12 surface(s) (ok=12 debt=0 gap=0) scope_partial=false groups=[]
+CHECK_EXIT:0

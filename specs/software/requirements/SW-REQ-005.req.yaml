@@ -1,0 +1,65 @@
+id: SW-REQ-005
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: ""
+description: 'The state writer shall append one .qcs line per answer. Evidence shall follow the first standalone :: token to the end of the line.'
+formalization_strategy: informal
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: SYS-REQ-005
+component: state
+rationale: SPEC.md §4.4.1.
+tags:
+    - qcs
+variables: []
+references:
+    - type: document
+      id: SPEC.md#44-the-state-store
+traces:
+    satisfies:
+        - SYS-REQ-005
+    reviewed_at: "2026-08-21T12:33:33.074822Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:50c0518d2bdc2cdc2437fb85fab6d910ed6fca9f3be97bb4d5ae4073df36e835
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:33.074822Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - specs/system/requirements/SYS-REQ-005.req.yaml:16
+            - src/parser.c:201
+            - src/util.c:33
+            - tests/acceptance.sh:480
+            - tests/test_acceptance.c:123
+            - tests/test_kernel.c:53
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:31:30Z"
+    last_modified_by: agent:grok
+    last_modified_at: "2026-08-21T12:18:50Z"
+priority_level: major
+obligation_checklist:
+    - malformed_input
+    - nominal
+obligation_hazards:
+    - class: malformed_input
+      worst_case: 'Evidence after the first standalone :: is truncated or a second :: splits the line, so the stored answer is not one blameable git line.'
+      severity: medium
+    - class: nominal
+      worst_case: A valid mark writes zero lines or more than one .qcs line, so the store is not one blameable answer per item.
+      severity: high

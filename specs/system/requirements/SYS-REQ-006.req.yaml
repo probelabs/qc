@@ -1,0 +1,87 @@
+id: SYS-REQ-006
+version: 1
+status: draft
+priority: shall
+category: constraint
+req_type: guarantee
+fretish: the gate shall always satisfy (run_rc = 127) => (verdict != 0)
+description: When git is missing or the clone is shallow, the gate shall apply more items, never fewer. When an @run binary is missing, the gate shall fail and shall name the install command.
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: STK-REQ-006
+component: gate
+rationale: SPEC.md I8 and edge 9. Missing git widens applicability. A missing @run binary is a blocking failure with exit 127.
+tags:
+    - i8
+variables:
+    - run_rc
+    - verdict
+references:
+    - type: document
+      id: SPEC.md#13-edge-case-ledger
+traces:
+    satisfies:
+        - STK-REQ-006
+    reviewed_at: "2026-08-21T12:33:42.228112Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:fe3277d8750222cb837544a236293271640fa6523943acbdc6edbeb831792624
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:42.228112Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - specs/stakeholder/requirements/STK-REQ-006.req.yaml:87
+            - src/states.c:109
+            - tests/acceptance.sh:129
+            - tests/test_acceptance.c:21
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+    gaps_reviewed_at: "2026-08-21T11:59:00.041145Z"
+    gaps_reviewed_by: agent:qc-builder
+    gap_reviews:
+        - check: ambiguity
+          issue_key: ambiguity|gate|INT-REQ-001|SYS-REQ-006
+          reviewer: agent:qc-builder
+          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
+          reviewed_at: "2026-08-21T11:59:00.041145Z"
+        - check: ambiguity
+          issue_key: ambiguity|gate|SW-REQ-001|SYS-REQ-006
+          reviewer: agent:qc-builder
+          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Each child adds a distinct conjunct: INT-REQ-001 excludes scratch in CI mode; SW-REQ-001 adds the expiry comparison; SYS-REQ-006/SW-REQ-006 pin run_rc 127. These are layered refinements, not duplicate obligations.'
+          reviewed_at: "2026-08-21T09:27:56.355113Z"
+        - check: ambiguity
+          issue_key: ambiguity|gate|SYS-REQ-001|SYS-REQ-006
+          reviewer: agent:qc-builder
+          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
+          reviewed_at: "2026-08-21T11:59:00.041145Z"
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:31:15Z"
+    last_modified_by: agent:qc-builder
+    last_modified_at: "2026-08-21T09:58:45Z"
+priority_level: major
+obligation_checklist:
+    - empty_input
+    - error_handling
+    - boundary
+obligation_hazards:
+    - class: boundary
+      worst_case: run_rc is 0 or 1 and the item is still treated as a missing binary (127), so a real checker failure is mislabeled as install-the-tool.
+      severity: high
+    - class: empty_input
+      worst_case: Missing git or a missing @run binary narrows the forced set, so a thin environment hides items instead of applying more.
+      severity: high
+    - class: error_handling
+      worst_case: run_rc=127 still yields verdict=0, so a missing checker does not block the gate.
+      severity: high

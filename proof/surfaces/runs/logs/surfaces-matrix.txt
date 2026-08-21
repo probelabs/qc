@@ -1,0 +1,13 @@
+surfaces matrix: total=12 ok=12 debt=0 gap=0
+  [OK] cli.prompt_next
+  [OK] digest.content_bind
+  [OK] gate.deny_evidence
+  [OK] gate.evidence_no_secret
+  [OK] gate.human_refuse
+  [OK] gate.run_missing_fail
+  [OK] gate.verdict
+  [OK] runtime.ape_no_fetch
+  [OK] state.ci_no_scratch
+  [OK] state.scratch_write
+  [OK] state.seal_digest_eq
+  [OK] state.segment_new_file

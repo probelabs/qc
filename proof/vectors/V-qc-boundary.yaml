@@ -1,0 +1,15 @@
+id: V-qc-boundary
+title: Exit 0 never hides a forced item
+description: 'Hunt: verdict=0 while forced_item_count>0, empty forced set, expires_s=0 misclassification.'
+priority: P0
+status: closed-null
+related_obligation_classes:
+    - boundary
+stacks:
+    - c
+close_note: 'Hunted via STK-REQ-001 ACs and SYS-REQ-001: exit 0 never hides a forced item. 0 NEW Med+.'
+campaign_log:
+    - at: "2026-08-21T12:11:47Z"
+      status: closed-null
+      note: 'Hunted via STK-REQ-001 ACs and SYS-REQ-001: exit 0 never hides a forced item. 0 NEW Med+.'
+      actor: agent

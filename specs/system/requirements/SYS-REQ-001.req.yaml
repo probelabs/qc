@@ -1,0 +1,91 @@
+id: SYS-REQ-001
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: the gate shall always satisfy (verdict = 0) => (forced_item_count = 0)
+description: verify shall return exit code 0 only when forced_item_count is 0. verify shall return exit code 2 on a config error. Two machines that see the same worktree bytes, checklist files, state store, and clock shall return the same exit code. The gate shall not infer, guess, or use the network.
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: STK-REQ-001
+component: gate
+rationale: SPEC.md I1 and §8 exit codes. A passing verdict shall not hide a forced item. Determinism is a function of the four inputs; the formula pins the exit-code safety half. Refined by INT-REQ-001 (CI scratch exclusion) and SW-REQ-001 (expiry).
+tags:
+    - i1
+    - verify
+variables:
+    - verdict
+    - forced_item_count
+references:
+    - type: document
+      id: SPEC.md#1-purpose-and-thesis
+traces:
+    satisfies:
+        - STK-REQ-001
+    reviewed_at: "2026-08-21T12:33:40.797537Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:53d16de9c86661e7b6e8b036c6c21eaf4cd130f663df97a407fa16dcf7644568
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:40.797537Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - specs/stakeholder/requirements/STK-REQ-001.req.yaml:93
+            - src/commands.c:470
+            - src/digest.c:5
+            - src/states.c:201
+            - src/store.c:185
+            - src/util.c:175
+            - tests/acceptance.sh:127
+            - tests/test_acceptance.c:19
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+    gaps_reviewed_at: "2026-08-21T11:59:00.041145Z"
+    gaps_reviewed_by: agent:qc-builder
+    gap_reviews:
+        - check: ambiguity
+          issue_key: ambiguity|gate|SW-REQ-006|SYS-REQ-001
+          reviewer: agent:qc-builder
+          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
+          reviewed_at: "2026-08-21T11:59:00.041145Z"
+        - check: ambiguity
+          issue_key: ambiguity|gate|SYS-REQ-001|SYS-REQ-006
+          reviewer: agent:qc-builder
+          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
+          reviewed_at: "2026-08-21T11:59:00.041145Z"
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:27:38Z"
+    last_modified_by: agent:qc-builder
+    last_modified_at: "2026-08-21T09:58:45Z"
+priority_level: critical
+obligation_checklist:
+    - boundary
+    - determinism
+    - error_handling
+    - nominal
+obligation_hazards:
+    - class: nominal
+      worst_case: Every applicable item already has a matching evidenced answer, yet verdict is not 0, so a finished review cannot ship.
+      severity: high
+    - class: boundary
+      worst_case: verdict=0 is returned while forced_item_count is greater than 0, so a passing exit hides a forced item.
+      severity: critical
+    - class: determinism
+      worst_case: The same worktree bytes, checklist files, state store, and clock yield different exit codes across machines, so CI cannot reproduce the local gate.
+      severity: high
+    - class: error_handling
+      worst_case: A config error returns exit 0 instead of 2, so a broken gate looks like all-clear.
+      severity: high

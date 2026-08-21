@@ -1,0 +1,30 @@
+{
+  "ok": true,
+  "scope": {
+    "packages": [
+      "gate"
+    ],
+    "groups": [
+      "cli",
+      "digest",
+      "gate",
+      "runtime",
+      "state"
+    ],
+    "partial": true
+  },
+  "summary": {
+    "total": 5,
+    "by_status": {
+      "OK": 5
+    },
+    "gap": 0,
+    "debt": 0,
+    "ok": 5,
+    "dual_surface_gap": 0,
+    "dual_surface_residual": 0
+  },
+  "message": "surface_coverage: OK — 5 surface(s) (ok=5 debt=0 gap=0) scope_partial=true groups=[gate]",
+  "help": "surface_coverage\n================\nEvery security surface a project DECLARES under proof/surfaces/*.yaml must carry\na disposition with a reason: reviewed, not_applicable, or accepted_risk.\n\n  GAP  — declared surface with no disposition (pending)\n  DEBT — accepted_risk, a disposition missing its reason, or detection drift\n  OK   — reviewed or not_applicable, with a reason\n\nGreen matrix ≠ zero bugs; it means every declared surface has been dispositioned.\nDual-surface rows (enforce ≡ project) may not be quieted by accepted_risk alone.\n\nThe check is inert until a project declares surfaces. Declare one:\n\n  # proof/surfaces/\u003cgroup\u003e.yaml\n  surfaces:\n    - id: admin.require_superuser\n      description: Admin mutations must require a superuser\n      location: { paths: [src/admin/**] }\n      detect:  { method: annotation, annotation: \"surface:admin.require_superuser\" }\n      disposition: { status: reviewed, reason: \"Enforced + tested\", ref: STK-REQ-12/AC-3 }\n\nDocs: proof help surface_coverage\nClose GAPs: proof role show surface-close --format agent\n",
+  "generated_at": "2026-08-21T09:37:02.12229Z"
+}

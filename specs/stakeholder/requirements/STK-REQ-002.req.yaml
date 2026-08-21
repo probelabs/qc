@@ -1,0 +1,82 @@
+id: STK-REQ-002
+version: 1
+status: draft
+priority: shall
+category: interface
+req_type: guarantee
+fretish: ""
+description: qc shall print every help line, error line, and worklist line as a prompt. The prompt shall name the next command. The prompt shall not name a string that would satisfy the gate.
+formalization_strategy: informal
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: cli
+rationale: 'SPEC.md I5. qc is an AI-native CLI harness. Output shall provoke the next action, not report status.'
+tags:
+    - i5
+    - cli
+    - agent-harness
+variables: []
+references:
+    - type: document
+      id: SPEC.md#7-evidence-rules
+traces:
+    reviewed_at: "2026-08-21T12:33:38.832215Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:d81359d78979306dd8d65549deb17545199b1dc8cce4cd01164a0bcaeeac68cb
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:38.832215Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - src/templates.c:252
+            - tests/acceptance.sh:8
+            - tests/test_acceptance.c:64
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:27:28Z"
+    last_modified_by: agent:qc-builder
+    last_modified_at: "2026-08-21T09:58:43Z"
+priority_level: critical
+obligation_checklist:
+    - nominal
+    - error_handling
+obligation_hazards:
+    - class: error_handling
+      worst_case: A failing command prints a passing evidence string, so the agent copies that string into the store and clears the gate.
+      severity: high
+    - class: nominal
+      worst_case: A help or worklist line names no next command, so the agent guesses a command and invents evidence.
+      severity: medium
+acceptance_review:
+    reviewed_at: "2026-08-21T09:55:00Z"
+    reviewed_by: agent:ac-sweep
+    disposition: reviewed
+    templates_applied:
+        - AC-ENFORCE
+    notes: 'cli.prompt_next: AC-ENFORCE plus existing prompt AC; auto-derived dual is shared help sites'
+stakeholder:
+    persona: AI coding agent
+    story: As an AI coding agent, I want every help and error to name the next command so that I do not guess.
+    acceptance_criteria:
+        - id: AC-001
+          text: a failing command prints the exact next command and does not print a passing evidence string
+          verification_method: test
+          derived_reqs:
+            - SYS-REQ-002
+        - id: AC-002
+          text: every help, error, and worklist line names a next qc command and does not print a string that would satisfy the evidence checker
+          verification_method: test
+          derived_reqs:
+            - SYS-REQ-002

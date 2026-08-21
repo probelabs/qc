@@ -1,0 +1,5 @@
+component: state
+no_interface:
+    declared: true
+    reason: "in-process state store in the single APE; scratch, segments, and base are files written by this binary"
+variables: []

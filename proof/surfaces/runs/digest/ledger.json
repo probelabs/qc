@@ -1,0 +1,72 @@
+{
+  "generated_at": "2026-08-21T09:37:02.589322Z",
+  "project_root": "/Users/buger/go/src/qc",
+  "scope": {
+    "packages": [
+      "digest"
+    ],
+    "groups": [
+      "cli",
+      "digest",
+      "gate",
+      "runtime",
+      "state"
+    ],
+    "partial": true
+  },
+  "surfaces": [
+    {
+      "id": "digest.content_bind",
+      "group": "digest",
+      "package": "digest",
+      "description": "attestation digest is SHA-256 of item text plus scoped file hashes; projected as @hex16",
+      "sites": [
+        {
+          "path": "src/digest.c",
+          "line": 268
+        },
+        {
+          "path": "src/digest.c",
+          "line": 312
+        },
+        {
+          "path": "src/digest.c",
+          "line": 322
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/digest.c",
+          "line": 268
+        },
+        {
+          "path": "src/digest.c",
+          "line": 312
+        },
+        {
+          "path": "src/digest.c",
+          "line": 322
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "reviewed",
+      "reason": "AC-DUAL-EQ: qc_digest_core produces the 16-hex value stored/printed on the line; qc_winner_match requires equality.",
+      "ref": "STK-REQ-001/AC-003",
+      "notes": "AC-DUAL-EQ: qc_digest_core produces the 16-hex value stored/printed on the line; qc_winner_match requires equality.",
+      "dual_surface": true,
+      "detect_method": "pattern",
+      "detect_matches": 3
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "by_disposition": {
+      "reviewed": 1
+    },
+    "by_package": {
+      "digest": 1
+    },
+    "dual_surface": 1,
+    "dual_surface_gap": 0
+  }
+}

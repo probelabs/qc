@@ -1,0 +1,13 @@
+component: runtime
+no_interface:
+    declared: true
+    reason: "in-process Cosmopolitan runtime in the single APE; no networked callee for artifact identity"
+variables:
+    - name: artifact_is_ape
+      type: bool
+      direction: output
+      description: True when the invoked qc artifact is the committed Cosmopolitan APE.
+    - name: runtime_fetch
+      type: bool
+      direction: output
+      description: True when the invoked artifact fetches gate code at run time.

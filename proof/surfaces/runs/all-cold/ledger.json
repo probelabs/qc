@@ -1,0 +1,503 @@
+{
+  "generated_at": "2026-08-21T09:35:54.948015Z",
+  "project_root": "/Users/buger/go/src/qc",
+  "scope": {
+    "groups": [
+      "cli",
+      "digest",
+      "gate",
+      "runtime",
+      "state"
+    ],
+    "partial": false
+  },
+  "surfaces": [
+    {
+      "id": "cli.prompt_next",
+      "group": "cli",
+      "package": "cli",
+      "description": "help, error, and worklist lines name the next command and do not print a passing token",
+      "sites": [
+        {
+          "path": "src/cli.c",
+          "line": 47
+        },
+        {
+          "path": "src/cli.c",
+          "line": 117
+        },
+        {
+          "path": "src/cli.c",
+          "line": 125
+        },
+        {
+          "path": "src/commands.c",
+          "line": 150
+        },
+        {
+          "path": "src/commands.c",
+          "line": 183
+        },
+        {
+          "path": "src/commands.c",
+          "line": 288
+        },
+        {
+          "path": "src/commands.c",
+          "line": 313
+        },
+        {
+          "path": "src/commands.c",
+          "line": 333
+        },
+        {
+          "path": "src/commands.c",
+          "line": 362
+        },
+        {
+          "path": "src/commands.c",
+          "line": 406
+        },
+        {
+          "path": "src/commands.c",
+          "line": 479
+        },
+        {
+          "path": "src/commands.c",
+          "line": 540
+        },
+        {
+          "path": "src/commands.c",
+          "line": 577
+        },
+        {
+          "path": "src/commands.c",
+          "line": 665
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/cli.c",
+          "line": 47
+        },
+        {
+          "path": "src/cli.c",
+          "line": 117
+        },
+        {
+          "path": "src/cli.c",
+          "line": 125
+        },
+        {
+          "path": "src/commands.c",
+          "line": 150
+        },
+        {
+          "path": "src/commands.c",
+          "line": 183
+        },
+        {
+          "path": "src/commands.c",
+          "line": 288
+        },
+        {
+          "path": "src/commands.c",
+          "line": 313
+        },
+        {
+          "path": "src/commands.c",
+          "line": 333
+        },
+        {
+          "path": "src/commands.c",
+          "line": 362
+        },
+        {
+          "path": "src/commands.c",
+          "line": 406
+        },
+        {
+          "path": "src/commands.c",
+          "line": 479
+        },
+        {
+          "path": "src/commands.c",
+          "line": 540
+        },
+        {
+          "path": "src/commands.c",
+          "line": 577
+        },
+        {
+          "path": "src/commands.c",
+          "line": 665
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "pending",
+      "dual_surface": true,
+      "dual_derived": true,
+      "detect_method": "pattern",
+      "detect_matches": 14
+    },
+    {
+      "id": "digest.content_bind",
+      "group": "digest",
+      "package": "digest",
+      "description": "attestation digest is SHA-256 of item text plus scoped file hashes; projected as @hex16",
+      "sites": [
+        {
+          "path": "src/digest.c",
+          "line": 268
+        },
+        {
+          "path": "src/digest.c",
+          "line": 312
+        },
+        {
+          "path": "src/digest.c",
+          "line": 322
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/digest.c",
+          "line": 268
+        },
+        {
+          "path": "src/digest.c",
+          "line": 312
+        },
+        {
+          "path": "src/digest.c",
+          "line": 322
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "pending",
+      "dual_surface": true,
+      "detect_method": "pattern",
+      "detect_matches": 3
+    },
+    {
+      "id": "gate.deny_evidence",
+      "group": "gate",
+      "package": "gate",
+      "description": "deny_builtin and deny_evidence reject non-falsifiable evidence tokens",
+      "sites": [
+        {
+          "path": "src/states.c",
+          "line": 7
+        },
+        {
+          "path": "src/states.c",
+          "line": 86
+        },
+        {
+          "path": "src/states.c",
+          "line": 87
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/states.c",
+          "line": 7
+        },
+        {
+          "path": "src/states.c",
+          "line": 86
+        },
+        {
+          "path": "src/states.c",
+          "line": 87
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "pending",
+      "dual_surface": true,
+      "dual_derived": true,
+      "detect_method": "pattern",
+      "detect_matches": 3
+    },
+    {
+      "id": "gate.evidence_no_secret",
+      "group": "gate",
+      "package": "gate",
+      "description": "evidence that looks like a credential is refused and never echoed",
+      "sites": [
+        {
+          "path": "src/states.c",
+          "line": 46
+        },
+        {
+          "path": "src/states.c",
+          "line": 100
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/states.c",
+          "line": 46
+        },
+        {
+          "path": "src/states.c",
+          "line": 100
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "pending",
+      "dual_surface": true,
+      "dual_derived": true,
+      "detect_method": "pattern",
+      "detect_matches": 2
+    },
+    {
+      "id": "gate.human_refuse",
+      "group": "gate",
+      "package": "gate",
+      "description": "@human items refuse by:agent; no scratch line is written",
+      "sites": [
+        {
+          "path": "src/commands.c",
+          "line": 246
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/commands.c",
+          "line": 246
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "pending",
+      "dual_surface": true,
+      "dual_derived": true,
+      "detect_method": "pattern",
+      "detect_matches": 1
+    },
+    {
+      "id": "gate.run_missing_fail",
+      "group": "gate",
+      "package": "gate",
+      "description": "missing @run binary is FAILED (run_rc=127) with an install command, never skipped",
+      "sites": [
+        {
+          "path": "src/states.c",
+          "line": 135
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/states.c",
+          "line": 135
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "pending",
+      "dual_surface": true,
+      "dual_derived": true,
+      "detect_method": "pattern",
+      "detect_matches": 1
+    },
+    {
+      "id": "gate.verdict",
+      "group": "gate",
+      "package": "gate",
+      "description": "verify exit code and plan worklist must report the same forced set",
+      "sites": [
+        {
+          "path": "src/commands.c",
+          "line": 475
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/commands.c",
+          "line": 475
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "pending",
+      "dual_surface": true,
+      "detect_method": "pattern",
+      "detect_matches": 1
+    },
+    {
+      "id": "runtime.ape_no_fetch",
+      "group": "runtime",
+      "package": "runtime",
+      "description": "one committed Cosmopolitan APE; no language-runtime install and no registry fetch",
+      "sites": [
+        {
+          "path": "include/qc.h",
+          "line": 0,
+          "symbol": "declared"
+        },
+        {
+          "path": "Makefile",
+          "line": 0,
+          "symbol": "declared"
+        },
+        {
+          "path": "src",
+          "line": 0,
+          "symbol": "declared"
+        }
+      ],
+      "enforce": [
+        {
+          "path": "include/qc.h",
+          "line": 0,
+          "symbol": "declared"
+        },
+        {
+          "path": "Makefile",
+          "line": 0,
+          "symbol": "declared"
+        },
+        {
+          "path": "src",
+          "line": 0,
+          "symbol": "declared"
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "pending",
+      "dual_surface": false,
+      "detect_method": "declared"
+    },
+    {
+      "id": "state.ci_no_scratch",
+      "group": "state",
+      "package": "state",
+      "description": "verify --ci and compact load committed store only; scratch is not read or written",
+      "sites": [
+        {
+          "path": "src/store.c",
+          "line": 68
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/store.c",
+          "line": 68
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "pending",
+      "dual_surface": true,
+      "detect_method": "pattern",
+      "detect_matches": 1
+    },
+    {
+      "id": "state.scratch_write",
+      "group": "state",
+      "package": "state",
+      "description": "mark/decide/baseline write scratch only; committed qc/state is untouched",
+      "sites": [
+        {
+          "path": "src/commands.c",
+          "line": 267
+        },
+        {
+          "path": "src/commands.c",
+          "line": 385
+        },
+        {
+          "path": "src/commands.c",
+          "line": 424
+        },
+        {
+          "path": "src/store.c",
+          "line": 130
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/commands.c",
+          "line": 267
+        },
+        {
+          "path": "src/commands.c",
+          "line": 385
+        },
+        {
+          "path": "src/commands.c",
+          "line": 424
+        },
+        {
+          "path": "src/store.c",
+          "line": 130
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "pending",
+      "dual_surface": true,
+      "dual_derived": true,
+      "detect_method": "pattern",
+      "detect_matches": 4
+    },
+    {
+      "id": "state.seal_digest_eq",
+      "group": "state",
+      "package": "state",
+      "description": "seal promotes a scratch line only when recomputed digest equals the line digest",
+      "sites": [
+        {
+          "path": "src/commands.c",
+          "line": 376
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/commands.c",
+          "line": 376
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "pending",
+      "dual_surface": true,
+      "detect_method": "pattern",
+      "detect_matches": 1
+    },
+    {
+      "id": "state.segment_new_file",
+      "group": "state",
+      "package": "state",
+      "description": "seal appends to a per-branch segment file; no shared mutable state file",
+      "sites": [
+        {
+          "path": "src/store.c",
+          "line": 144
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/store.c",
+          "line": 144
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "pending",
+      "dual_surface": true,
+      "dual_derived": true,
+      "detect_method": "pattern",
+      "detect_matches": 1
+    }
+  ],
+  "summary": {
+    "total": 12,
+    "by_disposition": {
+      "pending": 12
+    },
+    "by_package": {
+      "cli": 1,
+      "digest": 1,
+      "gate": 5,
+      "runtime": 1,
+      "state": 4
+    },
+    "dual_surface": 11,
+    "dual_surface_gap": 11
+  }
+}

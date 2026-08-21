@@ -1,0 +1,25 @@
+# Package → path map for surface-close (role precondition).
+# Inventory itself lives in the sibling group files (gate/state/digest/cli/runtime.yaml).
+# This file has no `surfaces:` key and is ignored by the declaration loader.
+packages:
+  - key: gate
+    prefixes:
+      - src/states.c
+      - src/commands.c
+  - key: state
+    prefixes:
+      - src/store.c
+      - src/commands.c
+  - key: digest
+    prefixes:
+      - src/digest.c
+      - src/store.c
+  - key: cli
+    prefixes:
+      - src/cli.c
+      - src/commands.c
+  - key: runtime
+    prefixes:
+      - src
+      - Makefile
+      - include/qc.h

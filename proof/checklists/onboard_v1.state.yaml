@@ -1,0 +1,62 @@
+checklist: onboard_v1
+updated_at: "2026-08-21T12:04:07Z"
+steps:
+    ac-sweep:
+        status: pending
+    annotations-heavy:
+        status: pending
+    coverage:
+        status: pending
+    hazard:
+        status: pending
+    init:
+        status: not_applicable
+        confirmed_at: "2026-08-21T07:30:40Z"
+        confirmed_by: agent:qc-builder
+        note: 'proof.yaml present. Cosmopolitan APE: project.commands.build=cosmocc -o qc src/qc.c, project.commands.test=./qc --help, project.scope=**/*.{c,h}. No workflow. Active checklist=onboard_v1.'
+        verify_result:
+            exit_code: 0
+            passed: true
+            at: "2026-08-21T07:30:40Z"
+        check_results:
+            - id: validate_passes
+              status: pass
+              at: "2026-08-21T07:30:40Z"
+            - id: role_prompt_hygiene
+              status: pass
+              at: "2026-08-21T07:30:40Z"
+    research:
+        status: not_applicable
+        confirmed_at: "2026-08-21T07:31:02Z"
+        confirmed_by: agent:qc-builder
+        note: 'Spec-derived map in docs/onboard-research.md. Stakeholders: agent, reviewer, CI, maintainer. Components: cli, gate, state, checklist, digest, runtime. No source yet.'
+    residual:
+        status: pending
+    skeleton:
+        status: not_applicable
+        confirmed_at: "2026-08-21T08:54:52Z"
+        confirmed_by: agent:qc-builder
+        note: 'Four-layer skeleton: 7 STK, 7 SYS, 7 SW, 4 INT. proof validate clean. Audit green: l0_stakeholder_complete, l1_system_complete, l2_software_complete, levels_connected, system_requirements_linked.'
+        check_results:
+            - id: l0_stakeholder_complete
+              status: pass
+              at: "2026-08-21T08:54:52Z"
+            - id: l1_system_complete
+              status: pass
+              at: "2026-08-21T08:54:52Z"
+            - id: l2_software_complete
+              status: pass
+              at: "2026-08-21T08:54:52Z"
+            - id: levels_connected
+              status: pass
+              at: "2026-08-21T08:54:52Z"
+    spec-review-1:
+        status: pending
+    spec-review-2:
+        status: pending
+    surface-matrix:
+        status: pending
+    traces-light:
+        status: pending
+    variables:
+        status: pending

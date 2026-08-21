@@ -1,0 +1,16 @@
+group: cli
+surfaces:
+  - id: cli.prompt_next
+    description: "help, error, and worklist lines name the next command and do not print a passing token"
+    location:
+      paths:
+        - src/cli.c
+        - src/commands.c
+    detect:
+      method: pattern
+      pattern: "qc_print_help"
+      min_matches: 1
+    disposition:
+      status: reviewed
+      reason: "AC-ENFORCE: help/errors print NEXT: qc … and do not print a string that would satisfy qc_evidence_ok."
+      ref: STK-REQ-002/AC-002

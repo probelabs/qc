@@ -1,0 +1,101 @@
+id: SW-REQ-006
+version: 1
+status: draft
+priority: shall
+category: constraint
+req_type: guarantee
+fretish: the gate shall always satisfy (run_rc = 127) => ((verdict != 0) & (forced_item_count > 0))
+description: When the @run binary is absent, verify shall print FAILED and an install hint. verify shall not skip the item.
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: SYS-REQ-006
+component: gate
+rationale: I8, edge 9. Exit 127 is the missing-binary signal. The child adds that a missing binary also increments the open-item count.
+tags:
+    - i8
+variables:
+    - run_rc
+    - verdict
+    - forced_item_count
+references:
+    - type: document
+      id: SPEC.md#13-edge-case-ledger
+traces:
+    satisfies:
+        - SYS-REQ-006
+    reviewed_at: "2026-08-21T12:33:33.318258Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:3ed480d8f41d907b314ded2b52872c4e58acac01095019e10d026a7bf268f727
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:33.318258Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - specs/system/requirements/SYS-REQ-006.req.yaml:61
+            - src/states.c:110
+            - tests/acceptance.sh:130
+            - tests/test_acceptance.c:22
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+    gaps_reviewed_at: "2026-08-21T11:59:00.041145Z"
+    gaps_reviewed_by: agent:qc-builder
+    gap_reviews:
+        - check: ambiguity
+          issue_key: ambiguity|gate|INT-REQ-001|SW-REQ-006
+          reviewer: agent:qc-builder
+          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
+          reviewed_at: "2026-08-21T11:59:00.041145Z"
+        - check: ambiguity
+          issue_key: ambiguity|gate|SW-REQ-001|SW-REQ-006
+          reviewer: agent:qc-builder
+          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
+          reviewed_at: "2026-08-21T11:59:00.041145Z"
+        - check: ambiguity
+          issue_key: ambiguity|gate|SW-REQ-006|SYS-REQ-001
+          reviewer: agent:qc-builder
+          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
+          reviewed_at: "2026-08-21T11:59:00.041145Z"
+    not_modeled:
+        - predicate: st == -1
+          reason: "system() spawn-failure errno path; not a run_rc domain input [ki:KI-001]"
+        - predicate: blob >= 32
+          reason: "secret-scan entropy window in the same compilation unit [ki:KI-001]"
+        - predicate: i < 20
+          reason: "AKIA key-shape scan bound in the same compilation unit [ki:KI-001]"
+        - predicate: len(p) >= 20
+          reason: "AKIA remainder length in the same compilation unit [ki:KI-001]"
+        - predicate: len(p)
+          reason: "secret-scan pointer length in the same compilation unit [ki:KI-001]"
+        - predicate: len(tok)
+          reason: "evidence token length in the same compilation unit [ki:KI-001]"
+        - predicate: run >= 32
+          reason: "entropy run length in the same compilation unit [ki:KI-001]"
+        - predicate: len(ev)
+          reason: "evidence length helper in the same compilation unit [ki:KI-001]"
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:31:30Z"
+    last_modified_by: agent:qc-builder
+    last_modified_at: "2026-08-21T09:58:46Z"
+priority_level: major
+obligation_checklist:
+    - empty_input
+    - error_handling
+obligation_hazards:
+    - class: empty_input
+      worst_case: An absent @run binary is skipped with no install hint, so verify can still exit 0 on a thin environment.
+      severity: high
+    - class: error_handling
+      worst_case: run_rc=127 leaves forced_item_count=0 and verdict=0, so the missing binary does not increment the open set.
+      severity: high

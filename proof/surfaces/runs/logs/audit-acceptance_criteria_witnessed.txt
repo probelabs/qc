@@ -1,0 +1,29 @@
+
+Requirements: 25 total
+
+  ━━━ VERIFICATION ━━━
+Refreshing trace index + annotations (25 requirements)…
+    ▶ running acceptance_criteria_witnessed…
+    ⚠ acceptance_criteria_witnessed  18 testable acceptance criteria across 7 stakeholder req(s) witnessed (0 via direct acceptance test, 18 deferred (tracked)) — deferred ACs are tracked debt, not a pass  (157ms)
+      STK-REQ-001 acceptance criterion AC-001 is DEFERRED (tracked debt, not witnessed): tracking onboard-surface-matrix — No end-to-end acceptance test yet. tests/test_kernel.c is a kernel unit test, not an integrated-system acceptance witness. Surface-close staged this as tracked debt. This is tracked debt, not a pass: it stays a WARNING until a real acceptance test lands. To clear it, write an ACCEPTANCE test that exercises this stakeholder criterion end-to-end on the INTEGRATED system and annotate it `// STK-REQ-001:AC-001:acceptance` (then remove the deferral). A deferral is NOT a non-testable exemption — `witness_deferred` is only for criteria that ARE testable but have no acceptance test YET.
+      STK-REQ-001 acceptance criterion AC-002 is DEFERRED (tracked debt, not witnessed): tracking onboard-surface-matrix — No end-to-end acceptance test yet. tests/test_kernel.c is a kernel unit test, not an integrated-system acceptance witness. Surface-close staged this as tracked debt. This is tracked debt, not a pass: it stays a WARNING until a real acceptance test lands. To clear it, write an ACCEPTANCE test that exercises this stakeholder criterion end-to-end on the INTEGRATED system and annotate it `// STK-REQ-001:AC-002:acceptance` (then remove the deferral). A deferral is NOT a non-testable exemption — `witness_deferred` is only for criteria that ARE testable but have no acceptance test YET.
+      STK-REQ-001 acceptance criterion AC-003 is DEFERRED (tracked debt, not witnessed): tracking onboard-surface-matrix — No end-to-end acceptance test yet. tests/test_kernel.c is a kernel unit test, not an integrated-system acceptance witness. Surface-close staged this as tracked debt. This is tracked debt, not a pass: it stays a WARNING until a real acceptance test lands. To clear it, write an ACCEPTANCE test that exercises this stakeholder criterion end-to-end on the INTEGRATED system and annotate it `// STK-REQ-001:AC-003:acceptance` (then remove the deferral). A deferral is NOT a non-testable exemption — `witness_deferred` is only for criteria that ARE testable but have no acceptance test YET.
+      ... and 8 more (run with --verbose)
+
+  Errors: 0  Warnings: 1
+  Priority fix: acceptance_criteria_witnessed -- 18 testable acceptance criteria across 7 stakeholder req(s) witnessed (0 via direct acceptance test, 18 deferred (tracked)) — deferred ACs are tracked debt, not a pass
+  Run: proof workflow check --stage verify --verbose
+  Findings (1):
+    [VERIFICATION] acceptance_criteria_witnessed -- 18 testable acceptance criteria across 7 stakeholder req(s) witnessed (0 via direct acceptance test, 18 deferred (tracked)) — deferred ACs are tracked debt, not a pass
+      - STK-REQ-001 acceptance criterion AC-001 is DEFERRED (tracked debt, not witnessed): tracking onboard-surface-matrix — No end-to-end acceptance test yet. tests/test_kernel.c is a kernel unit test, not an integrated-system acceptance witness. Surface-close staged this as tracked debt. This is tracked debt, not a pass: it stays a WARNING until a real acceptance test lands. To clear it, write an ACCEPTANCE test that exercises this stakeholder criterion end-to-end on the INTEGRATED system and annotate it `// STK-REQ-001:AC-001:acceptance` (then remove the deferral). A deferral is NOT a non-testable exemption — `witness_deferred` is only for criteria that ARE testable but have no acceptance test YET.
+      - STK-REQ-001 acceptance criterion AC-002 is DEFERRED (tracked debt, not witnessed): tracking onboard-surface-matrix — No end-to-end acceptance test yet. tests/test_kernel.c is a kernel unit test, not an integrated-system acceptance witness. Surface-close staged this as tracked debt. This is tracked debt, not a pass: it stays a WARNING until a real acceptance test lands. To clear it, write an ACCEPTANCE test that exercises this stakeholder criterion end-to-end on the INTEGRATED system and annotate it `// STK-REQ-001:AC-002:acceptance` (then remove the deferral). A deferral is NOT a non-testable exemption — `witness_deferred` is only for criteria that ARE testable but have no acceptance test YET.
+      - STK-REQ-001 acceptance criterion AC-003 is DEFERRED (tracked debt, not witnessed): tracking onboard-surface-matrix — No end-to-end acceptance test yet. tests/test_kernel.c is a kernel unit test, not an integrated-system acceptance witness. Surface-close staged this as tracked debt. This is tracked debt, not a pass: it stays a WARNING until a real acceptance test lands. To clear it, write an ACCEPTANCE test that exercises this stakeholder criterion end-to-end on the INTEGRATED system and annotate it `// STK-REQ-001:AC-003:acceptance` (then remove the deferral). A deferral is NOT a non-testable exemption — `witness_deferred` is only for criteria that ARE testable but have no acceptance test YET.
+      ... and 8 more (rerun with --max-findings 0 or --format json for the full list)
+      Run: proof workflow check --stage verify --verbose
+
+Help: proof help audit
+Help: proof help <check-id>  # replace <check-id> with any check listed above
+Help: proof help acceptance_criteria_witnessed
+  Cache: 0 hits / 1 fresh (computed in 458ms)
+exit status 2
+ACW_EXIT:1

@@ -1,0 +1,15 @@
+id: V-qc-malformed-input
+title: Malformed checklist or qcs is config
+description: 'Hunt: malformed items or .qcs lines skipped as if absent instead of exit 2.'
+priority: P0
+status: closed-null
+related_obligation_classes:
+    - malformed_input
+stacks:
+    - c
+close_note: 'Hunted via STK-REQ-003 AC-003/004 and qcs parse tests: malformed checklist or qcs is config, never a matching answer. 0 NEW Med+.'
+campaign_log:
+    - at: "2026-08-21T12:11:48Z"
+      status: closed-null
+      note: 'Hunted via STK-REQ-003 AC-003/004 and qcs parse tests: malformed checklist or qcs is config, never a matching answer. 0 NEW Med+.'
+      actor: agent

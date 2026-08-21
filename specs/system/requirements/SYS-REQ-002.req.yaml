@@ -1,0 +1,85 @@
+id: SYS-REQ-002
+version: 1
+status: draft
+priority: shall
+category: interface
+req_type: guarantee
+fretish: the cli shall always satisfy next_named & !token_leaked
+description: When qc prints help, an error, or a worklist, the text shall name the exact next command and the principle the agent must satisfy. The text shall not reveal a token or evidence string that would satisfy the gate.
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: STK-REQ-002
+component: cli
+rationale: 'I5 and the proof CLI contract. Check-failure guidance includes the fix path. Help is agent doctrine. Every string is a prompt. Refined by SW-REQ-002 (printer) and INT-REQ-003 (@human refuse).'
+tags:
+    - i5
+    - cli
+    - prompt
+variables:
+    - next_named
+    - token_leaked
+references:
+    - type: document
+      id: SPEC.md#7-evidence-rules
+traces:
+    satisfies:
+        - STK-REQ-002
+    reviewed_at: "2026-08-21T12:33:41.2792Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:1b057b7cf94a34c1c95a813cd3a40c911b6a5cd67def8f27e56b6f0c622e24cf
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:41.2792Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - specs/stakeholder/requirements/STK-REQ-002.req.yaml:86
+            - src/templates.c:250
+            - tests/acceptance.sh:279
+            - tests/test_acceptance.c:62
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+    gaps_reviewed_at: "2026-08-21T12:26:11.243115Z"
+    gaps_reviewed_by: agent:qc-builder
+    gap_reviews:
+        - check: decomposition
+          issue_key: decomposition|SYS-REQ-002|next_named
+          reviewer: agent:qc-builder
+          reason: Children carry the parent nominal obligation as informal prose refinements; SW-REQ-003/005/007 now own nominal hazards and evidence triples.
+          reviewed_at: "2026-08-21T12:26:11.243115Z"
+        - check: decomposition
+          issue_key: decomposition|SYS-REQ-002|token_leaked
+          reviewer: agent:qc-builder
+          reason: Children carry the parent nominal obligation as informal prose refinements; SW-REQ-003/005/007 now own nominal hazards and evidence triples.
+          reviewed_at: "2026-08-21T12:26:11.243115Z"
+    not_modeled:
+        - predicate: argc < 2
+          reason: "CLI dispatch arity in main; SYS-REQ-002 is the printer contract"
+        - predicate: argc==0
+          reason: "POSIX empty-argv guard; not a SYS-REQ-002 domain input"
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:27:38Z"
+    last_modified_by: agent:qc-builder
+    last_modified_at: "2026-08-21T09:58:45Z"
+priority_level: critical
+obligation_checklist:
+    - error_handling
+    - nominal
+obligation_hazards:
+    - class: nominal
+      worst_case: Help or a worklist line omits the next qc command, so the agent guesses the invocation.
+      severity: high
+    - class: error_handling
+      worst_case: Error text omits the next command or prints a token that would satisfy the evidence checker, so the agent pastes that token and clears the item.
+      severity: high

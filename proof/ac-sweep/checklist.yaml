@@ -1,0 +1,39 @@
+version: 1
+updated_at: "2026-08-21T09:50:00Z"
+updated_by: agent:ac-sweep
+items:
+  - id: STK-REQ-001
+    status: done
+    acceptance_review: true
+    ac_count: 3
+    notes: "gate.verdict + digest.content_bind; AC-DUAL-EQ for forced-set and digest equality"
+  - id: STK-REQ-002
+    status: done
+    acceptance_review: true
+    ac_count: 2
+    notes: "cli.prompt_next; AC-ENFORCE; help/error/worklist name next command"
+  - id: STK-REQ-003
+    status: done
+    acceptance_review: true
+    ac_count: 4
+    notes: "gate.human_refuse + deny_evidence + evidence_no_secret; AC-ENFORCE"
+  - id: STK-REQ-004
+    status: done
+    acceptance_review: true
+    ac_count: 3
+    notes: "state.scratch_write + state.ci_no_scratch; AC-ENFORCE / AC-DUAL-EQ"
+  - id: STK-REQ-005
+    status: done
+    acceptance_review: true
+    ac_count: 1
+    notes: "runtime.ape_no_fetch; Cosmopolitan APE, no registry fetch"
+  - id: STK-REQ-006
+    status: done
+    acceptance_review: true
+    ac_count: 2
+    notes: "gate.run_missing_fail; AC-EMPTY fail-closed missing @run (run_rc=127)"
+  - id: STK-REQ-007
+    status: done
+    acceptance_review: true
+    ac_count: 3
+    notes: "state.segment_new_file + state.seal_digest_eq; AC-ENFORCE / AC-DUAL-EQ"

@@ -1,0 +1,9 @@
+Validation Summary: 25 requirements (25 valid, 0 warnings, 0 errors)
+                    3 variable files (3 valid, 0 warnings, 0 errors)
+
+
+Help: proof help validate
+Next: proof workflow check --stage spec
+Next: proof validate --variable-drift   # this run did not check variable declaration
+Next: proof help variables_declared
+VAL_EXIT:0

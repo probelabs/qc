@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-08-21T09:34:20.27132Z",
+  "project_root": "/Users/buger/go/src/qc",
+  "scope": {
+    "partial": false
+  },
+  "rows": null,
+  "summary": {
+    "total": 0,
+    "by_status": {},
+    "gap": 0,
+    "debt": 0,
+    "ok": 0,
+    "dual_surface_gap": 0,
+    "dual_surface_residual": 0
+  }
+}

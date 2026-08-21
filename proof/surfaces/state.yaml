@@ -1,0 +1,60 @@
+group: state
+surfaces:
+  - id: state.scratch_write
+    description: "mark/decide/baseline write scratch only; committed qc/state is untouched"
+    location:
+      paths:
+        - src/store.c
+        - src/commands.c
+    detect:
+      method: pattern
+      pattern: "qc_write_scratch"
+      min_matches: 1
+    disposition:
+      status: reviewed
+      reason: "AC-ENFORCE: write_attestation calls qc_write_scratch only; seal is the sole path to qc_append_segment."
+      ref: STK-REQ-004/AC-002
+  - id: state.seal_digest_eq
+    description: "seal promotes a scratch line only when recomputed digest equals the line digest"
+    dual_surface: true
+    location:
+      paths:
+        - src/commands.c
+        - src/store.c
+    detect:
+      method: pattern
+      pattern: "strcmp\\(dig, scratch\\[i\\]\\.digest\\)"
+      min_matches: 1
+    disposition:
+      status: reviewed
+      reason: "AC-DUAL-EQ: cmd_seal promotes iff computed digest ≡ line digest; mismatch stays on scratch."
+      ref: STK-REQ-007/AC-003
+  - id: state.segment_new_file
+    description: "seal appends to a per-branch segment file; no shared mutable state file"
+    location:
+      paths:
+        - src/store.c
+    detect:
+      method: pattern
+      pattern: "qc_append_segment"
+      min_matches: 1
+    disposition:
+      status: reviewed
+      reason: "AC-ENFORCE: qc_append_segment writes qc/state/seg-*.qcs per branch; two seals are two files."
+      ref: STK-REQ-007/AC-002
+  - id: state.ci_no_scratch
+    description: "verify --ci and compact load committed store only; scratch is not read or written"
+    dual_surface: true
+    location:
+      paths:
+        - src/store.c
+        - src/digest.c
+        - src/commands.c
+    detect:
+      method: pattern
+      pattern: "mode == MODE_LOOP"
+      min_matches: 1
+    disposition:
+      status: reviewed
+      reason: "AC-DUAL-EQ: qc_load_store reads scratch only in MODE_LOOP; MODE_CI skips scratch and qc_write_manifest returns."
+      ref: STK-REQ-004/AC-003

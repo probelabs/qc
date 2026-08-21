@@ -1,0 +1,65 @@
+id: SW-REQ-003
+version: 1
+status: draft
+priority: shall
+category: constraint
+req_type: guarantee
+fretish: ""
+description: The build shall produce one Cosmopolitan APE named qc. CI shall invoke that binary. The binary shall not fetch code at run time.
+formalization_strategy: informal
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: SYS-REQ-003
+component: runtime
+rationale: User override of I9. I12 still holds.
+tags:
+    - ape
+variables: []
+references:
+    - type: document
+      id: SPEC.md#15-distribution-and-updates
+traces:
+    satisfies:
+        - SYS-REQ-003
+    reviewed_at: "2026-08-21T12:33:32.611682Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:e4d4a73f0347c4e9c93591536420429fe858f773407f0f741f870273a466d27b
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:32.611682Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - specs/system/requirements/SYS-REQ-003.req.yaml:16
+            - src/commands.c:63
+            - src/templates.c:160
+            - src/util.c:155
+            - tests/acceptance.sh:588
+            - tests/test_acceptance.c:157
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:31:29Z"
+    last_modified_by: agent:grok
+    last_modified_at: "2026-08-21T12:18:50Z"
+priority_level: critical
+obligation_checklist:
+    - determinism
+    - nominal
+obligation_hazards:
+    - class: determinism
+      worst_case: The build output is not one qc APE, or the binary fetches code, so CI and agents run different gates.
+      severity: high
+    - class: nominal
+      worst_case: CI invokes a non-APE or a binary that is not the committed qc, so the gate that ran is not the gate that was reviewed.
+      severity: high

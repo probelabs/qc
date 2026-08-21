@@ -1,0 +1,26 @@
+component: state
+no_interface:
+    declared: true
+    reason: "in-process state store in the single APE; scratch, segments, and base are files written by this binary"
+variables:
+    - name: stored_ok
+      type: bool
+      direction: output
+      description: True when a recorded answer is kept as an ok state line.
+    - name: line_parseable
+      type: bool
+      direction: output
+      description: True when a stored state line parses as one unescaped .qcs line.
+    - name: parallel_seals
+      type: bool
+      direction: input
+      description: True when two branches each sealed matching scratch lines.
+    - name: segment_collision
+      type: bool
+      direction: output
+      description: True when two sealed branches write the same segment path or rewrite shared base.
+
+
+independence:
+    declared: true
+    reason: "SYS-REQ-005 governs .qcs line parseability; SYS-REQ-007 governs per-branch segment paths. They share the state component but not output or mode variables."

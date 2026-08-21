@@ -1,0 +1,32 @@
+id: KI-001
+title: Compilation-unit C compares are not FRETish domain inputs
+description: SW-REQ-001 and SW-REQ-006 share src/states.c with evidence-length checks, spawn-status compares, and neighboring helper bounds. Those compares are compilation-unit implementation bounds, not the expiry or run_rc 127 FRETish contracts.
+affected_requirements:
+    - SW-REQ-001
+    - SW-REQ-006
+severity: low
+severity_basis: risk
+risk: correctness
+cve_surface: none
+introduced_in: inception
+defect_class: latent
+minimization_status: not_applicable
+owner: agent:qc-builder
+status: withdrawn
+environment_note: "Modeling gap, not a runtime defect. FRETish names expiry and run_rc 127; neighboring C length and spawn compares in src/states.c are implementation bounds listed as not_modeled."
+poc_presence_exemption:
+    reviewer: agent:qc-builder
+    rationale: Design-only modeling observation. Neighboring C compares are not a runtime defect and have no failing public-API reproducer.
+security_relevance_justification:
+    reviewer: agent:qc-builder
+    rationale: Correctness modeling gap, not a security finding. No credential or advisory surface.
+remediation_exemption:
+    reviewer: agent:qc-builder
+    rationale: No product defect to contain. FRETish already names the domain contracts; extra compares stay in not_modeled.
+history:
+    - at: "2026-08-21T12:30:32Z"
+      by: agent:qc-builder
+      action: created
+    - at: "2026-08-21T12:36:00Z"
+      by: agent:qc-builder
+      action: withdrawn

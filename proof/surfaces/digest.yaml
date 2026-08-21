@@ -1,0 +1,18 @@
+group: digest
+surfaces:
+  - id: digest.content_bind
+    description: "attestation digest is SHA-256 of item text plus scoped file hashes; projected as @hex16"
+    dual_surface: true
+    location:
+      paths:
+        - src/digest.c
+        - src/store.c
+        - src/parser.c
+    detect:
+      method: pattern
+      pattern: "qc_digest_core"
+      min_matches: 1
+    disposition:
+      status: reviewed
+      reason: "AC-DUAL-EQ: qc_digest_core produces the 16-hex value stored/printed on the line; qc_winner_match requires equality."
+      ref: STK-REQ-001/AC-003

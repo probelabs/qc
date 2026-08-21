@@ -1,0 +1,62 @@
+id: SW-REQ-004
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: ""
+description: The run runner shall execute the @run command in the platform shell. Exit code 0 shall clear the item. A non-zero exit code shall mark the item FAILED.
+formalization_strategy: informal
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: SYS-REQ-004
+component: gate
+rationale: SPEC.md §6.1 and §7.
+tags:
+    - run
+    - attest
+variables: []
+references:
+    - type: document
+      id: SPEC.md#6-state-model
+traces:
+    satisfies:
+        - SYS-REQ-004
+    reviewed_at: "2026-08-21T12:33:32.843549Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:77a0c73a8004b5e909cf73b9c6d643c03364bc78461fe8c7d62e4c09f51c3720
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:32.843549Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - specs/system/requirements/SYS-REQ-004.req.yaml:16
+            - src/commands.c:278
+            - src/parser.c:9
+            - src/util.c:312
+            - tests/acceptance.sh:355
+            - tests/test_acceptance.c:86
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:31:29Z"
+    last_modified_by: agent:qc-builder
+    last_modified_at: "2026-08-21T09:58:46Z"
+priority_level: critical
+obligation_checklist:
+    - error_handling
+obligation_hazards:
+    - class: error_handling
+      worst_case: A non-zero platform-shell exit is treated as CLEAR, so a failing @run never marks the item FAILED.
+      severity: high

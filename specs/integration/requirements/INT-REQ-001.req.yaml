@@ -1,0 +1,95 @@
+id: INT-REQ-001
+version: 1
+status: draft
+priority: shall
+category: interface
+req_type: guarantee
+fretish: the gate shall always satisfy ((verdict = 0) => (forced_item_count = 0)) & ((ci_mode = 2) => (!scratch_counted))
+description: verify --ci shall read committed base and segments only. Scratch shall be invisible. Unsealed answers shall not clear the CI gate.
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: SYS-REQ-001
+component: gate
+rationale: SPEC.md §6.3. The child adds the CI scratch-exclusion conjunct the parent does not name.
+tags:
+    - ci
+    - scratch
+variables:
+    - ci_mode
+    - scratch_counted
+    - verdict
+    - forced_item_count
+references:
+    - type: document
+      id: SPEC.md#6-state-model
+traces:
+    satisfies:
+        - SYS-REQ-001
+        - STK-REQ-004
+    reviewed_at: "2026-08-21T12:33:31.185189Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:8cc8c8aef2cc28512c3c2d81d919a440dd504aba79e00a70eebf4debcfc9d560
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:31.185189Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - specs/stakeholder/requirements/STK-REQ-004.req.yaml:87
+            - specs/system/requirements/SYS-REQ-001.req.yaml:16
+            - src/store.c:62
+            - tests/acceptance.sh:131
+            - tests/test_acceptance.c:23
+    components:
+        - gate
+        - state
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+    gaps_reviewed_at: "2026-08-21T11:59:00.041145Z"
+    gaps_reviewed_by: agent:qc-builder
+    gap_reviews:
+        - check: ambiguity
+          issue_key: ambiguity|gate|INT-REQ-001|SW-REQ-001
+          reviewer: agent:qc-builder
+          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
+          reviewed_at: "2026-08-21T11:59:00.041145Z"
+        - check: ambiguity
+          issue_key: ambiguity|gate|INT-REQ-001|SW-REQ-006
+          reviewer: agent:qc-builder
+          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
+          reviewed_at: "2026-08-21T11:59:00.041145Z"
+        - check: ambiguity
+          issue_key: ambiguity|gate|INT-REQ-001|SYS-REQ-006
+          reviewer: agent:qc-builder
+          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
+          reviewed_at: "2026-08-21T11:59:00.041145Z"
+    not_modeled:
+        - predicate: len(a->raw)
+          reason: "store line-length helper; INT-REQ-001 is CI scratch exclusion"
+        - predicate: len(b->raw)
+          reason: "store line-length helper; INT-REQ-001 is CI scratch exclusion"
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:31:37Z"
+    last_modified_by: agent:qc-builder
+    last_modified_at: "2026-08-21T10:21:55Z"
+priority_level: critical
+obligation_checklist:
+    - error_handling
+obligation_hazards:
+    - class: error_handling
+      worst_case: verify --ci reads .qc/scratch.qcs or writes under .qc, so an unsealed local answer clears the CI gate.
+      severity: high
+interface:
+    caller: gate
+    callee: state

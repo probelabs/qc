@@ -1,0 +1,17 @@
+# ReqProof local-only state (versionable .proof/ audit objects stay tracked).
+.proof/
+.proof/native/
+
+
+# built APE and cosmocc sidecars
+/qc
+/qc.aarch64.elf
+/qc.com.dbg
+/tests/test_kernel
+/tests/test_kernel.aarch64.elf
+/tests/test_kernel.com.dbg
+*.elf
+*.com.dbg
+/tests/test_acceptance
+/tests/test_acceptance.aarch64.elf
+/tests/test_acceptance.com.dbg

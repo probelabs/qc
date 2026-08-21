@@ -1,0 +1,43 @@
+{
+  "generated_at": "2026-08-21T09:37:03.073112Z",
+  "project_root": "/Users/buger/go/src/qc",
+  "scope": {
+    "packages": [
+      "runtime"
+    ],
+    "groups": [
+      "cli",
+      "digest",
+      "gate",
+      "runtime",
+      "state"
+    ],
+    "partial": true
+  },
+  "rows": [
+    {
+      "surface_id": "runtime.ape_no_fetch",
+      "package": "runtime",
+      "group": "runtime",
+      "in_code": false,
+      "disposition": "reviewed",
+      "dual_surface": false,
+      "status": "OK",
+      "reason": "Phase 1 is a Cosmopolitan APE (Makefile cosmocc, include/qc.h _COSMO_SOURCE). src/ has no HTTP client or registry fetch. STK-REQ-005/AC-001.",
+      "ref": "STK-REQ-005/AC-001",
+      "notes": "Phase 1 is a Cosmopolitan APE (Makefile cosmocc, include/qc.h _COSMO_SOURCE). src/ has no HTTP client or registry fetch. STK-REQ-005/AC-001.",
+      "status_reason": "reviewed: Phase 1 is a Cosmopolitan APE (Makefile cosmocc, include/qc.h _COSMO_SOURCE). src/ has no HTTP client or registry fetch. STK-REQ-005/AC-001."
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "by_status": {
+      "OK": 1
+    },
+    "gap": 0,
+    "debt": 0,
+    "ok": 1,
+    "dual_surface_gap": 0,
+    "dual_surface_residual": 0
+  }
+}

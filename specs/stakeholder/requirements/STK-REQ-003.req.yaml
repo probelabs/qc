@@ -1,0 +1,97 @@
+id: STK-REQ-003
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: ""
+description: qc shall execute every machine-checkable item. qc shall require an evidenced answer for every applicable judgment item.
+formalization_strategy: informal
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: gate
+rationale: 'SPEC.md §1. The machine shall run every @run item. An agent or a human shall answer every @attest item with evidence.'
+tags:
+    - run
+    - attest
+    - evidence
+variables: []
+references:
+    - type: document
+      id: SPEC.md#1-purpose-and-thesis
+traces:
+    reviewed_at: "2026-08-21T12:33:39.185774Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:b7b270bb0d08d1c56c8213d8eea9397958c65b57ddc5883891efa326d958a9b4
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:39.185774Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - src/states.c:77
+            - tests/acceptance.sh:10
+            - tests/test_acceptance.c:87
+            - tests/test_kernel.c:100
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:27:28Z"
+    last_modified_by: agent:qc-builder
+    last_modified_at: "2026-08-21T09:58:43Z"
+priority_level: critical
+obligation_checklist:
+    - nominal
+    - error_handling
+    - malformed_input
+obligation_hazards:
+    - class: error_handling
+      worst_case: A missing or crashing @run is recorded as CLEAR, so the machine-check never actually ran and the item leaves the forced set.
+      severity: high
+    - class: malformed_input
+      worst_case: Evidence exactly lgtm or a ghp_ token is accepted and written, so a secret lands in git or a non-evidenced tick clears the item.
+      severity: high
+    - class: nominal
+      worst_case: An applicable @run item is not executed, so machine checks never run and only judgment items are considered.
+      severity: high
+acceptance_review:
+    reviewed_at: "2026-08-21T09:55:00Z"
+    reviewed_by: agent:ac-sweep
+    disposition: reviewed
+    templates_applied:
+        - AC-ENFORCE
+    notes: 'gate.human_refuse + deny_evidence + evidence_no_secret: AC-ENFORCE from write_attestation/qc_evidence_ok'
+stakeholder:
+    persona: AI coding agent
+    story: As an AI coding agent, I want machines to run the machine checks so that I only answer judgment questions.
+    acceptance_criteria:
+        - id: AC-001
+          text: every @run item is executed; every applicable @attest item has evidenced status
+          verification_method: test
+          derived_reqs:
+            - SYS-REQ-004
+        - id: AC-002
+          text: qc mark of an @human item with QC_BY=agent or --by agent exits 2 and writes no scratch line
+          verification_method: test
+          derived_reqs:
+            - SYS-REQ-004
+        - id: AC-003
+          text: qc mark with evidence exactly lgtm or done exits 2 and writes no scratch line
+          verification_method: test
+          derived_reqs:
+            - SYS-REQ-004
+        - id: AC-004
+          text: qc mark with evidence containing a ghp_ token or BEGIN PRIVATE KEY exits 2 and does not echo the secret
+          verification_method: test
+          derived_reqs:
+            - SYS-REQ-004

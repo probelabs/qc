@@ -1,0 +1,43 @@
+{
+  "generated_at": "2026-08-21T09:37:02.589323Z",
+  "project_root": "/Users/buger/go/src/qc",
+  "scope": {
+    "packages": [
+      "digest"
+    ],
+    "groups": [
+      "cli",
+      "digest",
+      "gate",
+      "runtime",
+      "state"
+    ],
+    "partial": true
+  },
+  "rows": [
+    {
+      "surface_id": "digest.content_bind",
+      "package": "digest",
+      "group": "digest",
+      "in_code": true,
+      "disposition": "reviewed",
+      "dual_surface": true,
+      "status": "OK",
+      "reason": "AC-DUAL-EQ: qc_digest_core produces the 16-hex value stored/printed on the line; qc_winner_match requires equality.",
+      "ref": "STK-REQ-001/AC-003",
+      "notes": "AC-DUAL-EQ: qc_digest_core produces the 16-hex value stored/printed on the line; qc_winner_match requires equality.",
+      "status_reason": "reviewed: AC-DUAL-EQ: qc_digest_core produces the 16-hex value stored/printed on the line; qc_winner_match requires equality."
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "by_status": {
+      "OK": 1
+    },
+    "gap": 0,
+    "debt": 0,
+    "ok": 1,
+    "dual_surface_gap": 0,
+    "dual_surface_residual": 0
+  }
+}

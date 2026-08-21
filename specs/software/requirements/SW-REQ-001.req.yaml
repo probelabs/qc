@@ -1,0 +1,109 @@
+id: SW-REQ-001
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: the gate shall always satisfy ((expires_s > 0) & (answer_age_s > expires_s)) => (forced_item_count > 0)
+description: The verify kernel shall hash scoped file bytes and item text. The kernel shall bind an attestation when the stored digest equals the current digest. The kernel shall treat an item as forced when expires_s is greater than 0 and answer_age_s is greater than expires_s. The kernel shall not infer.
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: SYS-REQ-001
+component: gate
+rationale: Component-owned I1 plus I3 expiry. SPEC.md §5 and §6.1. The child adds the expiry comparison the parent does not name.
+tags:
+    - digest
+    - verify
+variables:
+    - expires_s
+    - answer_age_s
+    - forced_item_count
+references:
+    - type: document
+      id: SPEC.md#5-the-digest-exact-algorithm
+traces:
+    satisfies:
+        - SYS-REQ-001
+    reviewed_at: "2026-08-21T12:33:32.132409Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:8549a4d1a7646cdba6f9b8465e15f45dadd2177af71442f4071ea59319c4b8d3
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:32.132409Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - specs/system/requirements/SYS-REQ-001.req.yaml:16
+            - src/states.c:136
+            - tests/acceptance.sh:128
+            - tests/test_acceptance.c:20
+            - tests/test_kernel.c:11
+verification:
+    assurance_level: E
+    formalization_status: valid
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+    gaps_reviewed_at: "2026-08-21T11:59:00.041145Z"
+    gaps_reviewed_by: agent:qc-builder
+    gap_reviews:
+        - check: ambiguity
+          issue_key: ambiguity|gate|INT-REQ-001|SW-REQ-001
+          reviewer: agent:qc-builder
+          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
+          reviewed_at: "2026-08-21T11:59:00.041145Z"
+        - check: ambiguity
+          issue_key: ambiguity|gate|SW-REQ-001|SW-REQ-006
+          reviewer: agent:qc-builder
+          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
+          reviewed_at: "2026-08-21T11:59:00.041145Z"
+        - check: ambiguity
+          issue_key: ambiguity|gate|SW-REQ-001|SYS-REQ-006
+          reviewer: agent:qc-builder
+          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Each child adds a distinct conjunct: INT-REQ-001 excludes scratch in CI mode; SW-REQ-001 adds the expiry comparison; SYS-REQ-006/SW-REQ-006 pin run_rc 127. These are layered refinements, not duplicate obligations.'
+          reviewed_at: "2026-08-21T09:27:56.355113Z"
+    not_modeled:
+        - predicate: blob >= 32
+          reason: "secret-scan entropy window in the same compilation unit [ki:KI-001]"
+        - predicate: i < 20
+          reason: "AKIA key-shape scan bound in the same compilation unit [ki:KI-001]"
+        - predicate: len(ev) < 12
+          reason: "evidence substance length in the same compilation unit [ki:KI-001]"
+        - predicate: len(ev)
+          reason: "evidence length helper in the same compilation unit [ki:KI-001]"
+        - predicate: len(p) >= 20
+          reason: "AKIA remainder length in the same compilation unit [ki:KI-001]"
+        - predicate: len(p)
+          reason: "secret-scan pointer length in the same compilation unit [ki:KI-001]"
+        - predicate: len(tok)
+          reason: "evidence token length in the same compilation unit [ki:KI-001]"
+        - predicate: rc == -1
+          reason: "self-scope digest failure in the same compilation unit [ki:KI-001]"
+        - predicate: rc == 127
+          reason: "missing-binary status in the same compilation unit [ki:KI-001]"
+        - predicate: run >= 32
+          reason: "entropy run length in the same compilation unit [ki:KI-001]"
+        - predicate: st == -1
+          reason: "system() spawn-failure errno path in the same compilation unit [ki:KI-001]"
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:31:29Z"
+    last_modified_by: agent:qc-builder
+    last_modified_at: "2026-08-21T10:18:42Z"
+priority_level: critical
+obligation_checklist:
+    - boundary
+    - determinism
+obligation_hazards:
+    - class: boundary
+      worst_case: expires_s is greater than 0 and answer_age_s is greater than expires_s, yet the item stays CLEAR, so an expired attestation keeps verify at 0.
+      severity: high
+    - class: determinism
+      worst_case: The digest of the same checklist id, item id, question, and scoped file bytes differs across hosts, so a valid line fails to bind.
+      severity: high

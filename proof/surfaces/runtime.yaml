@@ -1,0 +1,15 @@
+group: runtime
+surfaces:
+  - id: runtime.ape_no_fetch
+    description: "one committed Cosmopolitan APE; no language-runtime install and no registry fetch"
+    location:
+      paths:
+        - include/qc.h
+        - Makefile
+        - src
+    detect:
+      method: declared
+    disposition:
+      status: reviewed
+      reason: "Phase 1 is a Cosmopolitan APE (Makefile cosmocc, include/qc.h _COSMO_SOURCE). src/ has no HTTP client or registry fetch. STK-REQ-005/AC-001."
+      ref: STK-REQ-005/AC-001

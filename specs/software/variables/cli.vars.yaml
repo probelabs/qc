@@ -1,0 +1,5 @@
+component: cli
+no_interface:
+    declared: true
+    reason: "in-process CLI in the single Cosmopolitan APE; help and errors are printed by the same binary, not a networked callee"
+variables: []

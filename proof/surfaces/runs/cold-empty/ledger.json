@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-08-21T09:34:20.27131Z",
+  "project_root": "/Users/buger/go/src/qc",
+  "scope": {
+    "partial": false
+  },
+  "surfaces": [],
+  "summary": {
+    "total": 0,
+    "by_disposition": {},
+    "by_package": {},
+    "dual_surface": 0,
+    "dual_surface_gap": 0
+  }
+}

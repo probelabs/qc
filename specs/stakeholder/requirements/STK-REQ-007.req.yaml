@@ -1,0 +1,86 @@
+id: STK-REQ-007
+version: 1
+status: draft
+priority: shall
+category: constraint
+req_type: guarantee
+fretish: ""
+description: Parallel feature branches shall not write one shared mutable state file. A merge of two sealed branches shall add two files.
+formalization_strategy: informal
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: state
+rationale: 'SPEC.md I10: zero conflict surface on hot paths, by construction.'
+tags:
+    - i10
+    - segments
+variables: []
+references:
+    - type: document
+      id: SPEC.md#44-the-state-store
+traces:
+    reviewed_at: "2026-08-21T12:33:40.5497Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:4c80477f84e65a7de068faa25be1ca8d9ebce59ea4581ce491413234d36e6361
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:40.5497Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - tests/acceptance.sh:20
+            - tests/test_acceptance.c:213
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:27:29Z"
+    last_modified_by: agent:qc-builder
+    last_modified_at: "2026-08-21T09:58:44Z"
+priority_level: major
+obligation_checklist:
+    - nominal
+    - concurrent
+obligation_hazards:
+    - class: concurrent
+      worst_case: Parallel seals interleave writes to one file, so one branch loses attested lines and re-review cannot name the stale question.
+      severity: high
+    - class: nominal
+      worst_case: Two sealed branches rewrite one shared state file, so the merge is a conflict instead of two added segment files.
+      severity: medium
+acceptance_review:
+    reviewed_at: "2026-08-21T09:55:00Z"
+    reviewed_by: agent:ac-sweep
+    disposition: reviewed
+    templates_applied:
+        - AC-ENFORCE
+        - AC-DUAL-EQ
+    notes: 'state.segment_new_file + state.seal_digest_eq: AC-ENFORCE / AC-DUAL-EQ for per-branch seal'
+stakeholder:
+    persona: Human reviewer
+    story: As a reviewer of parallel PRs, I want no shared-file merge conflict on state so that re-review is a named stale question.
+    acceptance_criteria:
+        - id: AC-001
+          text: two sealed branches merge as two added segment files
+          verification_method: test
+          derived_reqs:
+            - SYS-REQ-007
+        - id: AC-002
+          text: qc seal appends matching lines to a per-branch qc/state/seg-*.qcs file and does not rewrite a shared mutable state file
+          verification_method: test
+          derived_reqs:
+            - SYS-REQ-007
+        - id: AC-003
+          text: qc seal promotes a scratch line only when the recomputed content digest equals the digest stored on that line; a mismatch leaves the line on scratch
+          verification_method: test
+          derived_reqs:
+            - SYS-REQ-007

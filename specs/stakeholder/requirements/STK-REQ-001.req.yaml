@@ -1,0 +1,94 @@
+id: STK-REQ-001
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: ""
+description: An AI agent shall not finish a change until every applicable quality question has a recorded evidenced answer. The answer shall bind to the current content.
+formalization_strategy: informal
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+component: gate
+rationale: 'SPEC.md §1 thesis. The gate does not judge whether work is good. The gate judges whether a decision about the work was recorded: by whom, when, against what content, and with what evidence.'
+tags:
+    - thesis
+    - gate
+variables: []
+references:
+    - type: document
+      id: SPEC.md#1-purpose-and-thesis
+traces:
+    reviewed_at: "2026-08-21T12:33:34.388771Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:aaeb95c0460d0d7e9acec2206d45c070e0367dff93b9c5b5978d1a47919a6d47
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:34.388771Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - tests/acceptance.sh:816
+            - tests/test_acceptance.c:254
+            - tests/test_kernel.c:199
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:27:05Z"
+    last_modified_by: agent:qc-builder
+    last_modified_at: "2026-08-21T09:58:43Z"
+priority_level: critical
+obligation_checklist:
+    - nominal
+    - error_handling
+    - determinism
+    - boundary
+obligation_hazards:
+    - class: boundary
+      worst_case: The empty forced set or expires_s=0 is misclassified, so a just-cleared worktree still fails or a still-forced set passes.
+      severity: high
+    - class: determinism
+      worst_case: Two machines that see the same worktree, checklists, store, and clock return different verdicts, so CI green does not match the local gate.
+      severity: high
+    - class: error_handling
+      worst_case: A config or store read error is treated as all-clear (exit 0), so forced items never surface and the agent ships unreviewed change.
+      severity: high
+    - class: nominal
+      worst_case: An applicable item already has a matching evidenced answer, yet verify still exits 1, so a finished review cannot ship.
+      severity: high
+acceptance_review:
+    reviewed_at: "2026-08-21T09:55:00Z"
+    reviewed_by: agent:ac-sweep
+    disposition: reviewed
+    templates_applied:
+        - AC-DUAL-EQ
+    notes: 'gate.verdict + digest.content_bind: AC-DUAL-EQ for forced-set and digest equality'
+stakeholder:
+    persona: AI coding agent
+    story: As an AI coding agent, I want every applicable quality question answered against current content so that I cannot ship unreviewed change.
+    acceptance_criteria:
+        - id: AC-001
+          text: verify exits 0 only when every applicable item has a matching evidenced answer
+          verification_method: test
+          derived_reqs:
+            - SYS-REQ-001
+        - id: AC-002
+          text: 'plan and verify agree on the forced set: verify exits 0 if and only if plan lists zero FORCED, FAILED, BLOCKED, or AWAITING items for the same worktree, checklists, store, and clock'
+          verification_method: test
+          derived_reqs:
+            - SYS-REQ-001
+        - id: AC-003
+          text: the 16-hex digest stored and printed on an attestation line equals the digest computed from checklist id, item id, question text, and scoped file hashes; verify treats a line as a matching answer only when that equality holds
+          verification_method: test
+          derived_reqs:
+            - SYS-REQ-001

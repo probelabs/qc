@@ -1,0 +1,84 @@
+{
+  "generated_at": "2026-08-21T09:37:02.357982Z",
+  "project_root": "/Users/buger/go/src/qc",
+  "scope": {
+    "packages": [
+      "state"
+    ],
+    "groups": [
+      "cli",
+      "digest",
+      "gate",
+      "runtime",
+      "state"
+    ],
+    "partial": true
+  },
+  "rows": [
+    {
+      "surface_id": "state.ci_no_scratch",
+      "package": "state",
+      "group": "state",
+      "in_code": true,
+      "disposition": "reviewed",
+      "dual_surface": true,
+      "status": "OK",
+      "reason": "AC-DUAL-EQ: qc_load_store reads scratch only in MODE_LOOP; MODE_CI skips scratch and qc_write_manifest returns.",
+      "ref": "STK-REQ-004/AC-003",
+      "notes": "AC-DUAL-EQ: qc_load_store reads scratch only in MODE_LOOP; MODE_CI skips scratch and qc_write_manifest returns.",
+      "status_reason": "reviewed: AC-DUAL-EQ: qc_load_store reads scratch only in MODE_LOOP; MODE_CI skips scratch and qc_write_manifest returns."
+    },
+    {
+      "surface_id": "state.scratch_write",
+      "package": "state",
+      "group": "state",
+      "in_code": true,
+      "disposition": "reviewed",
+      "dual_surface": true,
+      "dual_derived": true,
+      "status": "OK",
+      "reason": "AC-ENFORCE: write_attestation calls qc_write_scratch only; seal is the sole path to qc_append_segment.",
+      "ref": "STK-REQ-004/AC-002",
+      "notes": "AC-ENFORCE: write_attestation calls qc_write_scratch only; seal is the sole path to qc_append_segment.",
+      "status_reason": "reviewed: AC-ENFORCE: write_attestation calls qc_write_scratch only; seal is the sole path to qc_append_segment."
+    },
+    {
+      "surface_id": "state.seal_digest_eq",
+      "package": "state",
+      "group": "state",
+      "in_code": true,
+      "disposition": "reviewed",
+      "dual_surface": true,
+      "status": "OK",
+      "reason": "AC-DUAL-EQ: cmd_seal promotes iff computed digest ≡ line digest; mismatch stays on scratch.",
+      "ref": "STK-REQ-007/AC-003",
+      "notes": "AC-DUAL-EQ: cmd_seal promotes iff computed digest ≡ line digest; mismatch stays on scratch.",
+      "status_reason": "reviewed: AC-DUAL-EQ: cmd_seal promotes iff computed digest ≡ line digest; mismatch stays on scratch."
+    },
+    {
+      "surface_id": "state.segment_new_file",
+      "package": "state",
+      "group": "state",
+      "in_code": true,
+      "disposition": "reviewed",
+      "dual_surface": true,
+      "dual_derived": true,
+      "status": "OK",
+      "reason": "AC-ENFORCE: qc_append_segment writes qc/state/seg-*.qcs per branch; two seals are two files.",
+      "ref": "STK-REQ-007/AC-002",
+      "notes": "AC-ENFORCE: qc_append_segment writes qc/state/seg-*.qcs per branch; two seals are two files.",
+      "status_reason": "reviewed: AC-ENFORCE: qc_append_segment writes qc/state/seg-*.qcs per branch; two seals are two files."
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "by_status": {
+      "OK": 4
+    },
+    "gap": 0,
+    "debt": 0,
+    "ok": 4,
+    "dual_surface_gap": 0,
+    "dual_surface_residual": 0
+  }
+}

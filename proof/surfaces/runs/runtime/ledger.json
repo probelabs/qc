@@ -1,0 +1,77 @@
+{
+  "generated_at": "2026-08-21T09:37:03.073111Z",
+  "project_root": "/Users/buger/go/src/qc",
+  "scope": {
+    "packages": [
+      "runtime"
+    ],
+    "groups": [
+      "cli",
+      "digest",
+      "gate",
+      "runtime",
+      "state"
+    ],
+    "partial": true
+  },
+  "surfaces": [
+    {
+      "id": "runtime.ape_no_fetch",
+      "group": "runtime",
+      "package": "runtime",
+      "description": "one committed Cosmopolitan APE; no language-runtime install and no registry fetch",
+      "sites": [
+        {
+          "path": "include/qc.h",
+          "line": 0,
+          "symbol": "declared"
+        },
+        {
+          "path": "Makefile",
+          "line": 0,
+          "symbol": "declared"
+        },
+        {
+          "path": "src",
+          "line": 0,
+          "symbol": "declared"
+        }
+      ],
+      "enforce": [
+        {
+          "path": "include/qc.h",
+          "line": 0,
+          "symbol": "declared"
+        },
+        {
+          "path": "Makefile",
+          "line": 0,
+          "symbol": "declared"
+        },
+        {
+          "path": "src",
+          "line": 0,
+          "symbol": "declared"
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "reviewed",
+      "reason": "Phase 1 is a Cosmopolitan APE (Makefile cosmocc, include/qc.h _COSMO_SOURCE). src/ has no HTTP client or registry fetch. STK-REQ-005/AC-001.",
+      "ref": "STK-REQ-005/AC-001",
+      "notes": "Phase 1 is a Cosmopolitan APE (Makefile cosmocc, include/qc.h _COSMO_SOURCE). src/ has no HTTP client or registry fetch. STK-REQ-005/AC-001.",
+      "dual_surface": false,
+      "detect_method": "declared"
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "by_disposition": {
+      "reviewed": 1
+    },
+    "by_package": {
+      "runtime": 1
+    },
+    "dual_surface": 0,
+    "dual_surface_gap": 0
+  }
+}

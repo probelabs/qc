@@ -1,0 +1,160 @@
+{
+  "generated_at": "2026-08-21T09:37:02.357981Z",
+  "project_root": "/Users/buger/go/src/qc",
+  "scope": {
+    "packages": [
+      "state"
+    ],
+    "groups": [
+      "cli",
+      "digest",
+      "gate",
+      "runtime",
+      "state"
+    ],
+    "partial": true
+  },
+  "surfaces": [
+    {
+      "id": "state.ci_no_scratch",
+      "group": "state",
+      "package": "state",
+      "description": "verify --ci and compact load committed store only; scratch is not read or written",
+      "sites": [
+        {
+          "path": "src/store.c",
+          "line": 68
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/store.c",
+          "line": 68
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "reviewed",
+      "reason": "AC-DUAL-EQ: qc_load_store reads scratch only in MODE_LOOP; MODE_CI skips scratch and qc_write_manifest returns.",
+      "ref": "STK-REQ-004/AC-003",
+      "notes": "AC-DUAL-EQ: qc_load_store reads scratch only in MODE_LOOP; MODE_CI skips scratch and qc_write_manifest returns.",
+      "dual_surface": true,
+      "detect_method": "pattern",
+      "detect_matches": 1
+    },
+    {
+      "id": "state.scratch_write",
+      "group": "state",
+      "package": "state",
+      "description": "mark/decide/baseline write scratch only; committed qc/state is untouched",
+      "sites": [
+        {
+          "path": "src/commands.c",
+          "line": 267
+        },
+        {
+          "path": "src/commands.c",
+          "line": 385
+        },
+        {
+          "path": "src/commands.c",
+          "line": 424
+        },
+        {
+          "path": "src/store.c",
+          "line": 130
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/commands.c",
+          "line": 267
+        },
+        {
+          "path": "src/commands.c",
+          "line": 385
+        },
+        {
+          "path": "src/commands.c",
+          "line": 424
+        },
+        {
+          "path": "src/store.c",
+          "line": 130
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "reviewed",
+      "reason": "AC-ENFORCE: write_attestation calls qc_write_scratch only; seal is the sole path to qc_append_segment.",
+      "ref": "STK-REQ-004/AC-002",
+      "notes": "AC-ENFORCE: write_attestation calls qc_write_scratch only; seal is the sole path to qc_append_segment.",
+      "dual_surface": true,
+      "dual_derived": true,
+      "detect_method": "pattern",
+      "detect_matches": 4
+    },
+    {
+      "id": "state.seal_digest_eq",
+      "group": "state",
+      "package": "state",
+      "description": "seal promotes a scratch line only when recomputed digest equals the line digest",
+      "sites": [
+        {
+          "path": "src/commands.c",
+          "line": 376
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/commands.c",
+          "line": 376
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "reviewed",
+      "reason": "AC-DUAL-EQ: cmd_seal promotes iff computed digest ≡ line digest; mismatch stays on scratch.",
+      "ref": "STK-REQ-007/AC-003",
+      "notes": "AC-DUAL-EQ: cmd_seal promotes iff computed digest ≡ line digest; mismatch stays on scratch.",
+      "dual_surface": true,
+      "detect_method": "pattern",
+      "detect_matches": 1
+    },
+    {
+      "id": "state.segment_new_file",
+      "group": "state",
+      "package": "state",
+      "description": "seal appends to a per-branch segment file; no shared mutable state file",
+      "sites": [
+        {
+          "path": "src/store.c",
+          "line": 144
+        }
+      ],
+      "enforce": [
+        {
+          "path": "src/store.c",
+          "line": 144
+        }
+      ],
+      "discovered_by": "declared",
+      "disposition": "reviewed",
+      "reason": "AC-ENFORCE: qc_append_segment writes qc/state/seg-*.qcs per branch; two seals are two files.",
+      "ref": "STK-REQ-007/AC-002",
+      "notes": "AC-ENFORCE: qc_append_segment writes qc/state/seg-*.qcs per branch; two seals are two files.",
+      "dual_surface": true,
+      "dual_derived": true,
+      "detect_method": "pattern",
+      "detect_matches": 1
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "by_disposition": {
+      "reviewed": 4
+    },
+    "by_package": {
+      "state": 4
+    },
+    "dual_surface": 4,
+    "dual_surface_gap": 0
+  }
+}

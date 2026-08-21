@@ -1,0 +1,13 @@
+component: cli
+no_interface:
+    declared: true
+    reason: "in-process CLI in the single Cosmopolitan APE; help and errors are printed by the same binary, not a networked callee"
+variables:
+    - name: next_named
+      type: bool
+      direction: output
+      description: True when printed help or error text names the next qc command.
+    - name: token_leaked
+      type: bool
+      direction: output
+      description: True when printed help or error text contains a string that would satisfy the evidence checker.

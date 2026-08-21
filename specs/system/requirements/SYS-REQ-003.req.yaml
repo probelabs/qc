@@ -1,0 +1,79 @@
+id: SYS-REQ-003
+version: 1
+status: draft
+priority: shall
+category: constraint
+req_type: guarantee
+fretish: the runtime shall always satisfy artifact_is_ape & !runtime_fetch
+description: The shipped qc artifact shall be one Cosmopolitan Actually Portable Executable. CI and agents shall invoke that binary. The repo shall not fetch gate code at run time.
+formalization_strategy: fretish
+informal_verification:
+    method: ""
+    evidence: ""
+    verified: false
+parent: STK-REQ-005
+component: runtime
+rationale: 'User direction: Cosmopolitan universal binary as the agentic native harness. Replaces SPEC.md I9 Python vendor. I12 still holds. Refined by SW-REQ-003 (APE vendor) and INT-REQ-004 (locale-blind digest).'
+tags:
+    - cosmopolitan
+    - ape
+    - i12
+variables:
+    - artifact_is_ape
+    - runtime_fetch
+references:
+    - type: document
+      id: SPEC.md#15-distribution-and-updates
+traces:
+    satisfies:
+        - STK-REQ-005
+    reviewed_at: "2026-08-21T12:33:41.548794Z"
+    reviewed_by: agent:qc-builder
+    reviewed_fingerprint: sha256:2da439f0b76362c48bd614e5effe1feb68822488e799ebe02e5c192e622348cf
+    review_history:
+        - reviewed_at: "2026-08-21T12:33:41.548794Z"
+          reviewed_by: agent:qc-builder
+          method: inspection
+          rationale: Citation-backed restamp after function-level Implements and autolink.
+          source: proof trace review --citation
+          citations:
+            - specs/stakeholder/requirements/STK-REQ-005.req.yaml:85
+            - tests/acceptance.sh:587
+            - tests/test_acceptance.c:156
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+    gaps_reviewed_at: "2026-08-21T12:26:11.243115Z"
+    gaps_reviewed_by: agent:qc-builder
+    gap_reviews:
+        - check: decomposition
+          issue_key: decomposition|SYS-REQ-003|artifact_is_ape
+          reviewer: agent:qc-builder
+          reason: Children carry the parent nominal obligation as informal prose refinements; SW-REQ-003/005/007 now own nominal hazards and evidence triples.
+          reviewed_at: "2026-08-21T12:26:11.243115Z"
+        - check: decomposition
+          issue_key: decomposition|SYS-REQ-003|runtime_fetch
+          reviewer: agent:qc-builder
+          reason: Children carry the parent nominal obligation as informal prose refinements; SW-REQ-003/005/007 now own nominal hazards and evidence triples.
+          reviewed_at: "2026-08-21T12:26:11.243115Z"
+history:
+    created_by: agent:qc-builder
+    created_at: "2026-08-21T07:27:38Z"
+    last_modified_by: agent:qc-builder
+    last_modified_at: "2026-08-21T09:58:45Z"
+priority_level: critical
+obligation_checklist:
+    - determinism
+    - nominal
+obligation_hazards:
+    - class: nominal
+      worst_case: CI invokes a host rebuild instead of the committed APE, so the shipped gate is not the reviewed artifact.
+      severity: high
+    - class: determinism
+      worst_case: The invoked artifact is not the committed APE, or it fetches code at run time, so two environments run different gate code on the same tree.
+      severity: high
