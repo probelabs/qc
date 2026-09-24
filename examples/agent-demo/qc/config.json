@@ -1,0 +1,6 @@
+{
+  "trunk": "auto",
+  "ignore": [],
+  "deny_evidence": [],
+  "compact_after": 40
+}

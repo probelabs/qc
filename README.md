@@ -384,9 +384,16 @@ qc verify --only code-quality/lint
 
 <!-- Documents: STK-REQ-003, STK-REQ-006, SYS-REQ-004, SYS-REQ-006, SW-REQ-004, SW-REQ-006 -->
 
+## For agents
+
+**Start here:** [`docs/agentic-guide.md`](./docs/agentic-guide.md) — Claude Code / Cursor / `AGENTS.md` wiring, exact loop, CI sketch, failure recovery, and copy-paste snippets.
+
+Short skill card to load into the agent: [`SKILL.md`](./SKILL.md).  
+Worked demo with a **real** fail-then-pass transcript: [`examples/agent-demo/`](./examples/agent-demo/).
+
 ## Agent workflow
 
-Point agents at [`SKILL.md`](./SKILL.md). Contract:
+Point agents at [`SKILL.md`](./SKILL.md) (full guide: [`docs/agentic-guide.md`](./docs/agentic-guide.md)). Contract:
 
 1. Set `QC_BY=agent`.
 2. Run `qc plan` at task start; treat questions as requirements, not an end exam.
@@ -430,6 +437,7 @@ Host coverage needs Homebrew `gcc-15` / `gcov-15` as wired in `scripts/host-c-mc
 
 - [`SPEC.md`](./SPEC.md) — specification v0.4 (purpose, invariants, digest, state, evidence, CLI, phasing).
 - [`SKILL.md`](./SKILL.md) — short agent loop contract.
+- [`docs/agentic-guide.md`](./docs/agentic-guide.md) — agent wiring (Claude Code, Cursor, CI) + demo pointer.
 
 Phase 1 is what this binary implements. Features marked Phase 2 in the spec (template diff, `qc update`, `qc stats`, `qc diff` / `--carry`, merge-queue mode, …) are not shipped here.
 

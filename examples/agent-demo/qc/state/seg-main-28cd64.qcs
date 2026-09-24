@@ -1,0 +1,9 @@
+# qc-state v1
+docs/@applies = pass @fef040470a7deb3f by:agent at:2026-09-24T14:30:29Z files:1 :: README.md documents examples/agent-demo layout, DEMO.md pointer, and verify --ci replay
+ai-generated-code/@applies = pass @f47911ecf74f63df by:agent at:2026-09-24T14:30:30Z files:1 :: agent edited src/hello.py to add empty-name handling in greet()
+ai-generated-code/apis-real = pass @6a3eb112ade9e562 by:agent at:2026-09-24T14:30:30Z files:1 :: used only stdlib f-strings and def; verified against https://docs.python.org/3/tutorial/controlflow.html in src/hello.py
+ai-generated-code/no-extra = pass @17de1b8175ecf704 by:agent at:2026-09-24T14:30:30Z files:1 :: diff touches only src/hello.py for behavior; README.md and DEMO.md are docs
+ai-generated-code/tests-honest = pass @ebc429feaa915008 by:agent at:2026-09-24T14:30:30Z files:1 :: no tests/ directory exists; nothing deleted or weakened in this change to src/hello.py
+ai-generated-code/no-silence = pass @45e9655bc029f2a6 by:agent at:2026-09-24T14:30:30Z files:1 :: no noqa, type: ignore, or suppressions added in src/hello.py
+docs/accuracy = pass @90aa8036eedad0b3 by:agent at:2026-09-24T14:30:30Z files:1 :: README.md table lists src/hello.py, qc/checklists/, DEMO.md; verified paths exist on disk
+docs/stale = pass @9da08b12e47252ad by:agent at:2026-09-24T14:30:30Z files:1 :: README.md replaces the one-line stub; DEMO.md holds the full transcript now
