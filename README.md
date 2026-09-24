@@ -6,21 +6,46 @@ Deterministic checklist gate for AI-driven development. Agents are non-determini
 
 ## Install
 
-`qc` is a Cosmopolitan [APE](https://justine.lol/ape.html) universal binary — one release asset runs on Linux, macOS, and Windows from a shell (do not open it from a GUI file manager).
+`qc` is a Cosmopolitan [APE](https://justine.lol/ape.html) universal binary — one release asset runs on Linux, macOS, and Windows from a shell (do not open it from a GUI file manager). Release assets: `qc` and `qc.exe` (same bytes; Windows-friendly name).
 
-### One-liner
+### One-liners
+
+**macOS / Linux**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/probelabs/qc/main/scripts/install.sh | sh
 ```
 
-Installs the latest GitHub release asset `qc` to `~/.local/bin/qc`. No root required. Overrides (pass env to `sh`, not only to `curl`): `curl … | QC_INSTALL_DIR=~/bin sh`, `curl … | QC_VERSION=v0.1.0 sh`. Then:
+Installs to `~/.local/bin/qc`. No root required.
+
+**Windows (PowerShell)**
+
+```powershell
+irm https://raw.githubusercontent.com/probelabs/qc/main/scripts/install.ps1 | iex
+```
+
+Installs to `%LOCALAPPDATA%\qc\bin\qc.exe`. The installer prints a PATH export if needed.
+
+**Windows (Git Bash / MSYS / Cygwin)**
+
+Same curl|sh as Unix — detects the Windows-ish host and installs `~/.local/bin/qc.exe`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/probelabs/qc/main/scripts/install.sh | sh
+```
+
+Overrides (pass env to the installer process, not only to `curl`/`irm`):
+
+- Unix / Git Bash: `curl … | QC_INSTALL_DIR=~/bin sh`, `curl … | QC_VERSION=v0.1.0 sh`
+- PowerShell: `$env:QC_INSTALL_DIR = "$env:USERPROFILE\bin"`; `$env:QC_VERSION = "v0.1.0"` then `irm … | iex`
+
+Then:
 
 ```bash
 qc help
 ```
 
-If `~/.local/bin` is not on your `PATH`, the installer prints the export to add.
+On Apple Silicon, the first run may self-extract an APE loader under TMPDIR/HOME (no sudo required for a smoke test).
 
 ### Build from source
 

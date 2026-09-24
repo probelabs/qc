@@ -6,6 +6,7 @@
 #   curl -fsSL … | QC_INSTALL_DIR=~/bin sh
 #   curl -fsSL … | QC_VERSION=v0.1.0 sh   # pin a release tag (default: latest)
 #
+# Works on Linux, macOS, and Windows Git Bash / MSYS / Cygwin / MinGW.
 # APE binaries must be invoked from a shell (e.g. `qc help`), not opened as
 # a document from a GUI file manager.
 
@@ -14,7 +15,6 @@ set -eu
 (set -o pipefail) 2>/dev/null && set -o pipefail
 
 REPO="probelabs/qc"
-ASSET="qc"
 DEFAULT_DIR="${HOME}/.local/bin"
 INSTALL_DIR="${QC_INSTALL_DIR:-$DEFAULT_DIR}"
 VERSION="${QC_VERSION:-latest}"
@@ -39,13 +39,29 @@ need_cmd rm
 need_cmd wc
 need_cmd tr
 
-# Cosmopolitan APE is one multi-platform binary; OS/arch only for messaging.
+# Cosmopolitan APE is one multi-platform binary; OS/arch only for messaging
+# and for choosing the install filename (.exe on Windows-ish hosts).
 OS="$(uname -s 2>/dev/null || echo unknown)"
 ARCH="$(uname -m 2>/dev/null || echo unknown)"
 printf 'qc install: detected %s/%s (APE binary is universal)\n' "$OS" "$ARCH"
 
+# Git Bash / MSYS / Cygwin / MinGW report uname like MINGW64_NT-10.0, MSYS_NT-…, CYGWIN_NT-…
+BIN_NAME="qc"
+case "$OS" in
+  MINGW*|MSYS*|CYGWIN*|mingw*|msys*|cygwin*)
+    BIN_NAME="qc.exe"
+    ;;
+esac
+
+# Prefer the obviously-named Windows asset when installing as .exe; fall back to `qc`.
+ASSET="qc"
+if [ "$BIN_NAME" = "qc.exe" ]; then
+  ASSET="qc.exe"
+fi
+
 if [ "$VERSION" = "latest" ]; then
   DOWNLOAD_URL="https://github.com/${REPO}/releases/latest/download/${ASSET}"
+  FALLBACK_URL="https://github.com/${REPO}/releases/latest/download/qc"
   LABEL="latest"
 else
   # Accept v0.1.0 or 0.1.0
@@ -54,6 +70,7 @@ else
     *) TAG="v$VERSION" ;;
   esac
   DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${TAG}/${ASSET}"
+  FALLBACK_URL="https://github.com/${REPO}/releases/download/${TAG}/qc"
   LABEL="$TAG"
 fi
 
@@ -63,11 +80,19 @@ cleanup() {
 }
 trap cleanup EXIT INT HUP TERM
 
-TMP_BIN="${TMPDIR_INSTALL}/${ASSET}"
+TMP_BIN="${TMPDIR_INSTALL}/${BIN_NAME}"
 
 printf 'qc install: downloading %s → %s\n' "$LABEL" "$DOWNLOAD_URL"
 if ! curl -fsSL -o "$TMP_BIN" "$DOWNLOAD_URL"; then
-  err "download failed: ${DOWNLOAD_URL}"
+  if [ "$ASSET" != "qc" ]; then
+    printf 'qc install: %s not found; falling back to qc asset\n' "$ASSET"
+    if ! curl -fsSL -o "$TMP_BIN" "$FALLBACK_URL"; then
+      err "download failed: ${DOWNLOAD_URL} and ${FALLBACK_URL}"
+    fi
+    DOWNLOAD_URL="$FALLBACK_URL"
+  else
+    err "download failed: ${DOWNLOAD_URL}"
+  fi
 fi
 
 if [ ! -s "$TMP_BIN" ]; then
@@ -81,7 +106,7 @@ if [ "$SIZE" -lt 10000 ]; then
 fi
 
 mkdir -p "$INSTALL_DIR"
-DEST="${INSTALL_DIR}/qc"
+DEST="${INSTALL_DIR}/${BIN_NAME}"
 TMP_DEST="${DEST}.new.$$"
 cp "$TMP_BIN" "$TMP_DEST"
 chmod +x "$TMP_DEST"
@@ -89,6 +114,14 @@ mv -f "$TMP_DEST" "$DEST"
 
 printf 'qc install: installed %s (%s bytes)\n' "$DEST" "$SIZE"
 printf 'qc install: note — run qc from a shell (APE); do not open the binary in a GUI\n'
+
+# On Apple Silicon, APE may self-extract a user-local loader on first run.
+# System-wide `ape install` (sudo) is optional and not required for a smoke test.
+case "$OS:$ARCH" in
+  Darwin:arm64|Darwin:aarch64)
+    printf 'qc install: note — on Apple Silicon, first run may self-extract an APE loader under TMPDIR/HOME (no sudo needed)\n'
+    ;;
+esac
 
 case ":${PATH}:" in
   *":${INSTALL_DIR}:"*) ;;
