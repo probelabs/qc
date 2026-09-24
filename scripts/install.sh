@@ -2,9 +2,9 @@
 # Install qc (Cosmopolitan APE) from the latest GitHub release.
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/probelabs/qc/main/scripts/install.sh | sh
-# Optional:
-#   QC_INSTALL_DIR=~/bin curl -fsSL … | sh
-#   QC_VERSION=v0.1.0 curl -fsSL … | sh   # pin a release tag (default: latest)
+# Optional (env must be visible to sh, not only to curl):
+#   curl -fsSL … | QC_INSTALL_DIR=~/bin sh
+#   curl -fsSL … | QC_VERSION=v0.1.0 sh   # pin a release tag (default: latest)
 #
 # APE binaries must be invoked from a shell (e.g. `qc help`), not opened as
 # a document from a GUI file manager.

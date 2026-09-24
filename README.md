@@ -14,7 +14,7 @@ Deterministic checklist gate for AI-driven development. Agents are non-determini
 curl -fsSL https://raw.githubusercontent.com/probelabs/qc/main/scripts/install.sh | sh
 ```
 
-Installs the latest GitHub release asset `qc` to `~/.local/bin/qc` (override with `QC_INSTALL_DIR`). No root required. Pin a tag with `QC_VERSION=v0.1.0`. Then:
+Installs the latest GitHub release asset `qc` to `~/.local/bin/qc`. No root required. Overrides (pass env to `sh`, not only to `curl`): `curl … | QC_INSTALL_DIR=~/bin sh`, `curl … | QC_VERSION=v0.1.0 sh`. Then:
 
 ```bash
 qc help
