@@ -60,8 +60,8 @@ verification:
 history:
     created_by: agent:qc-builder
     created_at: "2026-08-21T07:31:15Z"
-    last_modified_by: agent:qc-builder
-    last_modified_at: "2026-08-21T09:58:45Z"
+    last_modified_by: human:Leonid Bugaev
+    last_modified_at: "2026-09-24T13:20:24Z"
 priority_level: critical
 obligation_checklist:
     - error_handling
@@ -77,3 +77,21 @@ obligation_hazards:
     - class: nominal
       worst_case: One applicable @run or @attest item is silently omitted from evaluation, so the forced set is incomplete and verify can exit 0.
       severity: high
+lifecycle:
+    change_history:
+        - date: "2026-09-24T13:19:09Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:Leonid Bugaev
+        - date: "2026-09-24T13:20:24Z"
+          from: review
+          to: draft
+          reason: ""
+          changed_by: human:Leonid Bugaev
+defect_review:
+    reviewed_at: "2026-09-24T13:20:36Z"
+    session: CRS-0033
+    fingerprint_sha: sha256:d2996ef7d0400f018df2312f0c97f1409c46491d2f0070c40ab6da272178b48e
+    via: agent-review
+    counts: {}

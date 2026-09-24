@@ -68,8 +68,8 @@ verification:
 history:
     created_by: agent:qc-builder
     created_at: "2026-08-21T07:27:38Z"
-    last_modified_by: agent:qc-builder
-    last_modified_at: "2026-08-21T09:58:45Z"
+    last_modified_by: human:Leonid Bugaev
+    last_modified_at: "2026-09-24T13:20:23Z"
 priority_level: critical
 obligation_checklist:
     - boundary
@@ -89,3 +89,21 @@ obligation_hazards:
     - class: error_handling
       worst_case: A config error returns exit 0 instead of 2, so a broken gate looks like all-clear.
       severity: high
+lifecycle:
+    change_history:
+        - date: "2026-09-24T13:19:09Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:Leonid Bugaev
+        - date: "2026-09-24T13:20:23Z"
+          from: review
+          to: draft
+          reason: ""
+          changed_by: human:Leonid Bugaev
+defect_review:
+    reviewed_at: "2026-09-24T13:20:36Z"
+    session: CRS-0031
+    fingerprint_sha: sha256:6adcaa91cb2f898db2582e6e07da95e60a53972b9191cc14dcfeca2f9ae6ed34
+    via: agent-review
+    counts: {}

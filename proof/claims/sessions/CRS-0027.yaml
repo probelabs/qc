@@ -1,0 +1,20 @@
+id: CRS-0027
+spec_reqids:
+    - SW-REQ-004
+state: complete
+backend: grok
+cells:
+    - req_id: SW-REQ-004
+      dir: .proof/defect-sessions/CRS-0027/cells/SW-REQ-004
+      status: complete
+input_fingerprint:
+    spec_yaml_sha: sha256:d748d12061dd8e08c8f02550010ad185ac3ebd28496262c2218bacfa69f89a4f
+    spec_projection: semantic-v1
+    code_fingerprints:
+        src/commands.c: sha256:355c35bf98940239e7b814236424b59b534c0e02ebd20208b3b420c79f0f63bf
+        src/parser.c: sha256:54123628cb41a0418c74ac20fdc111f392ea34e1551cb2749d8029bafe5b9d50
+        src/util.c: sha256:0f8a877af4186fc5d34071968e9876c1efb6d7518d1562840ad909466fe4825e
+    claims_sha: sha256:0af6fa6339e55b578ede2b55b37a2115da19a66b95c144d9dbffdf1db32cba69
+    prompt_sha: 615a808bdaf817ea584d2ec0d63075a4a2cb89830d87461c99da7493ea247131
+created_at: "2026-09-24T13:20:26Z"
+updated_at: "2026-09-24T13:20:36Z"

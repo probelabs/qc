@@ -1,0 +1,18 @@
+id: CRS-0006
+spec_reqids:
+    - STK-REQ-003
+state: complete
+backend: grok
+cells:
+    - req_id: STK-REQ-003
+      dir: .proof/defect-sessions/CRS-0006/cells/STK-REQ-003
+      status: complete
+input_fingerprint:
+    spec_yaml_sha: sha256:f686c7d760d41a0c29e1ce038cf3efab7fe7e8fb348f23cdc2cc8f5fbe9262d3
+    spec_projection: semantic-v1
+    code_fingerprints:
+        src/states.c: sha256:c4df921a17e592219fef550098abd5a235766b09370d7e52f4ff3eedb7ef421f
+    claims_sha: sha256:19a40dc38d12aac80cb2efc1c86fecf061de7565216f22c78adc78b6880f2ade
+    prompt_sha: 615a808bdaf817ea584d2ec0d63075a4a2cb89830d87461c99da7493ea247131
+created_at: "2026-09-24T13:15:23Z"
+updated_at: "2026-09-24T13:16:26Z"

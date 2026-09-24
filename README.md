@@ -37,15 +37,15 @@ qc plan
 
 ```bash
 export QC_BY=agent
-qc decide docs --yes -m "README.md is documentation updated in this change"
+qc decide docs --yes -m "README.md documents the public install and usage surface for this change"
 qc plan
 ```
 
 Answer with falsifiable evidence (a real path, digit, URL, or backtick span). Vague ticks are rejected; the tool names the next command, never a passing phrase:
 
 ```bash
-qc mark docs/accuracy --pass -m "checked README.md install section against Makefile COSMOCC and ./qc help"
-qc mark docs/stale --pass -m "no stale install steps removed; README.md is new in this repo"
+qc mark docs/accuracy --pass -m "checked README.md section headings against the files present in the worktree"
+qc mark docs/stale --pass -m "README.md is new; no prior install steps to retire"
 qc verify                 # loop mode: scratch + committed state
 ```
 
@@ -113,23 +113,233 @@ Also: `--only <ref>`, `--quiet`, `--json`.
 
 <!-- Documents: STK-REQ-007, SYS-REQ-007, SW-REQ-007, INT-REQ-002 -->
 
-## Command map
+### I5 — every line is a prompt
 
-| Command | Purpose |
-|---|---|
-| `qc help [topic]` | Topic help; every topic ends with NEXT |
-| `qc init` | Create `qc/` + `.qc/`, vendor APE, one-line `.gitignore` |
-| `qc template list\|show <t>` | Bundled checklist gallery |
-| `qc add <t> [--full]` | Copy template into `qc/checklists/` (minimal unless `--full`) |
-| `qc plan [--json]` | Ordered worklist before work |
-| `qc decide <id> --yes\|--no -m "…"` | Applicability for `applies_when` checklists |
-| `qc mark <ref> --pass\|--fail\|--na -m "…"` | Evidenced answer → scratch |
-| `qc baseline [-m "…"] [--item <ref>]` | Grandfather current content at adoption |
-| `qc seal [--staged]` | Promote matching scratch into this branch segment |
-| `qc reset [--item <ref>]` | Wipe scratch (committed state untouched) |
-| `qc verify [--staged\|--ci] [--only] [--quiet] [--json]` | The gate |
-| `qc compact` | Trunk-only: fold segments into base, drop orphans, commit |
-| `qc report [--md]` | Claims table for reviewers / CI summaries |
+Help, errors, and worklists name the next `qc …` command. They never print a phrase that would satisfy the evidence checker. Agents copy NEXT lines; applause tokens (`lgtm`, `done`, `ok`) are rejected at mark time.
+
+<!-- Documents: STK-REQ-002, SYS-REQ-002, SW-REQ-002 -->
+
+### `QC_BY=agent`
+
+Set `export QC_BY=agent` (or pass `--by agent`) so attestations record provenance. Agents must not mark `@human` items — the CLI refuses and tells you to surface the item to a person.
+
+<!-- Documents: INT-REQ-003, SW-REQ-002 -->
+
+## Command reference
+
+Topic help: `qc help` then `qc help <topic>`. Every topic ends with NEXT.
+
+### `qc help [topic]`
+
+```bash
+qc help
+qc help mark
+qc help verify
+```
+
+Topics: `init` `add` `template` `plan` `decide` `mark` `baseline` `seal` `reset` `verify` `compact` `report`.
+
+### `qc init`
+
+Creates committed `qc/` (vendors this APE as `qc/qc`), ignored `.qc/`, and one-line `.gitignore` / `.gitattributes` updates.
+
+```bash
+qc init
+# Created qc/ (tool + checklists, committed) and .qc/ (local workspace, ignored)
+# NEXT: qc template list
+```
+
+### `qc template list` / `qc template show <t>`
+
+Gallery of bundled checklists. `show` prints the minimal file you would copy.
+
+```bash
+qc template list
+#   docs                 claims verified against code
+#   code-quality         quality questions for application code
+#   …
+
+qc template show docs
+# ---
+# id: docs
+# applies_when: The change is documentation
+# scope: [docs/**, README.md]
+# …
+```
+
+### `qc add <t> [--full]`
+
+Copies a template into `qc/checklists/`. Minimal by default; `--full` keeps every item.
+
+```bash
+qc add docs
+# Copied builtin/docs@1 (minimal) → qc/checklists/docs.md
+
+qc add security-review --full
+# Copied builtin/security-review@1 (full) → qc/checklists/security-review.md
+```
+
+Adapt after copy; there is no runtime `extends` (legibility beats DRY).
+
+### `qc plan [--json]`
+
+Ordered worklist before work: forced items, questions, previous answers, decision requests.
+
+```bash
+qc plan
+# 1  docs/@applies   FORCED (never)
+#    Q: The change is documentation
+#    NEXT: qc decide docs --yes|--no -m "…"
+
+qc plan --json | head -c 200
+# {"items":[{"ref":"docs/@applies","state":"FORCED (never)",…},…]}
+```
+
+### `qc decide <id> --yes|--no -m "…"`
+
+Applicability for checklists with `applies_when`. Writes scratch only. Exclusions are diffable Statements of Applicability.
+
+```bash
+export QC_BY=agent
+qc decide docs --yes -m "README.md documents the public install and usage surface for this change"
+qc decide code-quality --no -m "this change is docs-only README.md; src.rs is a stub not shipped"
+```
+
+### `qc mark <ref> --pass|--fail|--na -m "…"`
+
+Evidenced answer bound to the current worktree digest → scratch.
+
+```bash
+qc mark docs/accuracy --pass -m "checked README.md section headings against the files present in the worktree"
+qc mark docs/stale --fail -m "README.md still mentions cosmocc.zip path that Makefile no longer uses"
+qc mark docs/stale --na -m "docs/ is empty; only README.md exists and it is new in this PR"
+```
+
+### `qc baseline [-m "…"] [--item <ref>]`
+
+Grandfather current content at adoption. Writes scratch; seal afterward so trunk sees it.
+
+```bash
+qc baseline -m "adopting docs checklist on an existing README.md that already matches the code"
+qc baseline --item code-quality/naming -m "greenfield src.rs with a single fn main; naming debt accepted at adoption"
+qc seal --staged
+```
+
+### `qc seal [--staged]`
+
+Promote scratch entries whose digest still matches into this branch's `qc/state/seg-*.qcs`.
+
+```bash
+git add qc/ README.md
+qc seal --staged
+# seal: promoted 4 of 4 → qc/state/seg-main-28cd64.qcs
+# NEXT: qc verify --staged
+```
+
+Without `--staged`, seal uses the worktree view; `--staged` matches what the index will commit.
+
+### `qc reset [--item <ref>]`
+
+Wipe scratch, or one scratch entry. Committed `qc/state/` is untouched. Same safety class as `rm -rf .qc/`.
+
+```bash
+qc reset --item docs/stale
+# removed docs/stale from scratch. Committed state is untouched.
+qc reset                 # wipe all scratch
+qc plan
+```
+
+### `qc verify` modes
+
+```bash
+qc verify                         # loop: scratch + committed
+qc verify --staged                # index/committed only — predicts CI
+qc verify --ci                    # committed only, read-only gate of record
+qc verify --only docs/accuracy    # single ref
+qc verify --quiet                 # exit code only (still prints forced/failed lines)
+qc verify --json                  # machine-readable items[]
+```
+
+Example `--only` clear:
+
+```bash
+qc verify --only docs/accuracy
+# CLEAR              docs/accuracy
+# all clear
+```
+
+### `qc compact` (trunk only)
+
+Fold segments into `base.qcs`, one line per item, drop orphans, commit. Refuses off-trunk so parallel branches cannot rewrite shared base.
+
+```bash
+git checkout main
+qc compact
+
+# On a feature branch:
+qc compact
+# REFUSED — compact rewrites shared base.qcs; it runs on trunk only.
+# NEXT: git checkout main && qc compact
+```
+
+### `qc report [--md]`
+
+Claims table for reviewers / CI summaries.
+
+```bash
+qc report --md
+# | item | status | by | age | digest | evidence |
+# |---|---|---|---|---|---|
+# | docs/accuracy | CLEAR | agent | | b1a1bbdb28626343 | checked README.md section headings… |
+```
+
+<!-- Documents: STK-REQ-002, INT-REQ-003, SW-REQ-002 -->
+
+## Evidence, `@human`, and `@run`
+
+### Evidence rejection (I5)
+
+Every `pass` / `fail` / `n_a` needs `-m` evidence. Shape check at mark time:
+
+- Rejects empty applause (`done`, `ok`, `lgtm`, … and `deny_evidence`).
+- Requires enough substance **and** at least one falsifiable token: an existing repo path, a digit, a URL, or a ``backticked`` span.
+- Refuses common secret shapes (AWS keys, `ghp_`, `sk-`, PEM blocks, high-entropy blobs).
+
+```bash
+qc mark docs/accuracy --pass -m "lgtm"
+# REJECTED — evidence must point at something falsifiable (a path, a number, a command, a link),
+# not restate that checking happened.
+# NEXT: qc mark <ref> --pass -m "…"
+```
+
+Rejection messages state the principle and name the next `qc mark` command. They do not reveal a phrase that would pass.
+
+### `@human` refuse
+
+Items tagged `@human` require a human `--by <name>`. With `QC_BY=agent` the CLI refuses:
+
+```bash
+export QC_BY=agent
+qc mark code-quality/diff-read --pass -m "read src.rs top to bottom; only fn main present"
+# REFUSED — this item is @human. An agent must not attest it.
+# Principle: human approval is provenance the PR author cannot forge locally.
+# NEXT: surface code-quality/diff-read to the user; they run
+#       qc mark code-quality/diff-read --pass -m "…" --by <their-name>
+```
+
+### `@run` fail-closed
+
+`@run(cmd)` items are executed by the gate (exit 0 clears). A missing binary is a loud **FAILED** with an install hint — never a skip.
+
+```bash
+qc verify --only code-quality/lint
+# ruff: No such file or directory
+# FAILED             code-quality/lint
+#   @run exited 127. binary ruff not found. Install the command named in @run, then: qc verify
+#   → The gate does not skip a missing checker. NEXT: install it, then qc verify
+```
+
+<!-- Documents: STK-REQ-003, STK-REQ-006, SYS-REQ-004, SYS-REQ-006, SW-REQ-004, SW-REQ-006 -->
 
 ## Agent workflow
 
@@ -144,20 +354,6 @@ Point agents at [`SKILL.md`](./SKILL.md). Contract:
 7. On failure, read the worklist top-to-bottom and fix; do not re-attest blindly.
 
 <!-- Documents: STK-REQ-002, INT-REQ-003, SW-REQ-002 -->
-
-## Evidence rules
-
-Every `pass` / `fail` / `n_a` needs `-m` evidence. Shape check at mark time:
-
-- Rejects empty applause (`done`, `ok`, `lgtm`, … and `deny_evidence`).
-- Requires enough substance **and** at least one falsifiable token: an existing repo path, a digit, a URL, or a ``backticked`` span.
-- Refuses common secret shapes (AWS keys, `ghp_`, `sk-`, PEM blocks, high-entropy blobs).
-
-Rejection messages state the principle and name the next `qc mark` command. They do not reveal a phrase that would pass.
-
-`@run(cmd)` items are executed by the gate (exit 0 clears). A missing `@run` binary is a loud **FAILED** with an install hint — never a skip.
-
-<!-- Documents: STK-REQ-003, STK-REQ-006, SYS-REQ-004, SYS-REQ-006, SW-REQ-004, SW-REQ-006 -->
 
 ## Bundled templates
 

@@ -50,8 +50,8 @@ verification:
 history:
     created_by: agent:qc-builder
     created_at: "2026-08-21T07:31:30Z"
-    last_modified_by: agent:grok
-    last_modified_at: "2026-08-21T12:18:50Z"
+    last_modified_by: human:Leonid Bugaev
+    last_modified_at: "2026-09-24T13:20:23Z"
 priority_level: major
 obligation_checklist:
     - concurrent
@@ -63,3 +63,21 @@ obligation_hazards:
     - class: nominal
       worst_case: seal writes a file that is not this branch segment, or compact writes a file that is not base.qcs, so the single-writer placement is lost.
       severity: high
+lifecycle:
+    change_history:
+        - date: "2026-09-24T13:19:09Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:Leonid Bugaev
+        - date: "2026-09-24T13:20:23Z"
+          from: review
+          to: draft
+          reason: ""
+          changed_by: human:Leonid Bugaev
+defect_review:
+    reviewed_at: "2026-09-24T13:20:36Z"
+    session: CRS-0030
+    fingerprint_sha: sha256:ab12f3f951a8eb8d4ce815752ff8e95fee402a9317a0205f70615029fa7576e7
+    via: agent-review
+    counts: {}

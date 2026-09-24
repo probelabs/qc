@@ -22,9 +22,9 @@ references:
     - type: document
       id: SPEC.md#1-purpose-and-thesis
 traces:
-    reviewed_at: "2026-08-21T12:33:39.185774Z"
-    reviewed_by: agent:qc-builder
-    reviewed_fingerprint: sha256:b7b270bb0d08d1c56c8213d8eea9397958c65b57ddc5883891efa326d958a9b4
+    reviewed_at: "2026-09-24T13:19:10.376699Z"
+    reviewed_by: human:Leonid Bugaev
+    reviewed_fingerprint: sha256:0685d20404213c6d69d606c77f4d4c4e34a73d59a8896b6b135a23d6aaff3ff5
     review_history:
         - reviewed_at: "2026-08-21T12:33:39.185774Z"
           reviewed_by: agent:qc-builder
@@ -47,8 +47,8 @@ verification:
 history:
     created_by: agent:qc-builder
     created_at: "2026-08-21T07:27:28Z"
-    last_modified_by: agent:qc-builder
-    last_modified_at: "2026-08-21T09:58:43Z"
+    last_modified_by: human:Leonid Bugaev
+    last_modified_at: "2026-09-24T13:20:23Z"
 priority_level: critical
 obligation_checklist:
     - nominal
@@ -76,7 +76,7 @@ stakeholder:
     story: As an AI coding agent, I want machines to run the machine checks so that I only answer judgment questions.
     acceptance_criteria:
         - id: AC-001
-          text: every @run item is executed; every applicable @attest item has evidenced status
+          text: qc executes every @run item. every applicable @attest item carries evidenced status.
           verification_method: test
           derived_reqs:
             - SYS-REQ-004
@@ -95,3 +95,21 @@ stakeholder:
           verification_method: test
           derived_reqs:
             - SYS-REQ-004
+lifecycle:
+    change_history:
+        - date: "2026-09-24T13:19:09Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:Leonid Bugaev
+        - date: "2026-09-24T13:20:23Z"
+          from: review
+          to: draft
+          reason: ""
+          changed_by: human:Leonid Bugaev
+defect_review:
+    reviewed_at: "2026-09-24T13:20:35Z"
+    session: CRS-0023
+    fingerprint_sha: sha256:a4b61fb83c3bfd23d6804aa780cbc44dea685e1ae29c37dd08dc013881b24932
+    via: agent-review
+    counts: {}

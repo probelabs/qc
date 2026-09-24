@@ -12,7 +12,7 @@ informal_verification:
     evidence: ""
     verified: false
 component: gate
-rationale: 'SPEC.md §1 thesis. The gate does not judge whether work is good. The gate judges whether a decision about the work was recorded: by whom, when, against what content, and with what evidence.'
+rationale: 'SPEC.md section 1 thesis. The gate does not judge whether work is good. The gate judges whether a reviewer recorded a decision about the work. The record names who decided, when, which content, and which evidence.'
 tags:
     - thesis
     - gate
@@ -21,9 +21,9 @@ references:
     - type: document
       id: SPEC.md#1-purpose-and-thesis
 traces:
-    reviewed_at: "2026-08-21T12:33:34.388771Z"
-    reviewed_by: agent:qc-builder
-    reviewed_fingerprint: sha256:aaeb95c0460d0d7e9acec2206d45c070e0367dff93b9c5b5978d1a47919a6d47
+    reviewed_at: "2026-09-24T13:19:10.052267Z"
+    reviewed_by: human:Leonid Bugaev
+    reviewed_fingerprint: sha256:690ef06c15c8aa596c20a4362bd4cc0efc9f11227870e9f3efa5082ba94e2995
     review_history:
         - reviewed_at: "2026-08-21T12:33:34.388771Z"
           reviewed_by: agent:qc-builder
@@ -45,8 +45,8 @@ verification:
 history:
     created_by: agent:qc-builder
     created_at: "2026-08-21T07:27:05Z"
-    last_modified_by: agent:qc-builder
-    last_modified_at: "2026-08-21T09:58:43Z"
+    last_modified_by: human:Leonid Bugaev
+    last_modified_at: "2026-09-24T13:20:23Z"
 priority_level: critical
 obligation_checklist:
     - nominal
@@ -83,12 +83,24 @@ stakeholder:
           derived_reqs:
             - SYS-REQ-001
         - id: AC-002
-          text: 'plan and verify agree on the forced set: verify exits 0 if and only if plan lists zero FORCED, FAILED, BLOCKED, or AWAITING items for the same worktree, checklists, store, and clock'
+          text: 'plan and verify agree on the forced set for the same worktree, checklists, store, and clock. verify exits 0 only when plan lists zero FORCED, FAILED, BLOCKED, or AWAITING items.'
           verification_method: test
           derived_reqs:
             - SYS-REQ-001
         - id: AC-003
-          text: the 16-hex digest stored and printed on an attestation line equals the digest computed from checklist id, item id, question text, and scoped file hashes; verify treats a line as a matching answer only when that equality holds
+          text: the attestation line stores a 16-hex content digest over checklist id, item id, question text, plus scoped file hashes. verify accepts the line as a matching answer only when that digest equals.
           verification_method: test
           derived_reqs:
             - SYS-REQ-001
+lifecycle:
+    change_history:
+        - date: "2026-09-24T13:19:08Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:Leonid Bugaev
+        - date: "2026-09-24T13:20:23Z"
+          from: review
+          to: draft
+          reason: ""
+          changed_by: human:Leonid Bugaev

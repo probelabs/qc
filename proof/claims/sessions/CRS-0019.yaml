@@ -1,0 +1,19 @@
+id: CRS-0019
+spec_reqids:
+    - INT-REQ-002
+state: complete
+backend: grok
+cells:
+    - req_id: INT-REQ-002
+      dir: .proof/defect-sessions/CRS-0019/cells/INT-REQ-002
+      status: complete
+input_fingerprint:
+    spec_yaml_sha: sha256:89d09a96442e70d92f5aa80b10e8e42a6df1f3eae5dcd636a4ef07a3865e2e5b
+    spec_projection: semantic-v1
+    code_fingerprints:
+        src/commands.c: sha256:355c35bf98940239e7b814236424b59b534c0e02ebd20208b3b420c79f0f63bf
+        src/store.c: sha256:692579702b1c82ab5008fe3a110ad65aafa7932434af04345e9c869bda0329ed
+    claims_sha: sha256:7475ce75270ce7e55ade9729c68c11319ca32bb0844ad5585e9b6a0ff9229450
+    prompt_sha: 615a808bdaf817ea584d2ec0d63075a4a2cb89830d87461c99da7493ea247131
+created_at: "2026-09-24T13:20:24Z"
+updated_at: "2026-09-24T13:20:35Z"

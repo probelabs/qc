@@ -22,9 +22,9 @@ references:
     - type: document
       id: SPEC.md#44-the-state-store
 traces:
-    reviewed_at: "2026-08-21T12:33:39.732845Z"
-    reviewed_by: agent:qc-builder
-    reviewed_fingerprint: sha256:49818c71e05d1b576324309b96e0177d2c81e181ee9b95bd010c539496cad543
+    reviewed_at: "2026-09-24T13:19:10.46196Z"
+    reviewed_by: human:Leonid Bugaev
+    reviewed_fingerprint: sha256:915a2579543a93aa36b9e548f1e2247331302114c574bf97c2b91c36f0615e26
     review_history:
         - reviewed_at: "2026-08-21T12:33:39.732845Z"
           reviewed_by: agent:qc-builder
@@ -45,8 +45,8 @@ verification:
 history:
     created_by: agent:qc-builder
     created_at: "2026-08-21T07:27:28Z"
-    last_modified_by: agent:qc-builder
-    last_modified_at: "2026-08-21T09:58:44Z"
+    last_modified_by: human:Leonid Bugaev
+    last_modified_at: "2026-09-24T13:20:23Z"
 priority_level: major
 obligation_checklist:
     - nominal
@@ -76,12 +76,24 @@ stakeholder:
           derived_reqs:
             - SYS-REQ-005
         - id: AC-002
-          text: qc mark writes only .qc/scratch.qcs and optional .qc/manifests digest json; qc/state is unchanged
+          text: qc mark writes only .qc/scratch.qcs and optional .qc/manifests digest json. qc mark leaves qc/state unchanged.
           verification_method: test
           derived_reqs:
             - SYS-REQ-005
         - id: AC-003
-          text: 'qc verify --ci loads committed base and segments only: .qc/scratch.qcs is not read and no file under .qc is written'
+          text: 'qc verify --ci loads committed base and segments only. it does not read .qc/scratch.qcs and writes no file under .qc.'
           verification_method: test
           derived_reqs:
             - INT-REQ-001
+lifecycle:
+    change_history:
+        - date: "2026-09-24T13:19:09Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:Leonid Bugaev
+        - date: "2026-09-24T13:20:23Z"
+          from: review
+          to: draft
+          reason: ""
+          changed_by: human:Leonid Bugaev

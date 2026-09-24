@@ -1,0 +1,61 @@
+# Project-local C signal pack for qc (Cosmopolitan APE checklist CLI).
+# Declares languages: [c] so code_signal_obligations_reviewed treats C as
+# covered by a configured rule pack (no builtin C scanner exists).
+# Patterns are honest C hazards for this codebase; enable an OpenGrep
+# provider and `proof signals collect` when ready to close obligations.
+rules:
+  - id: c.unchecked-malloc
+    languages: [c]
+    message: Heap allocation result used without a NULL check.
+    severity: WARNING
+    metadata:
+      proof:
+        signal_id: c.unchecked_malloc
+        provider: opengrep
+        obligations: [nil_safety]
+        tags: [memory_safety]
+        confidence: medium
+    patterns:
+      - pattern: |
+          $P = malloc($N);
+          ...
+          $P->$F
+      - pattern-not-inside: |
+          if ($P == NULL) { ... }
+          ...
+          $P->$F
+      - pattern-not-inside: |
+          if (!$P) { ... }
+          ...
+          $P->$F
+
+  - id: c.strcpy-unbounded
+    languages: [c]
+    message: Unbounded strcpy/sprintf into a fixed buffer.
+    severity: WARNING
+    metadata:
+      proof:
+        signal_id: c.strcpy_unbounded
+        provider: opengrep
+        obligations: [boundary]
+        tags: [memory_safety]
+        confidence: high
+    pattern-either:
+      - pattern: strcpy($DST, $SRC)
+      - pattern: sprintf($DST, $FMT, ...)
+      - pattern: gets($BUF)
+
+  - id: c.ignored-close
+    languages: [c]
+    message: File close return value ignored.
+    severity: INFO
+    metadata:
+      proof:
+        signal_id: c.ignored_close
+        provider: opengrep
+        obligations: [error_handling]
+        tags: [resource_lifecycle]
+        confidence: low
+    pattern: fclose($F);
+    pattern-not-inside: |
+      if (fclose($F) ...) { ... }

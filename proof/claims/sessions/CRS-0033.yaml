@@ -1,0 +1,19 @@
+id: CRS-0033
+spec_reqids:
+    - SYS-REQ-004
+state: complete
+backend: grok
+cells:
+    - req_id: SYS-REQ-004
+      dir: .proof/defect-sessions/CRS-0033/cells/SYS-REQ-004
+      status: complete
+input_fingerprint:
+    spec_yaml_sha: sha256:5999eeafce0c5fdb9d1b91b5e17acc2c3f829983782f6012c3f9b4ff61d26963
+    spec_projection: semantic-v1
+    code_fingerprints:
+        src/commands.c: sha256:355c35bf98940239e7b814236424b59b534c0e02ebd20208b3b420c79f0f63bf
+        src/states.c: sha256:c4df921a17e592219fef550098abd5a235766b09370d7e52f4ff3eedb7ef421f
+    claims_sha: sha256:4ff1838bbd6c3bea71fc558b283297f4c3d924fdb018853da52bfa9519db9047
+    prompt_sha: 615a808bdaf817ea584d2ec0d63075a4a2cb89830d87461c99da7493ea247131
+created_at: "2026-09-24T13:20:27Z"
+updated_at: "2026-09-24T13:20:36Z"

@@ -22,6 +22,8 @@ project:
         auto_increment: false
     signals:
         defaults: auto
+        rule_packs:
+            - signal-rules/c-ape.yaml
     documentation:
         sources:
             - path: docs/

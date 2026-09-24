@@ -21,9 +21,9 @@ references:
     - type: document
       id: SPEC.md#13-edge-case-ledger
 traces:
-    reviewed_at: "2026-08-21T12:33:40.249773Z"
-    reviewed_by: agent:qc-builder
-    reviewed_fingerprint: sha256:cd56a2cbfe75b3b2e367da1ca213b6280e47e8d9968ee0abfc8cc61de03ae870
+    reviewed_at: "2026-09-24T13:19:10.492146Z"
+    reviewed_by: human:Leonid Bugaev
+    reviewed_fingerprint: sha256:75011855049db5b186f3f6fd3976a83200d4c20838672269c4f875a1e8a4f8bf
     review_history:
         - reviewed_at: "2026-08-21T12:33:40.249773Z"
           reviewed_by: agent:qc-builder
@@ -44,8 +44,8 @@ verification:
 history:
     created_by: agent:qc-builder
     created_at: "2026-08-21T07:27:28Z"
-    last_modified_by: agent:qc-builder
-    last_modified_at: "2026-08-21T09:58:44Z"
+    last_modified_by: human:Leonid Bugaev
+    last_modified_at: "2026-09-24T13:20:23Z"
 priority_level: major
 obligation_checklist:
     - error_handling
@@ -78,7 +78,19 @@ stakeholder:
           derived_reqs:
             - SYS-REQ-006
         - id: AC-002
-          text: when an @run item names a missing binary, the item is FAILED with run_rc 127 and an install command, never skipped or CLEAR
+          text: when an @run item names a missing binary, qc marks it FAILED with run_rc 127 and an install command. qc never skips it or marks it CLEAR.
           verification_method: test
           derived_reqs:
             - SYS-REQ-006
+lifecycle:
+    change_history:
+        - date: "2026-09-24T13:19:09Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:Leonid Bugaev
+        - date: "2026-09-24T13:20:23Z"
+          from: review
+          to: draft
+          reason: ""
+          changed_by: human:Leonid Bugaev

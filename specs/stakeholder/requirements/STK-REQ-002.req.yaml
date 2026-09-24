@@ -22,9 +22,9 @@ references:
     - type: document
       id: SPEC.md#7-evidence-rules
 traces:
-    reviewed_at: "2026-08-21T12:33:38.832215Z"
-    reviewed_by: agent:qc-builder
-    reviewed_fingerprint: sha256:d81359d78979306dd8d65549deb17545199b1dc8cce4cd01164a0bcaeeac68cb
+    reviewed_at: "2026-09-24T13:19:10.266708Z"
+    reviewed_by: human:Leonid Bugaev
+    reviewed_fingerprint: sha256:cac2d0f5b9c823164a8fcc342912f5c2e073865e20361e05313abe6cee940e05
     review_history:
         - reviewed_at: "2026-08-21T12:33:38.832215Z"
           reviewed_by: agent:qc-builder
@@ -46,8 +46,8 @@ verification:
 history:
     created_by: agent:qc-builder
     created_at: "2026-08-21T07:27:28Z"
-    last_modified_by: agent:qc-builder
-    last_modified_at: "2026-08-21T09:58:43Z"
+    last_modified_by: human:Leonid Bugaev
+    last_modified_at: "2026-09-24T13:20:23Z"
 priority_level: critical
 obligation_checklist:
     - nominal
@@ -76,7 +76,25 @@ stakeholder:
           derived_reqs:
             - SYS-REQ-002
         - id: AC-002
-          text: every help, error, and worklist line names a next qc command and does not print a string that would satisfy the evidence checker
+          text: every help, error, and worklist line names a next qc command. no such line prints a string that would satisfy the evidence checker.
           verification_method: test
           derived_reqs:
             - SYS-REQ-002
+lifecycle:
+    change_history:
+        - date: "2026-09-24T13:19:09Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:Leonid Bugaev
+        - date: "2026-09-24T13:20:23Z"
+          from: review
+          to: draft
+          reason: ""
+          changed_by: human:Leonid Bugaev
+defect_review:
+    reviewed_at: "2026-09-24T13:20:35Z"
+    session: CRS-0022
+    fingerprint_sha: sha256:f0cf85a30052e9f81bf8b4bba1c221f9b5260776d7384ae3ea8eb69a29c21351
+    via: agent-review
+    counts: {}

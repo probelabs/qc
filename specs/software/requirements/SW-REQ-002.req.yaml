@@ -52,8 +52,8 @@ verification:
 history:
     created_by: agent:qc-builder
     created_at: "2026-08-21T07:31:29Z"
-    last_modified_by: agent:qc-builder
-    last_modified_at: "2026-08-21T09:58:46Z"
+    last_modified_by: human:Leonid Bugaev
+    last_modified_at: "2026-09-24T13:20:23Z"
 priority_level: critical
 obligation_checklist:
     - error_handling
@@ -61,3 +61,21 @@ obligation_hazards:
     - class: error_handling
       worst_case: The printer emits a passing evidence string on failure, so the agent records that string and the evidence checker accepts it.
       severity: high
+lifecycle:
+    change_history:
+        - date: "2026-09-24T13:19:09Z"
+          from: draft
+          to: review
+          reason: ""
+          changed_by: human:Leonid Bugaev
+        - date: "2026-09-24T13:20:23Z"
+          from: review
+          to: draft
+          reason: ""
+          changed_by: human:Leonid Bugaev
+defect_review:
+    reviewed_at: "2026-09-24T13:20:35Z"
+    session: CRS-0025
+    fingerprint_sha: sha256:3ec98c65238f0dee74d577ccc2bc3bb20db306747e3a2fe76a8d24858b0fdba9
+    via: agent-review
+    counts: {}
