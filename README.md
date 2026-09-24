@@ -6,7 +6,25 @@ Deterministic checklist gate for AI-driven development. Agents are non-determini
 
 ## Install
 
-`qc` is a Cosmopolitan [APE](https://justine.lol/ape.html) universal binary. There are no release downloads yet — build from source with [cosmocc](https://cosmo.zip/pub/cosmocc/cosmocc.zip).
+`qc` is a Cosmopolitan [APE](https://justine.lol/ape.html) universal binary — one release asset runs on Linux, macOS, and Windows from a shell (do not open it from a GUI file manager).
+
+### One-liner
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/probelabs/qc/main/scripts/install.sh | sh
+```
+
+Installs the latest GitHub release asset `qc` to `~/.local/bin/qc` (override with `QC_INSTALL_DIR`). No root required. Pin a tag with `QC_VERSION=v0.1.0`. Then:
+
+```bash
+qc help
+```
+
+If `~/.local/bin` is not on your `PATH`, the installer prints the export to add.
+
+### Build from source
+
+Needs [cosmocc](https://cosmo.zip/pub/cosmocc/cosmocc.zip):
 
 ```bash
 git clone https://github.com/probelabs/qc.git
