@@ -1,5 +1,7 @@
 # qc — agent skill
 
+<!-- Documents: STK-REQ-002, INT-REQ-003, SW-REQ-002 -->
+
 Run `qc plan` at task start. Treat the questions as requirements, not an exam at the end.
 
 - Set `QC_BY=agent`.

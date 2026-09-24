@@ -22,6 +22,17 @@ project:
         auto_increment: false
     signals:
         defaults: auto
+    documentation:
+        sources:
+            - path: docs/
+              type: auto
+            - path: README.md
+              type: auto
+            - path: SPEC.md
+              type: auto
+            - path: SKILL.md
+              type: auto
+        threshold: 80
     checks:
         slow_tests:
             enabled: true
@@ -62,8 +73,6 @@ project:
             require_worst_case_scope: all
             require_prose_at_assurance: E
             require_checklist_at_assurance: E
-        disabled:
-            - documentation_coverage
     approval:
         agent_autonomous_for:
             all: true

@@ -1,5 +1,7 @@
 # qc — a deterministic checklist gate for AI-driven development
 
+<!-- Documents: STK-REQ-001, STK-REQ-002, STK-REQ-003, STK-REQ-004, STK-REQ-005, STK-REQ-006, STK-REQ-007, SYS-REQ-001, SYS-REQ-002, SYS-REQ-003, SYS-REQ-004, SYS-REQ-005, SYS-REQ-006, SYS-REQ-007, SW-REQ-001, SW-REQ-002, SW-REQ-003, SW-REQ-004, SW-REQ-005, SW-REQ-006, SW-REQ-007, INT-REQ-001, INT-REQ-002, INT-REQ-003, INT-REQ-004 -->
+
 ## Specification v0.4 — 2026-08-06
 
 v0.4 splits the tool's footprint into a committed, visible qc/ (tool, checklists, state — the review surface) and a gitignored, dotted .qc/ (scratch, manifests, cache — the disposable local workspace), making ephemerality structural: one .gitignore line, rm -rf .qc/ always safe (D19). Also adds the state-self-scope guard (edge 15). v0.3 replaced JSONL state with the human-readable .qcs line grammar (D15) and added §15 Distribution and updates (D16–D18) plus invariants I11–I12. v0.2 replaced the single committed ledger with the three-tier store — scratch → per-branch segments → trunk-compacted base (D11–D14). The logical read model (content-addressed attestations) is unchanged across all versions; only physical placement and syntax have moved.
