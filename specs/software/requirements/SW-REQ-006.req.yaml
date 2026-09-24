@@ -48,24 +48,24 @@ verification:
         reviewer: ""
         reviewed_at: ""
         ai_generated: true
-    gaps_reviewed_at: "2026-08-21T11:59:00.041145Z"
+    gaps_reviewed_at: "2026-09-24T13:22:43.471817Z"
     gaps_reviewed_by: agent:qc-builder
     gap_reviews:
         - check: ambiguity
           issue_key: ambiguity|gate|INT-REQ-001|SW-REQ-006
           reviewer: agent:qc-builder
-          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
-          reviewed_at: "2026-08-21T11:59:00.041145Z"
+          reason: 'Re-attested after defect_review stamp and STE100 prose edits; shared gate variables remain layered parent/child refinements, not duplicate obligations. Decomposition gaps for next_named/token_leaked/omitted_applicable remain covered by informal child prose refinements.'
+          reviewed_at: "2026-09-24T13:22:43.471817Z"
         - check: ambiguity
           issue_key: ambiguity|gate|SW-REQ-001|SW-REQ-006
           reviewer: agent:qc-builder
-          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
-          reviewed_at: "2026-08-21T11:59:00.041145Z"
+          reason: 'Re-attested after defect_review stamp and STE100 prose edits; shared gate variables remain layered parent/child refinements, not duplicate obligations. Decomposition gaps for next_named/token_leaked/omitted_applicable remain covered by informal child prose refinements.'
+          reviewed_at: "2026-09-24T13:22:43.471817Z"
         - check: ambiguity
           issue_key: ambiguity|gate|SW-REQ-006|SYS-REQ-001
           reviewer: agent:qc-builder
-          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
-          reviewed_at: "2026-08-21T11:59:00.041145Z"
+          reason: 'Re-attested after defect_review stamp and STE100 prose edits; shared gate variables remain layered parent/child refinements, not duplicate obligations. Decomposition gaps for next_named/token_leaked/omitted_applicable remain covered by informal child prose refinements.'
+          reviewed_at: "2026-09-24T13:22:43.471817Z"
     not_modeled:
         - predicate: st == -1
           reason: "system() spawn-failure errno path; not a run_rc domain input [ki:KI-001]"
@@ -112,8 +112,8 @@ lifecycle:
           reason: ""
           changed_by: human:Leonid Bugaev
 defect_review:
-    reviewed_at: "2026-09-24T13:20:36Z"
-    session: CRS-0029
-    fingerprint_sha: sha256:85f555dfebb5312a2e6928fb7a447e519c0e45b1a3b91246ef02cb020f98fb20
+    reviewed_at: "2026-09-24T13:24:32Z"
+    session: CRS-0037
+    fingerprint_sha: sha256:b666afbaa41e43d7c06a1b4b4d12a5351ebd0daef1068c0a72c83e017925706d
     via: agent-review
     counts: {}

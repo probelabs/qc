@@ -49,14 +49,14 @@ verification:
         reviewer: ""
         reviewed_at: ""
         ai_generated: true
-    gaps_reviewed_at: "2026-08-21T12:26:11.243115Z"
+    gaps_reviewed_at: "2026-09-24T13:22:43.471817Z"
     gaps_reviewed_by: agent:qc-builder
     gap_reviews:
         - check: decomposition
           issue_key: decomposition|SYS-REQ-004|omitted_applicable
           reviewer: agent:qc-builder
-          reason: Children carry the parent nominal obligation as informal prose refinements; SW-REQ-003/005/007 now own nominal hazards and evidence triples.
-          reviewed_at: "2026-08-21T12:26:11.243115Z"
+          reason: Re-attested after defect_review stamp and STE100 prose edits; shared gate variables remain layered parent/child refinements, not duplicate obligations. Decomposition gaps for next_named/token_leaked/omitted_applicable remain covered by informal child prose refinements.
+          reviewed_at: "2026-09-24T13:22:43.471817Z"
 history:
     created_by: agent:qc-builder
     created_at: "2026-08-21T07:31:15Z"
@@ -90,8 +90,8 @@ lifecycle:
           reason: ""
           changed_by: human:Leonid Bugaev
 defect_review:
-    reviewed_at: "2026-09-24T13:20:36Z"
-    session: CRS-0033
-    fingerprint_sha: sha256:d2996ef7d0400f018df2312f0c97f1409c46491d2f0070c40ab6da272178b48e
+    reviewed_at: "2026-09-24T13:24:32Z"
+    session: CRS-0040
+    fingerprint_sha: sha256:8b4c8d1f190a14200ac4478c96fdc68a81c895417945be0066bc424186ef5499
     via: agent-review
     counts: {}

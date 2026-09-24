@@ -49,19 +49,19 @@ verification:
         reviewer: ""
         reviewed_at: ""
         ai_generated: true
-    gaps_reviewed_at: "2026-08-21T12:26:11.243115Z"
+    gaps_reviewed_at: "2026-09-24T13:22:43.471817Z"
     gaps_reviewed_by: agent:qc-builder
     gap_reviews:
         - check: decomposition
           issue_key: decomposition|SYS-REQ-002|next_named
           reviewer: agent:qc-builder
-          reason: Children carry the parent nominal obligation as informal prose refinements; SW-REQ-003/005/007 now own nominal hazards and evidence triples.
-          reviewed_at: "2026-08-21T12:26:11.243115Z"
+          reason: Re-attested after defect_review stamp and STE100 prose edits; shared gate variables remain layered parent/child refinements, not duplicate obligations. Decomposition gaps for next_named/token_leaked/omitted_applicable remain covered by informal child prose refinements.
+          reviewed_at: "2026-09-24T13:22:43.471817Z"
         - check: decomposition
           issue_key: decomposition|SYS-REQ-002|token_leaked
           reviewer: agent:qc-builder
-          reason: Children carry the parent nominal obligation as informal prose refinements; SW-REQ-003/005/007 now own nominal hazards and evidence triples.
-          reviewed_at: "2026-08-21T12:26:11.243115Z"
+          reason: Re-attested after defect_review stamp and STE100 prose edits; shared gate variables remain layered parent/child refinements, not duplicate obligations. Decomposition gaps for next_named/token_leaked/omitted_applicable remain covered by informal child prose refinements.
+          reviewed_at: "2026-09-24T13:22:43.471817Z"
     not_modeled:
         - predicate: argc < 2
           reason: "CLI dispatch arity in main; SYS-REQ-002 is the printer contract"
@@ -96,8 +96,8 @@ lifecycle:
           reason: ""
           changed_by: human:Leonid Bugaev
 defect_review:
-    reviewed_at: "2026-09-24T13:20:36Z"
-    session: CRS-0032
-    fingerprint_sha: sha256:4cc1c44c366529f862b1168590588d2400a37d6204ddea20c2160ea37b966019
+    reviewed_at: "2026-09-24T13:24:32Z"
+    session: CRS-0039
+    fingerprint_sha: sha256:16c5ff42df354867227c643d2f2cfb6d206ce6514e99cab61fc7a9336838bfa7
     via: agent-review
     counts: {}

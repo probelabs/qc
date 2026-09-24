@@ -47,14 +47,14 @@ verification:
         reviewer: ""
         reviewed_at: ""
         ai_generated: true
-    gaps_reviewed_at: "2026-08-21T11:59:00.041145Z"
+    gaps_reviewed_at: "2026-09-24T13:22:43.471817Z"
     gaps_reviewed_by: agent:qc-builder
     gap_reviews:
         - check: ambiguity
           issue_key: ambiguity|gate|INT-REQ-001|SYS-REQ-006
           reviewer: agent:qc-builder
-          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
-          reviewed_at: "2026-08-21T11:59:00.041145Z"
+          reason: 'Re-attested after defect_review stamp and STE100 prose edits; shared gate variables remain layered parent/child refinements, not duplicate obligations. Decomposition gaps for next_named/token_leaked/omitted_applicable remain covered by informal child prose refinements.'
+          reviewed_at: "2026-09-24T13:22:43.471817Z"
         - check: ambiguity
           issue_key: ambiguity|gate|SW-REQ-001|SYS-REQ-006
           reviewer: agent:qc-builder
@@ -63,8 +63,8 @@ verification:
         - check: ambiguity
           issue_key: ambiguity|gate|SYS-REQ-001|SYS-REQ-006
           reviewer: agent:qc-builder
-          reason: 'Shared verdict and forced_item_count are the parent exit-code contract. Children add distinct conjuncts (CI scratch exclusion, expiry, run_rc 127, omitted_applicable). Layered refinements, not duplicate obligations.'
-          reviewed_at: "2026-08-21T11:59:00.041145Z"
+          reason: 'Re-attested after defect_review stamp and STE100 prose edits; shared gate variables remain layered parent/child refinements, not duplicate obligations. Decomposition gaps for next_named/token_leaked/omitted_applicable remain covered by informal child prose refinements.'
+          reviewed_at: "2026-09-24T13:22:43.471817Z"
 history:
     created_by: agent:qc-builder
     created_at: "2026-08-21T07:31:15Z"
@@ -98,8 +98,8 @@ lifecycle:
           reason: ""
           changed_by: human:Leonid Bugaev
 defect_review:
-    reviewed_at: "2026-09-24T13:20:36Z"
-    session: CRS-0034
-    fingerprint_sha: sha256:a28fe812d29d2fdd0681638a65fdad0fcec94b4c4bea851b96b52248ec2dd8c7
+    reviewed_at: "2026-09-24T13:24:32Z"
+    session: CRS-0041
+    fingerprint_sha: sha256:9f9941b0470ccb982baa0f95218ae705628c1ca4b5b184388979d0304f62f6bd
     via: agent-review
     counts: {}
