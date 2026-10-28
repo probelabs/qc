@@ -4,18 +4,32 @@ Deterministic checklist gate for AI-driven development. Agents are non-determini
 
 <!-- Documents: STK-REQ-001, SYS-REQ-001, SW-REQ-001 -->
 
+## Quick start
+
+Install (macOS / Linux / Git Bash; one static binary, no runtime needed):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/probelabs/qc/main/scripts/install.sh | sh
+```
+
+Turn it on in your repo:
+
+```bash
+cd your-repo
+qc init
+```
+
+Then paste this into Claude Code, Cursor, or any agent that can run shell commands, with your checklist under it:
+
+```text
+Using the QC CLI, follow this checklist until it is done. If this checklist is only in the message, save it to a file first, then use that path. When qc verify is clear, show me the qc report --md output.
+```
+
+The agent reads `qc help`, saves the checklist, runs `qc plan`, does the work, marks each item with evidence, and shows you `qc report --md`. Windows PowerShell and other install options: [Install](#install). Check the version with `qc --version` (0.2.0 or newer has everything below).
+
 ## Give your agent a checklist
 
-The fastest way to use `qc`: write a checklist in markdown, paste it into your coding agent, and get back a table of evidence bound to the exact bytes it checked.
-
-1. [Install `qc`](#install) and run `qc init` in your repo.
-2. Paste this into Claude Code, Cursor, or any agent that can run shell commands. Put your checklist under it:
-
-   ```text
-   Using the QC CLI, follow this checklist until it is done. If this checklist is only in the message, save it to a file first, then use that path. When qc verify is clear, show me the qc report --md output.
-   ```
-
-3. The agent reads `qc help`, saves the checklist, runs `qc plan`, does the work, marks each item, and shows `qc report --md`.
+Write a checklist in markdown, paste it into your coding agent, and get back a table of evidence bound to the exact bytes it checked.
 
 A checklist is a markdown file:
 

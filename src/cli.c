@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     if (argc < 2 || !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h"))
         return qc_print_help(NULL);
     if (!strcmp(argv[1], "--version") || !strcmp(argv[1], "-V")) {
-        qc_out("qc phase-1 / SPEC.md v0.4 / Cosmopolitan APE\nNEXT: qc help\n");
+        qc_out("qc 0.2.0 (phase-1 / SPEC.md v0.4 / Cosmopolitan APE)\nNEXT: qc help\n");
         return QC_OK;
     }
     {
