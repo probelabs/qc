@@ -1,0 +1,1 @@
+Using the QC CLI, follow this checklist until it is done. If this checklist is only in the message, save it to a file first, then use that path. When qc verify is clear, show me the qc report --md output.

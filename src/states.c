@@ -41,6 +41,18 @@ static int has_repo_path(QcCtx *cx, const char *ev) {
     return 0;
 }
 
+// Implements: SW-REQ-006
+static int benign_run(const char *s, int n) {
+    int i, snake = 1, hex = 1, underscore = 0;
+    for (i = 0; i < n; i++) {
+        unsigned char c = (unsigned char)s[i];
+        if (c == '_') underscore = 1;
+        if (!(islower(c) || isdigit(c) || c == '_')) snake = 0;
+        if (!(isdigit(c) || (c >= 'a' && c <= 'f'))) hex = 0;
+    }
+    return (snake && underscore) || hex;
+}
+
 static int secret_hit(const char *ev) {
     /* common credential shapes — refuse, never print the token */
     const char *p;
@@ -58,18 +70,22 @@ static int secret_hit(const char *ev) {
     if (strstr(ev, "ghp_")) return 1;
     if (strstr(ev, "sk-")) return 1;
     if (strstr(ev, "-----BEGIN") && strstr(ev, "PRIVATE KEY")) return 1;
-    /* high-entropy blob >= 32 */
+    /* high-entropy blob >= 32. Lowercase snake_case identifiers (a long test
+     * name) and lowercase hex (a commit sha, a sha256) are evidence, not secrets. */
     {
         int run = 0;
-        for (p = ev; *p; p++) {
+        const char *start = ev;
+        for (p = ev; ; p++) {
             unsigned char c = (unsigned char)*p;
-            if (isalnum(c) || c == '/' || c == '+' || c == '=' || c == '_') run++;
-            else {
-                if (run >= 32) return 1;
-                run = 0;
+            if (c && (isalnum(c) || c == '/' || c == '+' || c == '=' || c == '_')) {
+                if (!run) start = p;
+                run++;
+                continue;
             }
+            if (run >= 32 && !benign_run(start, run)) return 1;
+            run = 0;
+            if (!c) break;
         }
-        if (run >= 32) return 1;
     }
     return 0;
 }

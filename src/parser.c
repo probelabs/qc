@@ -145,8 +145,10 @@ static int parse_item_line(QcChecklist *cl, char *line, char *err, size_t errn) 
         } else if (!strcmp(key, "expires")) it->expires_sec = qc_parse_expires(val);
         else if (!strcmp(key, "human")) it->human = 1;
         else if (!strcmp(key, "strict")) it->strict = 1;
-        /* cache, evidence: phase 2 — accepted, ignored */
-        while (*vp == ' ') vp++;
+        else if (!strcmp(key, "evidence")) snprintf(it->evidence_hint, sizeof it->evidence_hint, "%s", val);
+        /* cache: phase 2 — accepted, ignored */
+        /* Stop on the last space so the loop sees " @next" for a following annotation. */
+        while (vp[0] == ' ' && vp[1] == ' ') vp++;
         ann = vp;
     }
     cl->nitems++;
@@ -176,8 +178,30 @@ int qc_parse_checklist_file(const char *path, const char *fname, QcChecklist *cl
             if (in_fm) { in_fm = 0; continue; }
         }
         if (in_fm) { parse_fm_line(cl, line); continue; }
-        if (strncmp(line, "- [", 3) == 0) {
-            if (parse_item_line(cl, line, err, errn) != 0) { free(raw); return -1; }
+        {
+            /* Nested items: two leading spaces per level. */
+            size_t sp = 0;
+            while (line[sp] == ' ') sp++;
+            if (strncmp(line + sp, "- [", 3) == 0) {
+                int depth = (int)(sp / 2), k;
+                QcItem *it;
+                if (sp % 2) {
+                    snprintf(err, errn, "item indent of %d spaces; nest with two spaces per level", (int)sp);
+                    free(raw); return -1;
+                }
+                if (parse_item_line(cl, line + sp, err, errn) != 0) { free(raw); return -1; }
+                it = &cl->items[cl->nitems - 1];
+                it->depth = depth;
+                if (depth > 0) {
+                    for (k = cl->nitems - 2; k >= 0; k--)
+                        if (cl->items[k].depth < depth) break;
+                    if (k < 0 || cl->items[k].depth != depth - 1) {
+                        snprintf(err, errn, "item %s is indented but has no parent one level up", it->id);
+                        free(raw); return -1;
+                    }
+                    snprintf(it->parent, sizeof it->parent, "%s", cl->items[k].id);
+                }
+            }
         }
     }
     free(raw);
@@ -408,6 +432,24 @@ int cmp_str(const void *a, const void *b) {
     return strcmp(*(char *const *)a, *(char *const *)b);
 }
 
+static char qc_checklist_arg[QC_MAX_PATH];
+
+// Implements: SW-REQ-004
+/* Records --checklist from argv. A checklist outside qc/checklists/ is a
+ * definition only; state still lands in this repo's .qc/ and qc/state/. */
+void qc_note_checklist_arg(const char *path) {
+    snprintf(qc_checklist_arg, sizeof qc_checklist_arg, "%s", path ? path : "");
+}
+
+// Implements: SW-REQ-004
+static void resolve_extra_checklist(QcCtx *cx) {
+    const char *src = qc_checklist_arg[0] ? qc_checklist_arg : getenv("QC_CHECKLIST");
+    char abs[PATH_MAX];
+    if (!src || !src[0]) return;
+    if (realpath(src, abs)) snprintf(cx->extra_checklist, sizeof cx->extra_checklist, "%s", abs);
+    else snprintf(cx->extra_checklist, sizeof cx->extra_checklist, "%s", src);
+}
+
 // Implements: SW-REQ-004
 int qc_parse_checklists(QcCtx *cx) {
     char dir[QC_MAX_PATH];
@@ -415,10 +457,10 @@ int qc_parse_checklists(QcCtx *cx) {
     struct dirent *de;
     char names[QC_MAX_LISTS][QC_MAX_ID];
     int nn = 0, i, j;
+    resolve_extra_checklist(cx);
     qc_join(dir, sizeof dir, cx->root, "qc/checklists");
     d = opendir(dir);
-    if (!d) return 0;
-    while ((de = readdir(d))) {
+    while (d && (de = readdir(d))) {
         size_t L;
         if (!qc_endswith(de->d_name, ".md")) continue;
         L = strlen(de->d_name);
@@ -429,7 +471,7 @@ int qc_parse_checklists(QcCtx *cx) {
         }
         snprintf(names[nn++], QC_MAX_ID, "%s", de->d_name);
     }
-    closedir(d);
+    if (d) closedir(d);
     /* bytewise sort filenames */
     for (i = 0; i < nn; i++)
         for (j = i + 1; j < nn; j++)
@@ -448,6 +490,37 @@ int qc_parse_checklists(QcCtx *cx) {
             qc_die(QC_CONFIG, "parse error in %s: %s\nNEXT: fix the checklist, then qc verify", names[i], err);
         cx->nlists++;
     }
+    if (cx->extra_checklist[0]) {
+        const char *ep = cx->extra_checklist, *base = strrchr(ep, '/');
+        char err[256];
+        struct stat est;
+        base = base ? base + 1 : ep;
+        if (stat(ep, &est) != 0 || !S_ISREG(est.st_mode))
+            qc_die(QC_CONFIG, "checklist file %s does not exist\nNEXT: write the checklist to %s first (qc cannot read your memory), then rerun", ep, ep);
+        if (!qc_endswith(base, ".md"))
+            qc_die(QC_CONFIG, "checklist file %s must end in .md\nNEXT: save it as <id>.md, then rerun", ep);
+        for (i = 0; i < cx->nlists; i++) {
+            char stem[QC_MAX_ID];
+            snprintf(stem, sizeof stem, "%s", base);
+            stem[strlen(stem) - 3] = 0;
+            if (!strcmp(cx->lists[i].filename, stem)) {
+                char rp[PATH_MAX];
+                if (realpath(cx->lists[i].path, rp) && !strcmp(rp, ep)) goto extra_done; /* same file */
+                qc_die(QC_CONFIG, "checklist %s is already in qc/checklists/\nNEXT: drop --checklist or rename the file and its id", stem);
+            }
+        }
+        if (cx->nlists >= QC_MAX_LISTS)
+            qc_die(QC_CONFIG, "too many checklists\nNEXT: remove extras, then qc verify");
+        err[0] = 0;
+        if (qc_parse_checklist_file(ep, base, &cx->lists[cx->nlists], err, sizeof err) != 0) {
+            if (!strncmp(err, "id ", 3))
+                qc_die(QC_CONFIG, "%s: %s\nPrinciple: the filename stem is the checklist id, in the repo or in a temp directory.\n"
+                                  "NEXT: save the file as <id>.md (the id from its frontmatter), then rerun with --checklist <that path>", ep, err);
+            qc_die(QC_CONFIG, "parse error in %s: %s\nNEXT: fix the checklist, then qc verify", ep, err);
+        }
+        cx->nlists++;
+    }
+extra_done:
     {
         char err[256];
         if (qc_requires_cycles(cx, err, sizeof err))

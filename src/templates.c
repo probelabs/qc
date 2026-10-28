@@ -231,6 +231,29 @@ static void help_root(void) {
 "  Answer:          qc mark <ref> --pass|--fail|--na -m \"…\"\n"
 "  Ship:            qc seal --staged && qc verify --staged\n"
 "\n"
+"A CHECKLIST YOU WERE GIVEN\n"
+"  1. If the user gave you a checklist in the message, or it exists only in your\n"
+"     context, write it to a file before any other qc command. qc cannot read\n"
+"     your memory. A one-off checklist is still a file: qc writes state against\n"
+"     a file it can parse. Name the file <id>.md, where id is its frontmatter id.\n"
+"  2. Keep it:      qc/checklists/<id>.md, then qc plan\n"
+"  3. One-off:      $TMPDIR/<id>.md, then qc plan --checklist <path>\n"
+"                   (or QC_CHECKLIST=<path>). Pass the same path to every\n"
+"                   plan, mark, verify and report. State still lands in this\n"
+"                   repo's .qc/ and qc/state/.\n"
+"  4. Nested items are indented two spaces. Mark the children, then the parent:\n"
+"     a parent pass is refused while a child is open. @evidence(...) under a\n"
+"     question says what your -m must name. Each mark needs falsifiable evidence;\n"
+"     \"tests pass\" is rejected.\n"
+"  5. Finish with qc verify, then qc report --md, and show that report to the user.\n"
+"\n"
+"  Format:   ---\n"
+"            id: <id>\n"
+"            scope: [src/**]\n"
+"            ---\n"
+"            - [ ] parent :: question @evidence(what -m must name)\n"
+"              - [ ] child :: question @evidence(...)\n"
+"\n"
 "PRINCIPLE\n"
 "  Evidence must point at something falsifiable. The tool will not tell you the token.\n"
 "\n"
@@ -271,7 +294,7 @@ QcHelpRc qc_print_help(const char *topic) {
         help_topic("plan",
             "The ordered worklist: forced items, questions, previous answers, decision requests.",
             "Questions enter the agent's context BEFORE work. A stop-hook after the fact trains escape.",
-            "  qc plan\n  qc mark <ref> --pass -m \"…\"\n");
+            "  qc plan\n  qc plan --checklist <path>   # a checklist file outside qc/checklists/\n  qc mark <ref> --pass -m \"…\"\n");
     else if (!strcmp(topic, "decide"))
         help_topic("decide",
             "Record whether a checklist with applies_when applies. Writes scratch only.",
@@ -281,7 +304,7 @@ QcHelpRc qc_print_help(const char *topic) {
         help_topic("mark",
             "Record an evidenced answer on scratch, bound to the current worktree digest.",
             "Every status requires evidence. The tool never names the string that would pass.",
-            "  qc mark <ref> --pass -m \"…\"\n  qc mark <ref> --fail -m \"…\"\n  qc mark <ref> --na -m \"…\"\n");
+            "  qc mark <ref> --pass -m \"…\"\n  qc mark <ref> --fail -m \"…\"\n  qc mark <ref> --na -m \"…\"\n  qc mark <ref> --pass -m \"…\" --checklist <path>   # same path you gave plan\n  Nested: mark the children first; a parent pass is refused while a child is open.\n");
     else if (!strcmp(topic, "baseline"))
         help_topic("baseline",
             "Grandfather current content at adoption. Writes scratch. Honors expiry.",
@@ -301,7 +324,7 @@ QcHelpRc qc_print_help(const char *topic) {
         help_topic("verify",
             "The gate. loop = scratch+committed. --staged = index, no scratch. --ci = committed, read-only.",
             "Verdict is a pure function of worktree bytes, checklists, state, clock. No inference.",
-            "  qc verify\n  qc verify --staged\n  qc verify --ci\n  qc plan\n");
+            "  qc verify\n  qc verify --staged\n  qc verify --ci\n  qc verify --checklist <path>\n  qc plan\n");
     else if (!strcmp(topic, "compact"))
         help_topic("compact",
             "Trunk-only: fold segments into base, one line per item, drop orphans, commit.",
@@ -309,9 +332,9 @@ QcHelpRc qc_print_help(const char *topic) {
             "  git checkout main && qc compact\n");
     else if (!strcmp(topic, "report"))
         help_topic("report",
-            "Claims table: item, status, by, evidence, digest. --md for CI summaries.",
+            "Claims table: item, status, by, age, digest, evidence, parent, asked for. --md for CI summaries and the end-of-task report.",
             "Reviewers read claims next to the diff. Do not require answers in the PR description.",
-            "  qc report\n  qc report --md\n");
+            "  qc report\n  qc report --md\n  qc report --md --checklist <path>   # show this to the user when done\n");
     else {
         qc_out("unknown help topic %s.\nNEXT: qc help\n", topic);
         return QC_CONFIG;

@@ -11,6 +11,9 @@ Run `qc plan` at task start. Treat the questions as requirements, not an exam at
 - Everything under `.qc/` is disposable. Everything under `qc/` is git's.
 - On gate failure, read the worklist top-to-bottom and fix, rather than re-attest.
 - New checklist: `qc template list`, then `qc add <closest>` and adapt.
+- Checklist pasted by the user: write it to a file before any other `qc` command. `qc` cannot read your memory. Name it `<id>.md`; keep it in `qc/checklists/`, or put a one-off in `$TMPDIR` and pass `--checklist <path>` to every command.
+- Nested items (two-space indent): mark the children, then the parent. `@evidence(...)` says what your `-m` must name. `@run` items are run by `qc`; do not mark them.
+- Finish with `qc report --md` and show it to the user.
 - Do not skip `qc seal --staged` before claiming CI-ready; scratch is invisible to `--staged` / `--ci`.
 
 Loop: `qc plan` → work → `qc mark <ref> --pass -m "…"` → `qc seal --staged && qc verify --staged`.

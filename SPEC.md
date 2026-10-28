@@ -80,7 +80,7 @@ Frontmatter keys: id, applies_when, scope (list), expires, requires (list of che
 
 Item annotations:
 
-Annotation Meaning Notes @run(cmd) Machine-checked. Gate executes cmd via the platform shell; exit 0 = clear. Must be the last annotation; swallows to the final ) on the line. Run items ignore @scope/@expires unless @cache is present. @scope(g1, g2, !g3) Files this answer depends on. ! negates. Overrides the checklist-level scope default entirely (no merging). @expires(30d) Answer max age. Nd/Nh/Nw. Overrides checklist-level expires. @human Answer must carry by: human. Audit-trail semantics; see §16. @strict n_a is not an acceptable status. For killer items. Use ~3 times per repo, not 30. @cache(24h) Cache a slow @run result. Cache key = (ref, digest of @scope if any, command). Phase 2. @evidence(paths|command|link) Declares required evidence shape. Phase 2.
+Annotation Meaning Notes @run(cmd) Machine-checked. Gate executes cmd via the platform shell; exit 0 = clear. Must be the last annotation; swallows to the final ) on the line. Run items ignore @scope/@expires unless @cache is present. @scope(g1, g2, !g3) Files this answer depends on. ! negates. Overrides the checklist-level scope default entirely (no merging). @expires(30d) Answer max age. Nd/Nh/Nw. Overrides checklist-level expires. @human Answer must carry by: human. Audit-trail semantics; see §16. @strict n_a is not an acceptable status. For killer items. Use ~3 times per repo, not 30. @cache(24h) Cache a slow @run result. Cache key = (ref, digest of @scope if any, command). Phase 2. @evidence(text) Says what the -m on qc mark must name. Stored and shown by qc plan ("Evidence -m must name:") and in the "asked for" column of qc report --md. Not inferred, not matched against the mark; the falsifiability check in §7 still applies.
 
 Parser rules that prevent silent damage:
 
@@ -91,6 +91,10 @@ A literal @ inside the question (a@b.com) is fine — only SP @knownkey parses a
 The checkbox is display-only. [x] and [ ] parse identically; the state store is the sole source of truth. qc verify warns once per file containing [x] so drift doesn't accumulate.
 
 Duplicate checklist ids across files, duplicate item ids within a file, and requires cycles are exit-2 config errors. id defaults from the filename; if both present they must match.
+
+Nested items. An item line may be indented by two spaces per level ("  - [ ] child :: …"). Its parent is the nearest previous item one level up. An odd indent, or an indent with no parent one level up, is an exit-2 config error. Unindented files parse exactly as before. qc mark --pass on a parent is refused (exit 2) while any of its children is not CLEAR: mark the children, then the parent.
+
+Checklist outside qc/checklists/. Every command accepts --checklist <path> (or QC_CHECKLIST=<path>; the flag wins). The file is loaded after qc/checklists/, follows the same grammar, and its stem must equal its id. A missing file is exit 2 with the instruction to write it there first: qc cannot read an agent's memory, so a checklist pasted in chat must be saved before any qc command. A stem that collides with a repo checklist is exit 2. State is written to the repo's .qc/ and qc/state/ as usual; the file is only the definition.
 
 ### 4.3 A complete example
 

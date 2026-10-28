@@ -60,6 +60,9 @@ typedef struct {
     int    human;
     int    strict;
     int    checkbox_x;      /* display-only [x] */
+    int    depth;           /* 0 = top. Two leading spaces = one level. */
+    char   parent[QC_MAX_ID];
+    char   evidence_hint[QC_MAX_Q]; /* from @evidence(...); shown, not inferred */
 } QcItem;
 
 typedef struct {
@@ -167,6 +170,7 @@ typedef struct {
     time_t      now;
     int         self_scope;     /* set if a scope hit qc/state/ */
     char        self_scope_ref[QC_MAX_REF];
+    char        extra_checklist[QC_MAX_PATH]; /* --checklist or QC_CHECKLIST */
 } QcCtx;
 
 /* ---------- util (util.c) ---------- */
@@ -249,6 +253,7 @@ void qc_write_manifest(QcCtx *cx, const char *digest, const QcPair *pairs, int n
 
 /* ---------- parser ---------- */
 int  qc_parse_checklists(QcCtx *cx);              /* load qc/checklists/*.md */
+void qc_note_checklist_arg(const char *path);    /* --checklist <path>; overrides QC_CHECKLIST */
 int  qc_parse_checklist_file(const char *path, const char *fname, QcChecklist *cl, char *err, size_t errn);
 int  qc_parse_config(QcCtx *cx);
 int  qc_parse_qcs_line(const char *line, QcLine *out);

@@ -19,6 +19,29 @@ int main(int argc, char **argv) {
         qc_out("qc phase-1 / SPEC.md v0.4 / Cosmopolitan APE\nNEXT: qc help\n");
         return QC_OK;
     }
+    {
+        /* --checklist <path> works on every command: pull it out before dispatch. */
+        int i, j;
+        for (i = 2; i < argc; i++) {
+            const char *v = NULL;
+            int take = 0;
+            if (!strcmp(argv[i], "--checklist")) {
+                if (i + 1 >= argc) {
+                    qc_out("--checklist needs a path.\nNEXT: write the checklist to a file, then qc plan --checklist <path>\n");
+                    return QC_CONFIG;
+                }
+                v = argv[i + 1]; take = 2;
+            } else if (!strncmp(argv[i], "--checklist=", 12)) {
+                v = argv[i] + 12; take = 1;
+            }
+            if (!take) continue;
+            qc_note_checklist_arg(v);
+            for (j = i; j + take < argc; j++) argv[j] = argv[j + take];
+            argc -= take;
+            argv[argc] = NULL;
+            i--;
+        }
+    }
     cmd = argv[1];
     argc -= 2; argv += 2;
     if (!strcmp(cmd, "help")) return cmd_help(argc, argv);

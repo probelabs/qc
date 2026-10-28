@@ -4,6 +4,48 @@ Deterministic checklist gate for AI-driven development. Agents are non-determini
 
 <!-- Documents: STK-REQ-001, SYS-REQ-001, SW-REQ-001 -->
 
+## Give your agent a checklist
+
+The fastest way to use `qc`: write a checklist in markdown, paste it into your coding agent, and get back a table of evidence bound to the exact bytes it checked.
+
+1. [Install `qc`](#install) and run `qc init` in your repo.
+2. Paste this into Claude Code, Cursor, or any agent that can run shell commands. Put your checklist under it:
+
+   ```text
+   Using the QC CLI, follow this checklist until it is done. If this checklist is only in the message, save it to a file first, then use that path. When qc verify is clear, show me the qc report --md output.
+   ```
+
+3. The agent reads `qc help`, saves the checklist, runs `qc plan`, does the work, marks each item, and shows `qc report --md`.
+
+A checklist is a markdown file:
+
+```markdown
+---
+id: release-check
+scope: [src/**]
+---
+
+- [ ] behaviour :: Does the change still do what the ticket says? @evidence(the function and line that implement it)
+  - [ ] happy :: Run the example. Does the normal case work? @evidence(the output line, copied verbatim)
+  - [ ] edge :: Is the boundary case covered by a test? @evidence(the test name and the test summary line with its count)
+- [ ] tests :: Does the suite pass? @run(make test)
+- [ ] files :: Which files changed? @scope(src/**, tests/**) @evidence(the `git status --short` output)
+```
+
+- `id` must equal the filename stem: save it as `release-check.md`.
+- Indent two spaces to nest. Children are marked before their parent; a parent pass is refused while a child is open.
+- `@evidence(...)` tells the agent what its mark must name. `qc plan` shows it under the question, and `qc report --md` shows it next to the answer.
+- `@run(cmd)` items are run by `qc` itself. The agent cannot mark them.
+- `@scope(...)` overrides the files an item depends on. Edit one of them and the item opens again.
+- A mark like `tests pass`, `done` or `lgtm` exits 2. Evidence has to name a path, a number, a URL or a `backticked` command.
+- Prose between items is free text for the agent (for example: "go one item at a time"). `qc` parses only the `- [ ]` lines.
+
+Keep the checklist in `qc/checklists/<id>.md` to reuse it, or keep a one-off anywhere and pass `--checklist <path>` (or `QC_CHECKLIST=<path>`) to `plan`, `mark`, `verify` and `report`.
+
+**Try it end to end:** [`examples/paste-a-checklist/`](./examples/paste-a-checklist/). `COPY=1 ./setup.sh` makes a throwaway repo and puts the message on your clipboard.
+
+<!-- Documents: SW-REQ-002, SW-REQ-004 -->
+
 ## Install
 
 `qc` is a Cosmopolitan [APE](https://justine.lol/ape.html) universal binary — one release asset runs on Linux, macOS, and Windows from a shell (do not open it from a GUI file manager). Release assets: `qc` and `qc.exe` (same bytes; Windows-friendly name).
@@ -224,9 +266,9 @@ qc add security-review --full
 
 Adapt after copy; there is no runtime `extends` (legibility beats DRY).
 
-### `qc plan [--json]`
+### `qc plan [--json] [--checklist <path>]`
 
-Ordered worklist before work: forced items, questions, previous answers, decision requests.
+Ordered worklist before work: forced items, questions, previous answers, decision requests. Nested items are indented, and each `@evidence(...)` hint is printed under its question as `Evidence -m must name: …`. `--checklist <path>` (or `QC_CHECKLIST`) adds a checklist file that lives outside `qc/checklists/`; every command accepts it.
 
 ```bash
 qc plan
@@ -250,7 +292,7 @@ qc decide code-quality --no -m "this change is docs-only README.md; src.rs is a 
 
 ### `qc mark <ref> --pass|--fail|--na -m "…"`
 
-Evidenced answer bound to the current worktree digest → scratch.
+Evidenced answer bound to the current worktree digest → scratch. A `--pass` on a parent item is refused (exit 2) while any of its children is open.
 
 ```bash
 qc mark docs/accuracy --pass -m "checked README.md section headings against the files present in the worktree"
@@ -327,13 +369,15 @@ qc compact
 
 ### `qc report [--md]`
 
-Claims table for reviewers / CI summaries.
+Claims table for reviewers, CI summaries, and the end of an agent's task. `age` is when the answer was recorded. `parent` and `asked for` (the `@evidence` hint) come from the checklist. `@run` rows show `qc ran \`<cmd>\`: exit N`, by `qc`.
 
 ```bash
 qc report --md
-# | item | status | by | age | digest | evidence |
-# |---|---|---|---|---|---|
-# | docs/accuracy | CLEAR | agent | | b1a1bbdb28626343 | checked README.md section headings… |
+# | item | status | by | age | digest | evidence | parent | asked for |
+# |---|---|---|---|---|---|---|---|
+# | docs/accuracy | CLEAR | agent | 2026-10-28T15:04:14Z | b1a1bbdb28626343 | checked README.md section headings… | | |
+#
+# 1 of 1 items attested to the current bytes.
 ```
 
 <!-- Documents: STK-REQ-002, INT-REQ-003, SW-REQ-002 -->
@@ -388,6 +432,7 @@ qc verify --only code-quality/lint
 
 **Start here:** [`docs/agentic-guide.md`](./docs/agentic-guide.md) — Claude Code / Cursor / `AGENTS.md` wiring, exact loop, CI sketch, failure recovery, and copy-paste snippets.
 
+Paste-a-checklist walkthrough you can run in two minutes: [`examples/paste-a-checklist/`](./examples/paste-a-checklist/).  
 Short skill card to load into the agent: [`SKILL.md`](./SKILL.md).  
 Worked demo with a **real** fail-then-pass transcript: [`examples/agent-demo/`](./examples/agent-demo/).
 

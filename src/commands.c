@@ -203,6 +203,40 @@ int cmd_template(int argc, char **argv) {
     qc_die(QC_CONFIG, "unknown template subcommand.\nNEXT: qc template list");
 }
 
+// Implements: SW-REQ-004
+static int has_children(const QcChecklist *cl, const QcItem *it) {
+    int j;
+    for (j = 0; j < cl->nitems; j++)
+        if (!strcmp(cl->items[j].parent, it->id)) return 1;
+    return 0;
+}
+
+static int is_open(QcItemState s);
+
+// Implements: SYS-REQ-004
+/* A parent pass claims its children hold. Refuse it while any child is open. */
+static void require_children_clear(QcCtx *cx, QcChecklist *cl, QcItem *it, const char *ref) {
+    QcEval *evs = NULL;
+    int n = 0, i, bad = 0;
+    char open_refs[1024];
+    open_refs[0] = 0;
+    if (!has_children(cl, it)) return;
+    qc_load_store(cx);
+    if (qc_eval_all(cx, &evs, &n) < 0) return;
+    for (i = 0; i < n; i++) {
+        if (evs[i].list != cl || !evs[i].item) continue;
+        if (strcmp(evs[i].item->parent, it->id) != 0) continue;
+        if (evs[i].state == IS_CLEAR) continue;
+        bad++;
+        strncat(open_refs, "\n  ", sizeof open_refs - strlen(open_refs) - 1);
+        strncat(open_refs, evs[i].ref, sizeof open_refs - strlen(open_refs) - 1);
+    }
+    if (bad)
+        qc_die(QC_CONFIG, "REFUSED — %s is a parent and %d child item(s) are still open:%s\n"
+                          "Principle: a parent pass claims its children hold. Mark the children first.\n"
+                          "NEXT: qc plan", ref, bad, open_refs);
+}
+
 static QcItem *find_item(QcCtx *cx, const char *ref, QcChecklist **cl_out) {
     char id[QC_MAX_ID], item[QC_MAX_ID];
     const char *sl = strchr(ref, '/');
@@ -244,6 +278,7 @@ static int write_attestation(QcCtx *cx, const char *ref, QcStatus st, const char
         qc_die(QC_CONFIG, "REFUSED — this item is @human. An agent must not attest it.\n"
                           "Principle: human approval is provenance the PR author cannot forge locally.\n"
                           "NEXT: surface %s to the user; they run qc mark %s --pass -m \"…\" --by <their-name>", ref, ref);
+    if (it && st == ST_PASS) require_children_clear(cx, cl, it, ref);
     snprintf(ln.evidence, sizeof ln.evidence, "%s", msg);
     qc_norm_evidence(ln.evidence);
     if (qc_evidence_ok(cx, ln.evidence, why, sizeof why) != 0)
@@ -532,7 +567,7 @@ int cmd_verify(int argc, char **argv) {
 int cmd_plan(int argc, char **argv) {
     QcCtx *cx = cx_new();
     QcEval *evs = NULL;
-    int n = 0, i, k = 1;
+    int n = 0, i, k = 1, pad = 0;
     if (has_flag(argc, argv, "--help")) return qc_print_help("plan");
     qc_load_ctx(cx, 1);
     cx->mode = MODE_LOOP;
@@ -546,16 +581,24 @@ int cmd_plan(int argc, char **argv) {
     for (i = 0; i < n; i++) {
         if (!is_open(evs[i].state) && evs[i].state != IS_DORMANT) continue;
         if (evs[i].state == IS_DORMANT) continue;
-        qc_out("%d  %s   %s\n", k++, evs[i].ref, state_name(evs[i].state));
-        qc_out("   Q: %s\n", evs[i].question);
+        {
+            int d = evs[i].item ? evs[i].item->depth : 0;
+            qc_out("%d  %*s%s   %s\n", k++, d * 2, "", evs[i].ref, state_name(evs[i].state));
+            qc_out("   %*sQ: %s\n", d * 2, "", evs[i].question);
+            if (evs[i].item && evs[i].item->evidence_hint[0])
+                qc_out("   %*sEvidence -m must name: %s\n", d * 2, "", evs[i].item->evidence_hint);
+            if (evs[i].item && has_children(evs[i].list, evs[i].item))
+                qc_out("   %*sMark its children first. A parent pass is refused while a child is open.\n", d * 2, "");
+            pad = d * 2;
+        }
         if (evs[i].echo)
-            qc_out("   You said then: \"%s\"\n", evs[i].echo->evidence);
+            qc_out("   %*sYou said then: \"%s\"\n", pad, "", evs[i].echo->evidence);
         if (evs[i].is_applies || evs[i].state == IS_AWAITING)
-            qc_out("   NEXT: qc decide %s --yes|--no -m \"…\"\n", evs[i].list->id);
+            qc_out("   %*sNEXT: qc decide %s --yes|--no -m \"…\"\n", pad, "", evs[i].list->id);
         else if (!evs[i].is_run)
-            qc_out("   NEXT: qc mark %s --pass -m \"…\"\n", evs[i].ref);
+            qc_out("   %*sNEXT: qc mark %s --pass -m \"…\"\n", pad, "", evs[i].ref);
         else
-            qc_out("   NEXT: fix the @run, then qc verify\n");
+            qc_out("   %*sNEXT: fix the @run, then qc verify\n", pad, "");
     }
     if (k == 1) qc_out("all clear. NEXT: do the work, then qc seal --staged && qc verify --staged\n");
     return (k == 1) ? QC_OK : QC_OPEN;
@@ -667,14 +710,33 @@ int cmd_report(int argc, char **argv) {
     if (qc_eval_all(cx, &evs, &n) < 0)
         qc_die(QC_CONFIG, "a scope resolves into qc/state/.\nNEXT: fix the checklist, then qc report");
     if (md) {
-        qc_out("| item | status | by | age | digest | evidence |\n");
-        qc_out("|---|---|---|---|---|---|\n");
+        int nclear = 0, ncount = 0;
+        qc_out("| item | status | by | age | digest | evidence | parent | asked for |\n");
+        qc_out("|---|---|---|---|---|---|---|---|\n");
         for (i = 0; i < n; i++) {
             const char *by = evs[i].match ? evs[i].match->by : "";
             const char *ev = evs[i].match ? evs[i].match->evidence : "";
             const char *dg = evs[i].digest;
-            qc_out("| %s | %s | %s | | %s | %s |\n", evs[i].ref, state_name(evs[i].state), by, dg, ev);
+            char runev[QC_MAX_CMD + 64];
+            const char *par = evs[i].item ? evs[i].item->parent : "";
+            const char *hint = evs[i].item ? evs[i].item->evidence_hint : "";
+            int d = evs[i].item ? evs[i].item->depth : 0, j;
+            char item[QC_MAX_REF + 32];
+            item[0] = 0;
+            for (j = 0; j < d; j++) strcat(item, "↳ ");
+            strncat(item, evs[i].ref, sizeof item - strlen(item) - 1);
+            if (evs[i].is_run && evs[i].item && !ev[0]) {
+                /* qc ran this itself; the command and its exit are the evidence. */
+                snprintf(runev, sizeof runev, "qc ran `%s`: exit %d", evs[i].item->run_cmd, evs[i].run_rc);
+                ev = runev;
+                if (!by[0]) by = "qc";
+            }
+            if (evs[i].state != IS_DORMANT) ncount++;
+            if (evs[i].state == IS_CLEAR) nclear++;
+            qc_out("| %s | %s | %s | %s | %s | %s | %s | %s |\n", item, state_name(evs[i].state), by,
+                   evs[i].match ? evs[i].match->at : "", dg, ev, par, hint);
         }
+        qc_out("\n%d of %d items attested to the current bytes.\n", nclear, ncount);
     } else {
         for (i = 0; i < n; i++) {
             qc_out("%s  %s  @%s  %s\n", evs[i].ref, state_name(evs[i].state),
