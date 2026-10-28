@@ -4,7 +4,7 @@
 #   curl -fsSL https://raw.githubusercontent.com/probelabs/qc/main/scripts/install.sh | sh
 # Optional (env must be visible to sh, not only to curl):
 #   curl -fsSL … | QC_INSTALL_DIR=~/bin sh
-#   curl -fsSL … | QC_VERSION=v0.1.0 sh   # pin a release tag (default: latest)
+#   curl -fsSL … | QC_VERSION=v0.2.0 sh   # pin a release tag (default: latest)
 #
 # Works on Linux, macOS, and Windows Git Bash / MSYS / Cygwin / MinGW.
 # APE binaries must be invoked from a shell (e.g. `qc help`), not opened as

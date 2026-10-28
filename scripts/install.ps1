@@ -3,7 +3,7 @@
 #   irm https://raw.githubusercontent.com/probelabs/qc/main/scripts/install.ps1 | iex
 # Optional env overrides (set before irm|iex, or in the same session):
 #   $env:QC_INSTALL_DIR = "$env:USERPROFILE\bin"
-#   $env:QC_VERSION = "v0.1.0"   # pin a release tag (default: latest)
+#   $env:QC_VERSION = "v0.2.0"   # pin a release tag (default: latest)
 #
 # Default install dir: $env:LOCALAPPDATA\qc\bin\qc.exe
 # APE binaries must be invoked from a shell (e.g. `qc help`), not opened as

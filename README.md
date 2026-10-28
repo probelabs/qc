@@ -17,23 +17,24 @@ Turn it on in your repo:
 ```bash
 cd your-repo
 qc init
+qc --version   # 0.2.0 or newer for everything below
 ```
 
-Then paste this into Claude Code, Cursor, or any agent that can run shell commands, with your checklist under it:
+Windows PowerShell and other install options: [Install](#install).
 
-```text
+Now hand your agent a checklist. There are two ways: paste it into the chat, or point the agent at a markdown file.
+
+## Main use: give your agent a checklist
+
+A checklist is plain markdown. `qc` turns it into a gate: the agent has to answer every item with evidence tied to the exact bytes it checked, and `qc verify` stays red until it does.
+
+### 1. Paste a checklist into the chat
+
+Paste this into Claude Code, Cursor, Codex, or any agent that can run shell commands. The first line is the instruction; the checklist goes under it:
+
+````text
 Using the QC CLI, follow this checklist until it is done. If this checklist is only in the message, save it to a file first, then use that path. When qc verify is clear, show me the qc report --md output.
-```
 
-The agent reads `qc help`, saves the checklist, runs `qc plan`, does the work, marks each item with evidence, and shows you `qc report --md`. Windows PowerShell and other install options: [Install](#install). Check the version with `qc --version` (0.2.0 or newer has everything below).
-
-## Give your agent a checklist
-
-Write a checklist in markdown, paste it into your coding agent, and get back a table of evidence bound to the exact bytes it checked.
-
-A checklist is a markdown file:
-
-```markdown
 ---
 id: release-check
 scope: [src/**]
@@ -44,19 +45,60 @@ scope: [src/**]
   - [ ] edge :: Is the boundary case covered by a test? @evidence(the test name and the test summary line with its count)
 - [ ] tests :: Does the suite pass? @run(make test)
 - [ ] files :: Which files changed? @scope(src/**, tests/**) @evidence(the `git status --short` output)
+````
+
+`qc` cannot read the chat, so the agent first saves the checklist as `release-check.md` (`qc help` tells it to). Then it runs `qc plan`, does the work, marks each item, runs `qc verify`, and shows you the report.
+
+### 2. Point the agent at a checklist file
+
+Keep checklists in your repo (a release checklist, a review checklist, a runbook) and name the file:
+
+```text
+Using the QC CLI, follow the checklist in docs/release-check.md until it is done. When qc verify is clear, show me the qc report --md output.
 ```
 
-- `id` must equal the filename stem: save it as `release-check.md`.
-- Indent two spaces to nest. Children are marked before their parent; a parent pass is refused while a child is open.
+The agent passes the path to every command. You can run the same loop yourself:
+
+```bash
+export QC_BY=agent
+qc plan --checklist docs/release-check.md                          # questions + what evidence each needs
+qc mark release-check/happy --pass -m "make run printed \`total=42\`" --checklist docs/release-check.md
+qc verify --checklist docs/release-check.md                        # exit 0 only when every item is attested
+qc report --md --checklist docs/release-check.md                   # the evidence table
+```
+
+`QC_CHECKLIST=docs/release-check.md` does the same as the flag. To make a checklist part of every `qc verify`, copy it to `qc/checklists/<id>.md` and drop the flag.
+
+### What you get back
+
+From a real Claude Code run of [`examples/paste-a-checklist/`](./examples/paste-a-checklist/) (trimmed):
+
+```
+| item | status | by | digest | evidence | parent | asked for |
+|---|---|---|---|---|---|---|
+| reservation-release/promise | CLEAR | agent | 2bf544b4… | src/gate.py:9 'return is_retry and age_hours <= 24' | | the line number and text of the return statement in src/gate.py |
+| ↳ reservation-release/row-10 | CLEAR | agent | b11d0e9c… | python3 src/gate.py row: 'retry=True age=10 same=True expected=True' | promise | the age=10 output row, copied verbatim |
+| ↳ reservation-release/boundary | CLEAR | agent | 7df1f0c3… | Added test_retry_at_exactly_24_hours_is_same to tests/test_gate.py; 'Ran 4 tests' / 'OK' | promise | the new test name and the unittest summary line with its count |
+| reservation-release/suite | CLEAR | qc | | qc ran `python3 -m unittest discover -s tests -q`: exit 0 | | |
+| reservation-release/bytes | CLEAR | agent | 102dd37b… | git status --short: ' M tests/test_gate.py' | | the `git status --short` output, one entry per file |
+
+7 of 7 items attested to the current bytes.
+```
+
+Each row says who answered, what they cited, and what the checklist asked for. The digest covers the scoped files. If one of them changes later, the item opens again and `qc verify` exits 1.
+
+**Try it in two minutes:** `cd examples/paste-a-checklist && COPY=1 ./setup.sh`. That makes a throwaway repo and puts the message on your clipboard. Paste it into Claude Code.
+
+### Checklist format
+
+- Frontmatter `id` must equal the filename stem: save `id: release-check` as `release-check.md`. `scope` is the files every item depends on.
+- `- [ ] <name> :: <question>` is one item. Indent two spaces to nest. Children are marked before their parent; a parent pass is refused while a child is open.
 - `@evidence(...)` tells the agent what its mark must name. `qc plan` shows it under the question, and `qc report --md` shows it next to the answer.
 - `@run(cmd)` items are run by `qc` itself. The agent cannot mark them.
 - `@scope(...)` overrides the files an item depends on. Edit one of them and the item opens again.
+- `@human` items are for a person. An agent is refused.
 - A mark like `tests pass`, `done` or `lgtm` exits 2. Evidence has to name a path, a number, a URL or a `backticked` command.
-- Prose between items is free text for the agent (for example: "go one item at a time"). `qc` parses only the `- [ ]` lines.
-
-Keep the checklist in `qc/checklists/<id>.md` to reuse it, or keep a one-off anywhere and pass `--checklist <path>` (or `QC_CHECKLIST=<path>`) to `plan`, `mark`, `verify` and `report`.
-
-**Try it end to end:** [`examples/paste-a-checklist/`](./examples/paste-a-checklist/). `COPY=1 ./setup.sh` makes a throwaway repo and puts the message on your clipboard.
+- Prose between items is free text for the agent (for example: "go one item at a time and `sleep 2` between items so people can follow"). `qc` parses only the `- [ ]` lines.
 
 <!-- Documents: SW-REQ-002, SW-REQ-004 -->
 
@@ -92,8 +134,8 @@ curl -fsSL https://raw.githubusercontent.com/probelabs/qc/main/scripts/install.s
 
 Overrides (pass env to the installer process, not only to `curl`/`irm`):
 
-- Unix / Git Bash: `curl … | QC_INSTALL_DIR=~/bin sh`, `curl … | QC_VERSION=v0.1.0 sh`
-- PowerShell: `$env:QC_INSTALL_DIR = "$env:USERPROFILE\bin"`; `$env:QC_VERSION = "v0.1.0"` then `irm … | iex`
+- Unix / Git Bash: `curl … | QC_INSTALL_DIR=~/bin sh`, `curl … | QC_VERSION=v0.2.0 sh`
+- PowerShell: `$env:QC_INSTALL_DIR = "$env:USERPROFILE\bin"`; `$env:QC_VERSION = "v0.2.0"` then `irm … | iex`
 
 Then:
 
