@@ -238,8 +238,9 @@ static void help_root(void) {
 "     a file it can parse. Name the file <id>.md, where id is its frontmatter id.\n"
 "  2. Keep it:      qc/checklists/<id>.md, then qc plan\n"
 "  3. One-off:      $TMPDIR/<id>.md, then qc plan --checklist <path>\n"
-"                   (or QC_CHECKLIST=<path>). Pass the same path to every\n"
-"                   plan, mark, verify and report. State still lands in this\n"
+"                   Repeat --checklist <path> to combine files; pass the same\n"
+"                   paths to every plan, mark, verify and report. With no flags,\n"
+"                   QC_CHECKLIST=<path> supplies one file. State lands in this\n"
 "                   repo's .qc/ and qc/state/.\n"
 "  4. Nested items are indented two spaces. Mark the children, then the parent:\n"
 "     a parent pass is refused while a child is open. @evidence(...) under a\n"
@@ -294,7 +295,7 @@ QcHelpRc qc_print_help(const char *topic) {
         help_topic("plan",
             "The ordered worklist: forced items, questions, previous answers, decision requests.",
             "Questions enter the agent's context BEFORE work. A stop-hook after the fact trains escape.",
-            "  qc plan\n  qc plan --checklist <path>   # a checklist file outside qc/checklists/\n  qc mark <ref> --pass -m \"…\"\n");
+            "  qc plan\n  qc plan --checklist <path>   # repeat for each external checklist\n  qc mark <ref> --pass -m \"…\"\n");
     else if (!strcmp(topic, "decide"))
         help_topic("decide",
             "Record whether a checklist with applies_when applies. Writes scratch only.",

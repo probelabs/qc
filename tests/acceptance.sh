@@ -837,6 +837,112 @@ EOF
     fi
 }
 
+# Verifies: SW-REQ-261103-9f2a
+case_repeated_checklists() {
+    new_repo
+    mkdir -p external/other
+    printf '%s\n' '---' 'id: alpha' 'scope: [README.md]' '---' \
+        '- [ ] a1 :: Which alpha claim did you check?' > external/alpha.md
+    printf '%s\n' '---' 'id: beta' 'scope: [README.md]' '---' \
+        '- [ ] b1 :: Which beta claim did you check?' > external/beta.md
+    for first in alpha beta; do
+        if [ "$first" = alpha ]; then last=beta; else last=alpha; fi
+        set +e
+        "$QC" plan --checklist "external/$first.md" --checklist="external/$last.md" >plan.out 2>&1
+        code=$?
+        set -e
+        if [ "$code" -eq 1 ] && grep -q 'alpha/a1.*FORCED (never)' plan.out && grep -q 'beta/b1.*FORCED (never)' plan.out; then
+            say "repeated --checklist plans both files ($first first)"
+        else
+            bad "repeated checklist plan=$code ($first first)"
+            cat plan.out
+        fi
+    done
+    "$QC" mark beta/b1 --pass -m "$EVIDENCE" --checklist external/alpha.md --checklist external/beta.md >/dev/null
+    "$QC" seal --checklist external/alpha.md --checklist external/beta.md >/dev/null
+    for first in alpha beta; do
+        if [ "$first" = alpha ]; then last=beta; else last=alpha; fi
+        set +e
+        "$QC" verify --ci --checklist "external/$first.md" --checklist "external/$last.md" >verify.out 2>&1
+        code=$?
+        set -e
+        if [ "$code" -eq 1 ] && grep -q 'FORCED (never).*alpha/a1' verify.out; then
+            say "CI checks the open checklist with the other sealed ($first first)"
+        else
+            bad "repeated checklist CI verify=$code ($first first)"
+            cat verify.out
+        fi
+    done
+    set +e
+    "$QC" mark alpha/a1 --pass -m "$EVIDENCE" --checklist external/alpha.md --checklist external/beta.md >mark.out 2>&1
+    marked=$?
+    "$QC" verify --checklist=external/alpha.md --checklist external/beta.md >verify.out 2>&1
+    clear=$?
+    "$QC" report --md --checklist external/alpha.md --checklist external/beta.md >report.out 2>&1
+    reported=$?
+    set -e
+    if [ "$marked" -eq 0 ] && [ "$clear" -eq 0 ] && [ "$reported" -eq 0 ] && grep -q '| alpha/a1 | CLEAR |' report.out && grep -q '| beta/b1 | CLEAR |' report.out; then
+        say "mark, verify and report include every external checklist"
+    else
+        bad "repeated checklist mark=$marked verify=$clear report=$reported"
+        cat mark.out verify.out report.out
+    fi
+    set +e
+    "$QC" verify --checklist external/missing.md --checklist external/beta.md >error.out 2>&1
+    missing=$?
+    cp external/alpha.md external/other/alpha.md
+    "$QC" verify --checklist external/alpha.md --checklist external/other/alpha.md >duplicate.out 2>&1
+    duplicate=$?
+    set -e
+    if [ "$missing" -eq 2 ] && grep -q 'external/missing.md' error.out && grep -q 'NEXT:' error.out; then
+        say "a missing earlier checklist fails loudly"
+    else
+        bad "missing earlier checklist=$missing"
+        cat error.out
+    fi
+    if [ "$duplicate" -eq 2 ] && grep -q 'NEXT:' duplicate.out; then
+        say "distinct external files with the same id fail loudly"
+    else
+        bad "duplicate external checklist=$duplicate"
+        cat duplicate.out
+    fi
+    printf '%s\n' '---' 'id: broken' '---' '- [ ] x :: Question? @typo' > external/broken.md
+    set +e
+    "$QC" verify --checklist external/broken.md --checklist external/beta.md >error.out 2>&1
+    malformed=$?
+    "$QC" verify --checklist external/alpha.md --checklist= >empty.out 2>&1
+    empty=$?
+    set -e
+    if [ "$malformed" -eq 2 ] && grep -q 'NEXT:' error.out && [ "$empty" -eq 2 ] && grep -q 'NEXT:' empty.out; then
+        say "malformed earlier files and empty checklist paths fail loudly"
+    else
+        bad "malformed checklist=$malformed empty path=$empty"
+        cat error.out empty.out
+    fi
+    set --
+    i=0
+    while [ "$i" -lt 16 ]; do
+        printf '%s\n' '---' "id: list-$i" 'scope: [README.md]' '---' '- [ ] x :: Question?' > "external/list-$i.md"
+        set -- "$@" --checklist "external/list-$i.md"
+        i=$((i + 1))
+    done
+    set +e
+    "$QC" plan "$@" >capacity.out 2>&1
+    full=$?
+    "$QC" plan "$@" --checklist external/beta.md >overflow.out 2>&1
+    overflow=$?
+    write_attest
+    "$QC" plan "$@" >combined.out 2>&1
+    combined=$?
+    set -e
+    if [ "$full" -eq 1 ] && [ "$(grep -c '^[0-9]' capacity.out)" -eq 16 ] && [ "$overflow" -eq 2 ] && grep -q 'NEXT:' overflow.out && [ "$combined" -eq 2 ] && grep -q 'NEXT:' combined.out; then
+        say "checklist capacity loads all 16 and refuses overflow, including repo files"
+    else
+        bad "checklist capacity full=$full overflow=$overflow combined=$combined"
+        cat capacity.out overflow.out combined.out
+    fi
+}
+
 need_qc
 run_case STK-REQ-001:AC-001 case_stk001_ac001
 run_case STK-REQ-001:AC-002 case_stk001_ac002
@@ -858,6 +964,7 @@ run_case STK-REQ-007:AC-002 case_stk007_ac002
 run_case STK-REQ-007:AC-003 case_stk007_ac003
 run_case SW-REQ-001:expiry case_sw001_expiry
 run_case STK-REQ-001:cfg-error case_stk001_cfg_error
+run_case SW-REQ-261103-9f2a:repeated-checklists case_repeated_checklists
 if [ -n "$ONLY" ] && [ "$ran" -eq 0 ]; then echo unknown_case >&2; exit 2; fi
 if [ "$fail" -ne 0 ]; then echo "$fail acceptance failures"; exit 1; fi
 echo "acceptance tests passed ($ran cases)"
