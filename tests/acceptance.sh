@@ -837,6 +837,97 @@ EOF
     fi
 }
 
+# Verifies: SW-REQ-261103-0004
+case_local_templates() {
+    new_repo
+    rmdir qc/templates
+    "$QC" template list > template-list.out
+    if grep -q 'docs' template-list.out && grep -q 'NEXT:' template-list.out; then
+        say "template list works without a local library"
+    else
+        bad "template list without qc/templates/"
+    fi
+    # In a source build, qc is the executable rather than an installed directory.
+    mv qc qc-installed
+    printf 'stand-in for the built executable\n' > qc
+    "$QC" template list > template-list.out
+    if grep -q 'docs' template-list.out && grep -q 'NEXT:' template-list.out; then
+        say "template list works when qc is a file"
+    else
+        bad "template list beside a built qc executable"
+    fi
+    rm qc
+    mv qc-installed qc
+    mkdir -p qc/templates/ignored.md subdir
+    printf 'ignore this file\n' > qc/templates/notes.txt
+    # Create out of order: the gallery must sort locals after the bundled set.
+    printf -- '---\nid: z-last\nfrom: org/shared@7\n---\n\n- [ ] keys :: Which keys?\n' > qc/templates/z-last.md
+    printf -- '---\nid: area-keys\nscope: [storage/**]\n---\n\n- [ ] keys :: Which keys? @evidence(file:line)\n' > qc/templates/area-keys.md
+    printf -- '---\nid: docs\n---\n\n- [ ] local :: Local docs?\n' > qc/templates/docs.md
+    cd subdir
+    "$QC" template list > ../template-list.out
+    cd ..
+    if awk '/docs/ && !/local/ { builtin = NR }
+        /area-keys/ && /local/ { first = NR }
+        /z-last/ && /local/ { last = NR }
+        END { exit !(builtin && first > builtin && last > first) }' template-list.out &&
+        ! grep -q 'ignored\|notes.txt' template-list.out; then
+        say "template list includes sorted local markdown files after bundled templates"
+    else
+        bad "local template discovery/order"
+        cat template-list.out
+    fi
+    "$QC" add area-keys > add.out
+    if [ "$(grep -c '^from: local/area-keys$' qc/checklists/area-keys.md)" -eq 1 ] &&
+        sed '/^from: local\/area-keys$/d' qc/checklists/area-keys.md | cmp -s qc/templates/area-keys.md -; then
+        say "add stamps local provenance and preserves the template body"
+    else
+        bad "local template provenance"
+        cat qc/checklists/area-keys.md
+    fi
+    "$QC" add z-last > add.out
+    if cmp -s qc/templates/z-last.md qc/checklists/z-last.md; then
+        say "add preserves an existing template provenance stamp"
+    else
+        bad "existing template provenance changed"
+    fi
+    # A prose mention of from: is not provenance. Keep CRLF and long bodies intact.
+    printf -- '---\r\nid: long-local\r\n---\r\n\r\nfrom: prose outside frontmatter\r\n' > qc/templates/long-local.md
+    awk 'BEGIN { for (i = 0; i < 1000; i++) printf "Template guidance line %d\r\n", i }' >> qc/templates/long-local.md
+    printf -- '- [ ] keys :: Which keys?\r\n' >> qc/templates/long-local.md
+    "$QC" add long-local > add.out
+    cr=$(printf '\r')
+    if [ "$(grep -c "^from: local/long-local${cr}$" qc/checklists/long-local.md)" -eq 1 ] &&
+        sed "/^from: local\/long-local${cr}$/d" qc/checklists/long-local.md | cmp -s qc/templates/long-local.md -; then
+        say "local provenance ignores prose and preserves CRLF and large templates"
+    else
+        bad "local template body changed or stamp missing"
+    fi
+    printf -- '- [ ] keys :: Which keys?\n' > qc/templates/no-frontmatter.md
+    "$QC" add no-frontmatter > add.out
+    if grep -q '^from: local/no-frontmatter$' qc/checklists/no-frontmatter.md; then
+        say "local templates without frontmatter receive a provenance block"
+    else
+        bad "local template without frontmatter has no provenance"
+    fi
+    "$QC" add docs > add.out
+    if grep -q '^from: builtin/docs@1$' qc/checklists/docs.md &&
+        ! grep -q 'Local docs?' qc/checklists/docs.md; then
+        say "bundled templates retain precedence and provenance"
+    else
+        bad "bundled template precedence/provenance"
+    fi
+    set +e
+    "$QC" add area-keys > add.out 2>&1
+    code=$?
+    set -e
+    if [ "$code" -eq 2 ] && grep -q '^from: local/area-keys$' qc/checklists/area-keys.md; then
+        say "local template add refuses to overwrite a checklist"
+    else
+        bad "local template overwrite exit=$code"
+    fi
+}
+
 need_qc
 run_case STK-REQ-001:AC-001 case_stk001_ac001
 run_case STK-REQ-001:AC-002 case_stk001_ac002
@@ -858,6 +949,7 @@ run_case STK-REQ-007:AC-002 case_stk007_ac002
 run_case STK-REQ-007:AC-003 case_stk007_ac003
 run_case SW-REQ-001:expiry case_sw001_expiry
 run_case STK-REQ-001:cfg-error case_stk001_cfg_error
+run_case SW-REQ-261103-0004:local-templates case_local_templates
 if [ -n "$ONLY" ] && [ "$ran" -eq 0 ]; then echo unknown_case >&2; exit 2; fi
 if [ "$fail" -ne 0 ]; then echo "$fail acceptance failures"; exit 1; fi
 echo "acceptance tests passed ($ran cases)"

@@ -284,6 +284,10 @@ A template is a checklist file — same grammar, different directory; promoting 
 
 The gallery is the agent's prior: qc template list output is what lands in context, turning checklist generation from free authorship into "copy the closest, adapt" — constraining the non-determinism of the checklist-generation step itself.
 
+qc template list shows bundled templates first, then the regular, non-hidden qc/templates/*.md files in bytewise filename order, marked as local. A missing local directory leaves the bundled gallery available. Bundled names take precedence when adding. A local copy preserves an existing frontmatter from: line; otherwise qc add inserts from: local/<template-name>, adding frontmatter if needed, and preserves the remaining bytes.
+
+<!-- Documents: SW-REQ-261103-0004 -->
+
 Bundled set: code-quality · api-change · security-review · data-migration (killer items: reversibility @strict, backfill, downtime, rollback tested) · dependency-update · release · docs · ai-generated-code. The last is the differentiator, targeting agentic failure modes: APIs verified against real docs (not memory), no unrelated files touched, no tests weakened or deleted to pass, no suppressions (# type: ignore, eslint-disable) added to silence checkers.
 
 qc add copies the minimal variant unless --full: mandatory evidence makes every item expensive (by design — it's the anti-rubber-stamp pressure), so the path of least resistance must be a short checklist you'd actually defend.

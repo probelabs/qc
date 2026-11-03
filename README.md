@@ -292,13 +292,14 @@ qc init
 
 ### `qc template list` / `qc template show <t>`
 
-Gallery of bundled checklists. `show` prints the minimal file you would copy.
+Gallery of bundled checklists followed by local `qc/templates/*.md` files, marked `local` and sorted by filename. `show` prints a bundled template's minimal file. Bundled names take precedence over matching local names.
 
 ```bash
 qc template list
 #   docs                 claims verified against code
 #   code-quality         quality questions for application code
 #   …
+#   area-keys            local (qc/templates/area-keys.md)
 
 qc template show docs
 # ---
@@ -321,6 +322,10 @@ qc add security-review --full
 ```
 
 Adapt after copy; there is no runtime `extends` (legibility beats DRY).
+
+Local templates copy with `qc add <name>` and receive `from: local/<name>` in frontmatter, unless the template already has a `from:` line, which is preserved. Bundled copies keep `from: builtin/<name>@1`.
+
+<!-- Documents: SW-REQ-261103-0004 -->
 
 ### `qc plan [--json] [--checklist <path>]`
 

@@ -41,6 +41,71 @@ static void stamp_from(char *body, size_t n, const char *id) {
     }
 }
 
+// Implements: SW-REQ-261103-0004
+static char *local_template_body(const char *path, const char *id) {
+    char *raw = qc_read_file(path, NULL), *body;
+    const char *line, *end, *key, *nl = "\n";
+    size_t offset = 0, n;
+    if (!raw)
+        qc_die(QC_CONFIG, "cannot read %s\nNEXT: check permissions, then qc add %s", path, id);
+    if (qc_startswith(raw, "---\n")) offset = 4;
+    else if (qc_startswith(raw, "---\r\n")) { offset = 5; nl = "\r\n"; }
+    /* Only a frontmatter key supplies provenance; prose may mention "from:". */
+    for (line = raw + offset; offset && *line; line = end + 1) {
+        size_t len;
+        end = strchr(line, '\n');
+        if (!end) end = line + strlen(line);
+        len = (size_t)(end - line);
+        if (len && line[len - 1] == '\r') len--;
+        if (len == 3 && !strncmp(line, "---", 3)) break;
+        key = line;
+        while (key < end && isspace((unsigned char)*key)) key++;
+        if (end - key >= 4 && !strncmp(key, "from", 4)) {
+            key += 4;
+            while (key < end && isspace((unsigned char)*key)) key++;
+            if (key < end && *key == ':') return raw;
+        }
+        if (!*end) break;
+    }
+    n = strlen(raw) + strlen(id) + 32;
+    body = malloc(n);
+    if (!body) qc_die(QC_CONFIG, "out of memory\nNEXT: free memory, then qc add %s", id);
+    if (offset)
+        snprintf(body, n, "%.*sfrom: local/%s%s%s", (int)offset, raw, id, nl, raw + offset);
+    else
+        snprintf(body, n, "---\nfrom: local/%s\n---\n%s", id, raw);
+    free(raw);
+    return body;
+}
+
+// Implements: SW-REQ-261103-0004
+static int template_name_cmp(const struct dirent **a, const struct dirent **b) {
+    return strcmp((*a)->d_name, (*b)->d_name);
+}
+
+// Implements: SW-REQ-261103-0004
+static void list_local_templates(void) {
+    char root[QC_MAX_PATH], dir[QC_MAX_PATH], path[QC_MAX_PATH];
+    struct dirent **entries;
+    int n, i;
+    if (qc_find_root(root, sizeof root) != 0)
+        qc_die(QC_CONFIG, "cannot determine repo root\nNEXT: cd to the repo, then qc template list");
+    qc_join(dir, sizeof dir, root, "qc/templates");
+    n = scandir(dir, &entries, NULL, template_name_cmp);
+    if (n < 0) {
+        if (errno == ENOENT || errno == ENOTDIR) return;
+        qc_die(QC_CONFIG, "cannot list %s\nNEXT: check permissions, then qc template list", dir);
+    }
+    for (i = 0; i < n; i++) {
+        const char *name = entries[i]->d_name;
+        qc_join(path, sizeof path, dir, name);
+        if (name[0] != '.' && strlen(name) > 3 && qc_endswith(name, ".md") && qc_is_file(path))
+            qc_out("  %-20.*s local (qc/templates/%s)\n", (int)strlen(name) - 3, name, name);
+        free(entries[i]);
+    }
+    free(entries);
+}
+
 const char *flag_val(int argc, char **argv, const char *longf, const char *shortf) {
     int i;
     for (i = 0; i < argc; i++) {
@@ -131,6 +196,7 @@ int cmd_init(int argc, char **argv) {
 
 const char *qc_argv0 = "qc";
 
+// Implements: SW-REQ-261103-0004
 int cmd_add(int argc, char **argv) {
     QcCtx *cx = cx_new();
     const QcTemplate *t;
@@ -149,15 +215,17 @@ int cmd_add(int argc, char **argv) {
     t = qc_find_template(name);
     qc_load_ctx(cx, 1);
     if (!t) {
-        /* repo-local override */
+        /* repo-local fallback, after bundled templates */
         char loc[QC_MAX_PATH];
         snprintf(loc, sizeof loc, "%s/qc/templates/%s.md", cx->root, name);
         if (qc_is_file(loc)) {
-            char *raw = qc_read_file(loc, NULL);
+            char *raw;
             snprintf(dest, sizeof dest, "%s/qc/checklists/%s.md", cx->root, name);
             if (qc_is_file(dest))
                 qc_die(QC_CONFIG, "%s already exists.\nPrinciple: templates compose by copying, never by silent overwrite.\nNEXT: edit qc/checklists/%s.md or pick another template", dest, name);
-            qc_write_file(dest, raw);
+            raw = local_template_body(loc, name);
+            if (qc_write_file(dest, raw) != 0)
+                qc_die(QC_CONFIG, "cannot write %s\nNEXT: check permissions, then qc add %s", dest, name);
             free(raw);
             qc_out("Copied qc/templates/%s.md → qc/checklists/%s.md\nNEXT: qc plan\n", name, name);
             return QC_OK;
@@ -176,18 +244,20 @@ int cmd_add(int argc, char **argv) {
     return QC_OK;
 }
 
+// Implements: SW-REQ-261103-0004
 int cmd_template(int argc, char **argv) {
     const char *sub = argc ? argv[0] : "list";
     if (!strcmp(sub, "--help") || !strcmp(sub, "-h") || !strcmp(sub, "help")) return qc_print_help("template");
     //mcdc:ignore:defensive argc==0 already forces sub="list" so the || is unpairable
     if (!strcmp(sub, "list") || argc == 0) {
         int i;
-        qc_out("WHAT  bundled checklists. Copy the closest, then adapt (I7).\n");
+        qc_out("WHAT  bundled and local checklists. Copy the closest, then adapt (I7).\n");
         qc_out("WHY   free authorship of the gate is itself non-determinism.\n\n");
         qc_find_template("");
         for (i = 0; i < qc_ntemplates; i++)
             qc_out("  %-20s %s\n", qc_templates[i].id, qc_templates[i].blurb);
-        qc_out("\nNEXT: qc template show <t>\n      qc add <t>\n      qc add <t> --full\n");
+        list_local_templates();
+        qc_out("\nNEXT: qc add <t>\n      qc add <t> --full\n      qc template show <t>   # bundled preview\n");
         return QC_OK;
     }
     if (!strcmp(sub, "show")) {

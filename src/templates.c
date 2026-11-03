@@ -282,12 +282,12 @@ QcHelpRc qc_print_help(const char *topic) {
             "  qc init\n  qc template list\n");
     else if (!strcmp(topic, "add"))
         help_topic("add",
-            "Copy a bundled template into qc/checklists/. Minimal unless --full. Stamps from:.",
+            "Copy a bundled or local template into qc/checklists/. Bundled: minimal unless --full. Stamps from:.",
             "Checklists compose by copying. Runtime inheritance would hide the truth in review (I7).",
             "  qc template list\n  qc add <template>\n  qc add <template> --full\n  qc plan\n");
     else if (!strcmp(topic, "template"))
         help_topic("template",
-            "The gallery. list prints the menu; show prints the minimal file.",
+            "The gallery. list prints bundled and local templates; show prints a bundled minimal file.",
             "The agent's prior for checklist generation: copy the closest, then adapt.",
             "  qc template list\n  qc template show <t>\n  qc add <t>\n");
     else if (!strcmp(topic, "plan"))
