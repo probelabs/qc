@@ -837,6 +837,166 @@ EOF
     fi
 }
 
+# Verifies: SW-REQ-261103-7f3a
+case_template_set() {
+    new_repo
+    mkdir -p storage
+    printf 'keys = 1\n' > storage/keys.c
+    printf -- '---\nid: area-keys\nscope: [{{area}}/**]\n---\n\n- [ ] keys :: Which keys does {{area}} write? @evidence(file:line)\n' > qc/templates/area-keys.md
+    "$QC" add area-keys --set area=storage > add.out 2>&1
+    code=$?
+    printf -- '---\nid: area-keys\nscope: [storage/**]\n---\n\n- [ ] keys :: Which keys does storage write? @evidence(file:line)\n' > expected.md
+    if [ "$code" -eq 0 ] && cmp -s expected.md qc/checklists/area-keys.md; then
+        say "--set substitutes scope and question at copy time"
+    else
+        bad "--set copy differs from the fully substituted checklist (exit $code)"
+        cat add.out qc/checklists/area-keys.md
+    fi
+    if grep -q '{{area}}' qc/templates/area-keys.md; then
+        say "--set leaves the source template unchanged"
+    else
+        bad "--set changed the source template"
+    fi
+    for command in plan verify; do
+        "$QC" "$command" > gate.out 2>&1
+        code=$?
+        if [ "$code" -eq 1 ] && grep -q 'area-keys/keys' gate.out && grep -q 'Which keys does storage write?' gate.out; then
+            say "$command includes the substituted checklist with matching files"
+        else
+            bad "$command lost the substituted checklist (exit $code)"
+            cat gate.out
+        fi
+    done
+    rm qc/checklists/area-keys.md
+    printf '\n- [ ] detail :: {{label}} / {{area}} @scope({{area}}/**) @evidence({{label}})\n' >> qc/templates/area-keys.md
+    "$QC" add --set area=elsewhere --set=area=storage --set 'label=a=b & $HOME \1' area-keys --full > add.out 2>&1
+    code=$?
+    printf '\n- [ ] detail :: a=b & $HOME \\1 / storage @scope(storage/**) @evidence(a=b & $HOME \\1)\n' >> expected.md
+    if [ "$code" -eq 0 ] && cmp -s expected.md qc/checklists/area-keys.md; then
+        say "repeated --set, --set=, --full and literal values substitute every occurrence"
+    else
+        bad "multiple --set assignments were not copied literally (exit $code)"
+        cat add.out qc/checklists/area-keys.md
+    fi
+    rm qc/checklists/area-keys.md
+    "$QC" add area-keys --set area=storage --set label= > add.out 2>&1
+    code=$?
+    if [ "$code" -eq 0 ] && grep -Fq -- '- [ ] detail ::  / storage @scope(storage/**) @evidence()' qc/checklists/area-keys.md; then
+        say "an explicit empty --set value is copied literally"
+    else
+        bad "an explicit empty --set value was not substituted (exit $code)"
+        cat add.out
+    fi
+}
+
+# Verifies: SW-REQ-261103-7f3a
+case_template_set_errors() {
+    new_repo
+    printf -- '---\nid: area-keys\nscope: [{{area}}/**]\n---\n\n- [ ] keys :: Which keys does {{area}} write?\n' > qc/templates/area-keys.md
+    for assignment in area '=storage' ''; do
+        "$QC" add area-keys --set "$assignment" > add.out 2>&1
+        code=$?
+        if [ "$code" -eq 2 ] && [ ! -e qc/checklists/area-keys.md ] && grep -q 'NEXT: qc add' add.out; then
+            say "malformed --set assignment fails before writing a checklist"
+        else
+            bad "malformed --set accepted or left a checklist (exit $code)"
+            cat add.out
+        fi
+        rm -f qc/checklists/area-keys.md
+    done
+    "$QC" add area-keys --set > add.out 2>&1
+    code=$?
+    if [ "$code" -eq 2 ] && [ ! -e qc/checklists/area-keys.md ] && grep -q 'NEXT: qc add' add.out; then
+        say "--set without an argument fails before writing a checklist"
+    else
+        bad "missing --set argument accepted (exit $code)"
+        cat add.out
+    fi
+    rm -f qc/checklists/area-keys.md
+    "$QC" add area-keys > add.out 2>&1
+    code=$?
+    if [ "$code" -eq 2 ] && [ ! -e qc/checklists/area-keys.md ] && grep -q 'NEXT: qc add' add.out; then
+        say "an unset placeholder fails before writing a checklist"
+    else
+        bad "unset placeholder accepted (exit $code)"
+        cat add.out
+    fi
+    rm -f qc/checklists/area-keys.md
+    "$QC" add area-keys --set 'area={{other}}' --set other=storage > add.out 2>&1
+    code=$?
+    if [ "$code" -eq 2 ] && [ ! -e qc/checklists/area-keys.md ]; then
+        say "substitutions are literal; unresolved replacement values fail before writing"
+    else
+        bad "recursive or unresolved replacement accepted (exit $code)"
+        cat add.out
+    fi
+    rm -f qc/checklists/area-keys.md
+    printf '\nReview {{missing}} first.\n' >> qc/templates/area-keys.md
+    "$QC" add area-keys --set area=storage > add.out 2>&1
+    code=$?
+    if [ "$code" -eq 2 ] && [ ! -e qc/checklists/area-keys.md ]; then
+        say "a partially substituted template fails before writing"
+    else
+        bad "partially substituted template accepted (exit $code)"
+        cat add.out
+    fi
+    cp qc/templates/area-keys.md qc/checklists/area-keys.md
+    for command in plan verify; do
+        "$QC" "$command" > gate.out 2>&1
+        code=$?
+        if [ "$code" -eq 2 ] && grep -q 'unresolved template placeholder' gate.out && grep -q 'NEXT:.*qc verify' gate.out; then
+            say "$command rejects an already copied unresolved checklist"
+        else
+            bad "$command silently accepted an unresolved checklist (exit $code)"
+            cat gate.out
+        fi
+    done
+}
+
+# Verifies: SW-REQ-261103-7f3a
+case_template_syntax() {
+    new_repo
+    printf -- '---\nid: template-syntax\nscope: [README.md]\n---\n- [ ] render :: Does the {{.}} template still render with {{ .Values.image }} and {{ user }}?\n' > qc/checklists/template-syntax.md
+    "$QC" plan > gate.out 2>&1
+    code=$?
+    if [ "$code" -eq 1 ] && grep -Fq 'template-syntax/render' gate.out && grep -Fq 'Does the {{.}} template still render with {{ .Values.image }} and {{ user }}?' gate.out; then
+        say "Go, Helm and Jinja syntax loads and plans as literal question text"
+    else
+        bad "non-qc template syntax failed to load or plan (exit $code)"
+        cat gate.out
+    fi
+    rm qc/checklists/template-syntax.md
+    printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: {{area}} / {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{9key}} / {{bad.key}} / {{}} / {{area\n' > qc/templates/area-keys.md
+    "$QC" add area-keys --set area=storage --set ' .Values.x =changed' --set '.=changed' --set ' user =changed' > add.out 2>&1
+    code=$?
+    printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: storage / {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{9key}} / {{bad.key}} / {{}} / {{area\n' > expected.md
+    if [ "$code" -eq 0 ] && cmp -s expected.md qc/checklists/area-keys.md; then
+        say "--set substitutes only qc placeholders and preserves other braces, including unclosed text"
+    else
+        bad "--set changed or rejected non-qc template syntax (exit $code)"
+        cat add.out
+    fi
+    rm -f qc/checklists/area-keys.md
+    printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: {{area}}\n' > qc/templates/area-keys.md
+    "$QC" add area-keys --set 'area={{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{' > add.out 2>&1
+    code=$?
+    printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{\n' > expected.md
+    if [ "$code" -eq 0 ] && cmp -s expected.md qc/checklists/area-keys.md; then
+        say "literal replacement values may contain non-qc template syntax and unclosed braces"
+    else
+        bad "non-qc template syntax in a replacement was rejected (exit $code)"
+        cat add.out
+    fi
+    "$QC" plan > gate.out 2>&1
+    code=$?
+    if [ "$code" -eq 1 ] && grep -Fq '{{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{' gate.out; then
+        say "non-qc syntax and unclosed braces still load after copying"
+    else
+        bad "copied literal template syntax failed to plan (exit $code)"
+        cat gate.out
+    fi
+}
+
 need_qc
 run_case STK-REQ-001:AC-001 case_stk001_ac001
 run_case STK-REQ-001:AC-002 case_stk001_ac002
@@ -858,6 +1018,9 @@ run_case STK-REQ-007:AC-002 case_stk007_ac002
 run_case STK-REQ-007:AC-003 case_stk007_ac003
 run_case SW-REQ-001:expiry case_sw001_expiry
 run_case STK-REQ-001:cfg-error case_stk001_cfg_error
+run_case SW-REQ-261103-7f3a:copy case_template_set
+run_case SW-REQ-261103-7f3a:errors case_template_set_errors
+run_case SW-REQ-261103-7f3a:syntax case_template_syntax
 if [ -n "$ONLY" ] && [ "$ran" -eq 0 ]; then echo unknown_case >&2; exit 2; fi
 if [ "$fail" -ne 0 ]; then echo "$fail acceptance failures"; exit 1; fi
 echo "acceptance tests passed ($ran cases)"

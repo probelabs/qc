@@ -1,0 +1,63 @@
+id: SW-REQ-261103-7f3a
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: ""
+description: >-
+    qc add shall accept repeatable --set key=value and --set=key=value options
+    before or after the template id, split each assignment at the first equals
+    sign, and replace every qc placeholder throughout the copied template with
+    the literal value. A qc placeholder is exactly {{key}} where key matches
+    [A-Za-z_][A-Za-z0-9_-]*, with no spaces, dots or other characters. Only this
+    form shall be substituted or treated as unresolved. Empty values are allowed;
+    the last assignment to a key wins. Substitution shall not be recursive or
+    change the source template.
+    Missing arguments, assignments without an equals sign or with an empty key,
+    and unresolved qc placeholders (including any remaining after substitution)
+    shall exit 2 before writing the destination checklist. Any loaded checklist
+    containing an unresolved qc placeholder shall be a parse error (exit 2),
+    before scope evaluation can make the item dormant. Other brace text,
+    including {{ key }}, {{.}}, {{ .Values.x }}, {{ user }} and an unclosed {{,
+    shall pass through unchanged in templates and replacement values and shall
+    never be a placeholder error.
+formalization_strategy: informal
+informal_verification:
+    method: test
+    evidence: ""
+    verified: false
+parent: SYS-REQ-001
+component: cli
+rationale: SPEC.md sections 8 and 11 require copy-time substitution. Unresolved scope placeholders must not silently remove a gate from the worklist.
+tags:
+    - templates
+    - parser
+variables: []
+references:
+    - type: document
+      id: SPEC.md#11-templates
+    - type: document
+      id: SPEC.md#42-checklist-grammar
+traces:
+    satisfies:
+        - SYS-REQ-001
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
+priority_level: high
+obligation_checklist:
+    - nominal
+    - malformed_input
+obligation_hazards:
+    - class: nominal
+      worst_case: An unsubstituted scope matches no files and silently hides an applicable checklist.
+      severity: high
+    - class: malformed_input
+      worst_case: A malformed assignment or unresolved placeholder is accepted and creates a dormant gate.
+      severity: high

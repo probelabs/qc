@@ -131,17 +131,72 @@ int cmd_init(int argc, char **argv) {
 
 const char *qc_argv0 = "qc";
 
+// Implements: SW-REQ-261103-7f3a
+static char *substitute_template(const char *raw, const char **sets, int nsets, const char *name) {
+    const char *p = raw;
+    size_t cap = strlen(raw) + 1, used = 0;
+    char *out = malloc(cap);
+    if (!out) qc_die(QC_CONFIG, "out of memory\nNEXT: free memory, then qc add %s", name);
+    while (*p) {
+        const char *open = qc_find_placeholder(p), *end, *value = NULL;
+        size_t prefix, vlen, need;
+        int i;
+        if (!open) {
+            size_t tail = strlen(p);
+            memcpy(out + used, p, tail);
+            used += tail;
+            break;
+        }
+        end = strstr(open + 2, "}}");
+        for (i = 0; i < nsets; i++) {
+            const char *eq = strchr(sets[i], '=');
+            if ((size_t)(eq - sets[i]) == (size_t)(end - open - 2) &&
+                !strncmp(sets[i], open + 2, (size_t)(end - open - 2)))
+                value = eq + 1; /* repeated keys: the last assignment wins */
+        }
+        if (!value)
+            qc_die(QC_CONFIG, "unresolved template placeholder in %s.\nPrinciple: copied checklists must contain literal values.\nNEXT: qc add %s --set %.*s=<value>", name, name, (int)(end - open - 2), open + 2);
+        prefix = (size_t)(open - p);
+        vlen = strlen(value);
+        need = used + prefix + vlen + strlen(end + 2) + 1;
+        if (need > cap) {
+            cap = need;
+            out = realloc(out, cap);
+            if (!out) qc_die(QC_CONFIG, "out of memory\nNEXT: free memory, then qc add %s", name);
+        }
+        memcpy(out + used, p, prefix); used += prefix;
+        memcpy(out + used, value, vlen); used += vlen;
+        p = end + 2;
+    }
+    out[used] = 0;
+    if (qc_find_placeholder(out))
+        qc_die(QC_CONFIG, "unresolved template placeholder in replacement for %s.\nPrinciple: substitutions are literal, never recursive.\nNEXT: qc add %s --set <key>=<literal-value>", name, name);
+    return out;
+}
+
+// Implements: SW-REQ-261103-7f3a
 int cmd_add(int argc, char **argv) {
     QcCtx *cx = cx_new();
     const QcTemplate *t;
     int full = has_flag(argc, argv, "--full");
     const char *name = NULL;
-    int i;
+    const char **sets = calloc((size_t)argc + 1, sizeof *sets);
+    int i, nsets = 0;
     char dest[QC_MAX_PATH], body[16384];
+    if (!sets) qc_die(QC_CONFIG, "out of memory\nNEXT: free memory, then qc add <template>");
     for (i = 0; i < argc; i++) {
-        if (argv[i][0] == '-') continue;
-        name = argv[i];
-        break;
+        const char *set = NULL, *eq;
+        if (!strcmp(argv[i], "--set")) {
+            if (++i >= argc)
+                qc_die(QC_CONFIG, "--set needs key=value.\nNEXT: qc add <template> --set <key>=<value>");
+            set = argv[i];
+        } else if (qc_startswith(argv[i], "--set=")) set = argv[i] + 6;
+        else if (argv[i][0] != '-' && !name) name = argv[i];
+        if (!set) continue;
+        eq = strchr(set, '=');
+        if (!eq || eq == set)
+            qc_die(QC_CONFIG, "--set needs a nonempty key followed by =value.\nNEXT: qc add <template> --set <key>=<value>");
+        sets[nsets++] = set;
     }
     if (!name)
         qc_die(QC_CONFIG, "add needs a template id.\nPrinciple: copy a known checklist; do not invent one from scratch.\nNEXT: qc template list");
@@ -154,11 +209,18 @@ int cmd_add(int argc, char **argv) {
         snprintf(loc, sizeof loc, "%s/qc/templates/%s.md", cx->root, name);
         if (qc_is_file(loc)) {
             char *raw = qc_read_file(loc, NULL);
+            char *expanded;
             snprintf(dest, sizeof dest, "%s/qc/checklists/%s.md", cx->root, name);
             if (qc_is_file(dest))
                 qc_die(QC_CONFIG, "%s already exists.\nPrinciple: templates compose by copying, never by silent overwrite.\nNEXT: edit qc/checklists/%s.md or pick another template", dest, name);
-            qc_write_file(dest, raw);
+            if (!raw)
+                qc_die(QC_CONFIG, "cannot read %s\nNEXT: check permissions, then qc add %s", loc, name);
+            expanded = substitute_template(raw, sets, nsets, name);
             free(raw);
+            if (qc_write_file(dest, expanded) != 0)
+                qc_die(QC_CONFIG, "cannot write %s\nNEXT: check permissions, then qc add %s", dest, name);
+            free(expanded);
+            free(sets);
             qc_out("Copied qc/templates/%s.md → qc/checklists/%s.md\nNEXT: qc plan\n", name, name);
             return QC_OK;
         }
@@ -169,7 +231,13 @@ int cmd_add(int argc, char **argv) {
         qc_die(QC_CONFIG, "qc/checklists/%s.md already exists.\nPrinciple: templates compose by copying, never by silent overwrite.\nNEXT: edit the existing file, or qc template show %s", name, name);
     snprintf(body, sizeof body, "%s", full ? t->full : t->minimal);
     stamp_from(body, sizeof body, name);
-    qc_write_file(dest, body);
+    {
+        char *expanded = substitute_template(body, sets, nsets, name);
+        if (qc_write_file(dest, expanded) != 0)
+            qc_die(QC_CONFIG, "cannot write %s\nNEXT: check permissions, then qc add %s", dest, name);
+        free(expanded);
+    }
+    free(sets);
     qc_out("Copied builtin/%s@1 (%s) → qc/checklists/%s.md\n", name, full ? "full" : "minimal", name);
     qc_out("NEXT: qc plan\n");
     qc_out("      qc baseline -m \"…\"   # if adopting into existing code\n");
