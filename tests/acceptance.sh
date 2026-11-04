@@ -931,6 +931,8 @@ case_repeated_checklists() {
     full=$?
     "$QC" plan "$@" --checklist external/beta.md >overflow.out 2>&1
     overflow=$?
+    "$QC" plan "$@" --checklist external/list-0.md --checklist "$PWD/external/list-0.md" >repeat.out 2>&1
+    repeated=$?
     write_attest
     "$QC" plan "$@" >combined.out 2>&1
     combined=$?
@@ -941,6 +943,29 @@ case_repeated_checklists() {
         bad "checklist capacity full=$full overflow=$overflow combined=$combined"
         cat capacity.out overflow.out combined.out
     fi
+    if [ "$repeated" -eq 1 ] && [ "$(grep -c '^[0-9]' repeat.out)" -eq 16 ]; then
+        say "repeating a loaded file does not count against the checklist limit"
+    else
+        bad "repeated flags at capacity=$repeated"
+        cat repeat.out
+    fi
+    for len in 77 78 79; do
+        long=$(printf "%0${len}d" 0 | tr 0 l)
+        printf '%s\n' '---' "id: $long" 'scope: [README.md]' '---' '- [ ] x :: Question?' > "external/$long.md"
+        cp "external/$long.md" "external/other/$long.md"
+        set +e
+        "$QC" plan --checklist "external/$long.md" --checklist "external/other/$long.md" >long-dup.out 2>&1
+        long_dup=$?
+        "$QC" plan --checklist "external/$long.md" --checklist "./external/$long.md" >long-same.out 2>&1
+        long_same=$?
+        set -e
+        if [ "$long_dup" -eq 2 ] && grep -q 'NEXT:' long-dup.out && [ "$long_same" -eq 1 ] && [ "$(grep -c "^[0-9].*$long/x" long-same.out)" -eq 1 ]; then
+            say "a $len-character id collides across directories and loads once from one file"
+        else
+            bad "long id $len dup=$long_dup same=$long_same"
+            cat long-dup.out long-same.out
+        fi
+    done
 }
 
 need_qc

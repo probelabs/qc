@@ -432,7 +432,10 @@ int cmp_str(const void *a, const void *b) {
     return strcmp(*(char *const *)a, *(char *const *)b);
 }
 
-static char qc_checklist_args[QC_MAX_LISTS][QC_MAX_PATH];
+/* Flags are deduplicated by realpath when they load, and the QC_MAX_LISTS limit
+ * applies to the distinct files, so the raw flag list has headroom for repeats. */
+#define QC_MAX_CHECKLIST_ARGS (QC_MAX_LISTS * 4)
+static char qc_checklist_args[QC_MAX_CHECKLIST_ARGS][QC_MAX_PATH];
 static int qc_nchecklist_args;
 
 // Implements: SW-REQ-004
@@ -440,12 +443,15 @@ static int qc_nchecklist_args;
 /* Records --checklist from argv. A checklist outside qc/checklists/ is a
  * definition only; state still lands in this repo's .qc/ and qc/state/. */
 void qc_note_checklist_arg(const char *path) {
+    int i;
     if (!path) { qc_nchecklist_args = 0; return; }
     if (!path[0])
         qc_die(QC_CONFIG, "--checklist needs a path\nNEXT: write the checklist to a file, then qc plan --checklist <path>");
     if (strlen(path) >= QC_MAX_PATH)
         qc_die(QC_CONFIG, "checklist path is too long\nNEXT: use a shorter path, then qc plan --checklist <path>");
-    if (qc_nchecklist_args >= QC_MAX_LISTS)
+    for (i = 0; i < qc_nchecklist_args; i++)
+        if (!strcmp(qc_checklist_args[i], path)) return; /* the same flag again */
+    if (qc_nchecklist_args >= QC_MAX_CHECKLIST_ARGS)
         qc_die(QC_CONFIG, "too many --checklist flags\nNEXT: remove extras, then qc verify");
     snprintf(qc_checklist_args[qc_nchecklist_args++], QC_MAX_PATH, "%s", path);
 }
@@ -504,9 +510,11 @@ int qc_parse_checklists(QcCtx *cx) {
         if (!qc_endswith(base, ".md"))
             qc_die(QC_CONFIG, "checklist file %s must end in .md\nNEXT: save it as <id>.md, then rerun", ep);
         for (i = 0; i < cx->nlists; i++) {
-            char stem[QC_MAX_ID];
+            char stem[QC_MAX_ID], *dot;
+            /* the same stem rule as qc_parse_checklist_file, so long ids compare whole */
             snprintf(stem, sizeof stem, "%s", base);
-            stem[strlen(stem) - 3] = 0;
+            dot = strrchr(stem, '.');
+            if (dot) *dot = 0;
             if (!strcmp(cx->lists[i].filename, stem)) {
                 char rp[PATH_MAX];
                 if (realpath(cx->lists[i].path, rp) && !strcmp(rp, ep)) break; /* same file */
