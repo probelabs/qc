@@ -432,32 +432,44 @@ int cmp_str(const void *a, const void *b) {
     return strcmp(*(char *const *)a, *(char *const *)b);
 }
 
-static char qc_checklist_arg[QC_MAX_PATH];
+/* Flags are recorded by realpath, so every spelling of one file is one entry, and
+ * the QC_MAX_LISTS limit applies to the distinct files when they load. More
+ * distinct paths than this would exceed that limit anyway. */
+#define QC_MAX_CHECKLIST_ARGS (QC_MAX_LISTS * 4)
+static char qc_checklist_args[QC_MAX_CHECKLIST_ARGS][QC_MAX_PATH];
+static int qc_nchecklist_args;
 
 // Implements: SW-REQ-004
+// Implements: SW-REQ-261103-9f2a
 /* Records --checklist from argv. A checklist outside qc/checklists/ is a
  * definition only; state still lands in this repo's .qc/ and qc/state/. */
 void qc_note_checklist_arg(const char *path) {
-    snprintf(qc_checklist_arg, sizeof qc_checklist_arg, "%s", path ? path : "");
+    int i;
+    if (!path) { qc_nchecklist_args = 0; return; }
+    if (!path[0])
+        qc_die(QC_CONFIG, "--checklist needs a path\nNEXT: write the checklist to a file, then qc plan --checklist <path>");
+    if (strlen(path) >= QC_MAX_PATH)
+        qc_die(QC_CONFIG, "checklist path is too long\nNEXT: use a shorter path, then qc plan --checklist <path>");
+    {
+        char abs[PATH_MAX];
+        /* a missing file keeps its spelling: loading reports it by that name */
+        if (realpath(path, abs) && strlen(abs) < QC_MAX_PATH) path = abs;
+        for (i = 0; i < qc_nchecklist_args; i++)
+            if (!strcmp(qc_checklist_args[i], path)) return; /* the same file again */
+        if (qc_nchecklist_args >= QC_MAX_CHECKLIST_ARGS)
+            qc_die(QC_CONFIG, "too many --checklist flags\nNEXT: remove extras, then qc verify");
+        snprintf(qc_checklist_args[qc_nchecklist_args++], QC_MAX_PATH, "%s", path);
+    }
 }
 
 // Implements: SW-REQ-004
-static void resolve_extra_checklist(QcCtx *cx) {
-    const char *src = qc_checklist_arg[0] ? qc_checklist_arg : getenv("QC_CHECKLIST");
-    char abs[PATH_MAX];
-    if (!src || !src[0]) return;
-    if (realpath(src, abs)) snprintf(cx->extra_checklist, sizeof cx->extra_checklist, "%s", abs);
-    else snprintf(cx->extra_checklist, sizeof cx->extra_checklist, "%s", src);
-}
-
-// Implements: SW-REQ-004
+// Implements: SW-REQ-261103-9f2a
 int qc_parse_checklists(QcCtx *cx) {
     char dir[QC_MAX_PATH];
     DIR *d;
     struct dirent *de;
     char names[QC_MAX_LISTS][QC_MAX_ID];
     int nn = 0, i, j;
-    resolve_extra_checklist(cx);
     qc_join(dir, sizeof dir, cx->root, "qc/checklists");
     d = opendir(dir);
     while (d && (de = readdir(d))) {
@@ -490,25 +502,32 @@ int qc_parse_checklists(QcCtx *cx) {
             qc_die(QC_CONFIG, "parse error in %s: %s\nNEXT: fix the checklist, then qc verify", names[i], err);
         cx->nlists++;
     }
-    if (cx->extra_checklist[0]) {
-        const char *ep = cx->extra_checklist, *base = strrchr(ep, '/');
-        char err[256];
+    for (j = 0; j < (qc_nchecklist_args ? qc_nchecklist_args : 1); j++) {
+        const char *src = qc_nchecklist_args ? qc_checklist_args[j] : getenv("QC_CHECKLIST");
+        const char *ep, *base;
+        char abs[PATH_MAX], err[256];
         struct stat est;
+        if (!src || !src[0]) continue;
+        ep = realpath(src, abs) ? abs : src;
+        base = strrchr(ep, '/');
         base = base ? base + 1 : ep;
         if (stat(ep, &est) != 0 || !S_ISREG(est.st_mode))
             qc_die(QC_CONFIG, "checklist file %s does not exist\nNEXT: write the checklist to %s first (qc cannot read your memory), then rerun", ep, ep);
         if (!qc_endswith(base, ".md"))
             qc_die(QC_CONFIG, "checklist file %s must end in .md\nNEXT: save it as <id>.md, then rerun", ep);
         for (i = 0; i < cx->nlists; i++) {
-            char stem[QC_MAX_ID];
+            char stem[QC_MAX_ID], *dot;
+            /* the same stem rule as qc_parse_checklist_file, so long ids compare whole */
             snprintf(stem, sizeof stem, "%s", base);
-            stem[strlen(stem) - 3] = 0;
+            dot = strrchr(stem, '.');
+            if (dot) *dot = 0;
             if (!strcmp(cx->lists[i].filename, stem)) {
                 char rp[PATH_MAX];
-                if (realpath(cx->lists[i].path, rp) && !strcmp(rp, ep)) goto extra_done; /* same file */
-                qc_die(QC_CONFIG, "checklist %s is already in qc/checklists/\nNEXT: drop --checklist or rename the file and its id", stem);
+                if (realpath(cx->lists[i].path, rp) && !strcmp(rp, ep)) break; /* same file */
+                qc_die(QC_CONFIG, "checklist %s is already loaded from %s\nNEXT: drop the duplicate --checklist or rename the file and its id", stem, cx->lists[i].path);
             }
         }
+        if (i < cx->nlists) continue; /* same file; keep loading later flags */
         if (cx->nlists >= QC_MAX_LISTS)
             qc_die(QC_CONFIG, "too many checklists\nNEXT: remove extras, then qc verify");
         err[0] = 0;
@@ -520,7 +539,6 @@ int qc_parse_checklists(QcCtx *cx) {
         }
         cx->nlists++;
     }
-extra_done:
     {
         char err[256];
         if (qc_requires_cycles(cx, err, sizeof err))

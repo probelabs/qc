@@ -67,7 +67,7 @@ qc verify --checklist docs/release-check.md                        # exit 0 only
 qc report --md --checklist docs/release-check.md                   # the evidence table
 ```
 
-`QC_CHECKLIST=docs/release-check.md` does the same as the flag. To make a checklist part of every `qc verify`, copy it to `qc/checklists/<id>.md` and drop the flag.
+Repeat `--checklist` to combine files, for example `qc verify --checklist org/release.md --checklist org/security.md`. Pass the same paths to every command; every file contributes to the gate. `QC_CHECKLIST=docs/release-check.md` supplies one file when no `--checklist` flags are given. To make a checklist part of every `qc verify`, copy it to `qc/checklists/<id>.md` and drop the flag.
 
 ### What you get back
 
@@ -324,7 +324,7 @@ Adapt after copy; there is no runtime `extends` (legibility beats DRY).
 
 ### `qc plan [--json] [--checklist <path>]`
 
-Ordered worklist before work: forced items, questions, previous answers, decision requests. Nested items are indented, and each `@evidence(...)` hint is printed under its question as `Evidence -m must name: …`. `--checklist <path>` (or `QC_CHECKLIST`) adds a checklist file that lives outside `qc/checklists/`; every command accepts it.
+Ordered worklist before work: forced items, questions, previous answers, decision requests. Nested items are indented, and each `@evidence(...)` hint is printed under its question as `Evidence -m must name: …`. Every command accepts repeated `--checklist <path>` flags to add files outside `qc/checklists/` in argument order. With no flags, `QC_CHECKLIST` adds one file.
 
 ```bash
 qc plan

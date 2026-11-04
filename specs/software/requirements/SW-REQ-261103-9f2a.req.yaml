@@ -1,0 +1,34 @@
+id: SW-REQ-261103-9f2a
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+fretish: ""
+description: Every command that loads checklists shall load every --checklist path, including --checklist=path, after repository checklists in argument order. Explicit flags shall replace the QC_CHECKLIST environment fallback. Repeated paths to the same file shall load that file once without skipping later paths. An invalid path or file, a duplicate checklist id in distinct files, or exceeded checklist capacity shall cause exit code 2 with a NEXT instruction. No supplied checklist shall be silently dropped.
+formalization_strategy: informal
+informal_verification:
+    method: test
+    evidence: tests/test_kernel.c and tests/acceptance.sh
+    verified: false
+parent: SYS-REQ-004
+component: gate
+rationale: SPEC.md §4.2 and I8 require all supplied gates to participate or fail loudly.
+tags:
+    - checklist
+    - cli
+variables: []
+references:
+    - type: document
+      id: SPEC.md#42-checklist-grammar
+traces:
+    satisfies:
+        - SYS-REQ-004
+verification:
+    assurance_level: E
+    formalization_status: none
+    review:
+        status: pending
+        reviewer: ""
+        reviewed_at: ""
+        ai_generated: true
