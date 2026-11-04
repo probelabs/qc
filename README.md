@@ -104,7 +104,7 @@ Each row says who answered, what they cited, and what the checklist asked for. T
 
 ## Install
 
-`qc` is a Cosmopolitan [APE](https://justine.lol/ape.html) universal binary — one release asset runs on Linux, macOS, and Windows from a shell (do not open it from a GUI file manager). Release assets: `qc` and `qc.exe` (same bytes; Windows-friendly name).
+`qc` is a Cosmopolitan [APE](https://justine.lol/ape.html) universal binary — one release asset runs on Linux, macOS, and Windows from a shell (do not open it from a GUI file manager). Release assets: `qc` and `qc.exe` (same bytes; Windows-friendly name), plus `LICENSE`.
 
 ### One-liners
 
@@ -544,4 +544,6 @@ Phase 1 is what this binary implements. Features marked Phase 2 in the spec (tem
 
 ## License
 
-No `LICENSE` file is present in this repository. Treat the code as unlicensed until the maintainers add one — do not assume an SPDX identifier.
+Licensed under the [Apache License 2.0](./LICENSE). SPDX identifier: `Apache-2.0`.
+
+<!-- Documents: SW-REQ-003 -->
