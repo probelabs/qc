@@ -283,7 +283,8 @@ QcHelpRc qc_print_help(const char *topic) {
             "  qc init\n  qc template list\n");
     else if (!strcmp(topic, "add"))
         help_topic("add",
-            "Copy a bundled or repo-local template into qc/checklists/. Minimal unless --full. Bundled copies stamp from:.\n"
+            "Copy a bundled or local template into qc/checklists/. Bundled: minimal unless --full.\n"
+            "  Stamps from: (builtin/<t>@1, or local/<name> unless the template has a from: key).\n"
             "  Repeat --set key=value to replace {{key}} literally at copy time. Last assignment wins.\n"
             "  A qc placeholder is exactly {{key}}, with key matching [A-Za-z_][A-Za-z0-9_-]* (no spaces).\n"
             "  Other braces, e.g. {{ key }}, {{.}}, {{ .Values.x }} or unclosed {{, pass through unchanged.\n"
@@ -293,7 +294,7 @@ QcHelpRc qc_print_help(const char *topic) {
             "  qc template list\n  qc add <template>\n  qc add <template> --full\n  qc add <template> --set <key>=<value>\n  qc plan\n");
     else if (!strcmp(topic, "template"))
         help_topic("template",
-            "The gallery. list prints the menu; show prints the minimal file.",
+            "The gallery. list prints bundled and local templates; show prints a bundled minimal file.",
             "The agent's prior for checklist generation: copy the closest, then adapt.",
             "  qc template list\n  qc template show <t>\n  qc add <t>\n");
     else if (!strcmp(topic, "plan"))

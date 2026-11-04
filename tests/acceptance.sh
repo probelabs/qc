@@ -837,6 +837,135 @@ EOF
     fi
 }
 
+# Verifies: SW-REQ-261103-0004
+case_local_templates() {
+    new_repo
+    rmdir qc/templates
+    "$QC" template list > template-list.out
+    if grep -q 'docs' template-list.out && grep -q 'NEXT:' template-list.out; then
+        say "template list works without a local library"
+    else
+        bad "template list without qc/templates/"
+    fi
+    # In a source build, qc is the executable rather than an installed directory.
+    mv qc qc-installed
+    printf 'stand-in for the built executable\n' > qc
+    "$QC" template list > template-list.out
+    if grep -q 'docs' template-list.out && grep -q 'NEXT:' template-list.out; then
+        say "template list works when qc is a file"
+    else
+        bad "template list beside a built qc executable"
+    fi
+    rm qc
+    mv qc-installed qc
+    mkdir -p qc/templates/ignored.md subdir
+    printf 'ignore this file\n' > qc/templates/notes.txt
+    # Create out of order: the gallery must sort locals after the bundled set.
+    printf -- '---\nid: z-last\nfrom: org/shared@7\n---\n\n- [ ] keys :: Which keys?\n' > qc/templates/z-last.md
+    printf -- '---\nid: area-keys\nscope: [storage/**]\n---\n\n- [ ] keys :: Which keys? @evidence(file:line)\n' > qc/templates/area-keys.md
+    printf -- '---\nid: docs\n---\n\n- [ ] local :: Local docs?\n' > qc/templates/docs.md
+    cd subdir
+    "$QC" template list > ../template-list.out
+    cd ..
+    if awk '/docs/ && !/local/ { builtin = NR }
+        /area-keys/ && /local/ { first = NR }
+        /z-last/ && /local/ { last = NR }
+        END { exit !(builtin && first > builtin && last > first) }' template-list.out &&
+        ! grep -q 'ignored\|notes.txt' template-list.out; then
+        say "template list includes sorted local markdown files after bundled templates"
+    else
+        bad "local template discovery/order"
+        cat template-list.out
+    fi
+    "$QC" add area-keys > add.out
+    if [ "$(grep -c '^from: local/area-keys$' qc/checklists/area-keys.md)" -eq 1 ] &&
+        sed '/^from: local\/area-keys$/d' qc/checklists/area-keys.md | cmp -s qc/templates/area-keys.md -; then
+        say "add stamps local provenance and preserves the template body"
+    else
+        bad "local template provenance"
+        cat qc/checklists/area-keys.md
+    fi
+    "$QC" add z-last > add.out
+    if cmp -s qc/templates/z-last.md qc/checklists/z-last.md; then
+        say "add preserves an existing template provenance stamp"
+    else
+        bad "existing template provenance changed"
+    fi
+    # A prose mention of from: is not provenance. Keep CRLF and long bodies intact.
+    printf -- '---\r\nid: long-local\r\n---\r\n\r\nfrom: prose outside frontmatter\r\n' > qc/templates/long-local.md
+    awk 'BEGIN { for (i = 0; i < 1000; i++) printf "Template guidance line %d\r\n", i }' >> qc/templates/long-local.md
+    printf -- '- [ ] keys :: Which keys?\r\n' >> qc/templates/long-local.md
+    "$QC" add long-local > add.out
+    cr=$(printf '\r')
+    if [ "$(grep -c "^from: local/long-local${cr}$" qc/checklists/long-local.md)" -eq 1 ] &&
+        sed "/^from: local\/long-local${cr}$/d" qc/checklists/long-local.md | cmp -s qc/templates/long-local.md -; then
+        say "local provenance ignores prose and preserves CRLF and large templates"
+    else
+        bad "local template body changed or stamp missing"
+    fi
+    printf -- '- [ ] keys :: Which keys?\n' > qc/templates/no-frontmatter.md
+    "$QC" add no-frontmatter > add.out
+    if grep -q '^from: local/no-frontmatter$' qc/checklists/no-frontmatter.md; then
+        say "local templates without frontmatter receive a provenance block"
+    else
+        bad "local template without frontmatter has no provenance"
+    fi
+    "$QC" add docs > add.out
+    if grep -q '^from: builtin/docs@1$' qc/checklists/docs.md &&
+        ! grep -q 'Local docs?' qc/checklists/docs.md; then
+        say "bundled templates retain precedence and provenance"
+    else
+        bad "bundled template precedence/provenance"
+    fi
+    # Frontmatter after leading blank lines (the parser skips them): the stamp goes into that block,
+    # so scope, expiry and an existing from: keep their meaning. LF and CRLF.
+    printf -- '\n\n---\nid: lead-lf\nscope: [storage/**]\nexpires: 1d\n---\n\n- [ ] keys :: Which keys?\n' > qc/templates/lead-lf.md
+    printf -- '\r\n---\r\nid: lead-crlf\r\nscope: [storage/**]\r\n---\r\n\r\n- [ ] keys :: Which keys?\r\n' > qc/templates/lead-crlf.md
+    printf -- '\n---\nid: lead-from\nfrom: org/shared@7\nscope: [storage/**]\n---\n\n- [ ] keys :: Which keys?\n' > qc/templates/lead-from.md
+    set +e
+    "$QC" add lead-lf > add.out 2>&1; c_lf=$?
+    "$QC" add lead-crlf > add.out 2>&1; c_crlf=$?
+    "$QC" add lead-from > add.out 2>&1; c_from=$?
+    set -e
+    after_open() { awk '/^---\r?$/ { getline; print; exit }' "$1"; }
+    if [ "$c_lf" -eq 0 ] && [ "$c_crlf" -eq 0 ] && [ "$c_from" -eq 0 ] &&
+        [ "$(after_open qc/checklists/lead-lf.md)" = 'from: local/lead-lf' ] &&
+        sed '/^from: local\/lead-lf$/d' qc/checklists/lead-lf.md | cmp -s qc/templates/lead-lf.md - &&
+        [ "$(after_open qc/checklists/lead-crlf.md)" = "from: local/lead-crlf${cr}" ] &&
+        sed "/^from: local\/lead-crlf${cr}$/d" qc/checklists/lead-crlf.md | cmp -s qc/templates/lead-crlf.md - &&
+        cmp -s qc/templates/lead-from.md qc/checklists/lead-from.md; then
+        say "frontmatter after leading blank lines gets the stamp in place, LF and CRLF"
+    else
+        bad "leading-blank frontmatter lf=$c_lf crlf=$c_crlf from=$c_from"
+        cat qc/checklists/lead-lf.md qc/checklists/lead-crlf.md qc/checklists/lead-from.md
+    fi
+    # The opening "---" is the last line, with no newline (LF or CR): the stamp starts a new line once.
+    printf -- '---' > qc/templates/eof-lf.md
+    printf -- '---\r' > qc/templates/eof-cr.md
+    set +e
+    "$QC" add eof-lf > add.out 2>&1; c_eof_lf=$?
+    "$QC" add eof-cr > add.out 2>&1; c_eof_cr=$?
+    set -e
+    if [ "$c_eof_lf" -eq 0 ] && [ "$c_eof_cr" -eq 0 ] &&
+        [ "$(od -An -c qc/checklists/eof-lf.md | tr -s ' \n' ' ')" = "$(printf -- '---\nfrom: local/eof-lf\n' | od -An -c | tr -s ' \n' ' ')" ] &&
+        [ "$(od -An -c qc/checklists/eof-cr.md | tr -s ' \n' ' ')" = "$(printf -- '---\r\nfrom: local/eof-cr\r\n' | od -An -c | tr -s ' \n' ' ')" ]; then
+        say "an opening --- at end of file gets one line break before the stamp"
+    else
+        bad "frontmatter opener at EOF lf=$c_eof_lf cr=$c_eof_cr"
+        od -c qc/checklists/eof-lf.md qc/checklists/eof-cr.md
+    fi
+    rm -f qc/checklists/eof-lf.md qc/checklists/eof-cr.md
+    set +e
+    "$QC" add area-keys > add.out 2>&1
+    code=$?
+    set -e
+    if [ "$code" -eq 2 ] && grep -q '^from: local/area-keys$' qc/checklists/area-keys.md; then
+        say "local template add refuses to overwrite a checklist"
+    else
+        bad "local template overwrite exit=$code"
+    fi
+}
+
 # Verifies: SW-REQ-261103-7f3a
 case_template_set() {
     new_repo
@@ -845,7 +974,7 @@ case_template_set() {
     printf -- '---\nid: area-keys\nscope: [{{area}}/**]\n---\n\n- [ ] keys :: Which keys does {{area}} write? @evidence(file:line)\n' > qc/templates/area-keys.md
     "$QC" add area-keys --set area=storage > add.out 2>&1
     code=$?
-    printf -- '---\nid: area-keys\nscope: [storage/**]\n---\n\n- [ ] keys :: Which keys does storage write? @evidence(file:line)\n' > expected.md
+    printf -- '---\nfrom: local/area-keys\nid: area-keys\nscope: [storage/**]\n---\n\n- [ ] keys :: Which keys does storage write? @evidence(file:line)\n' > expected.md
     if [ "$code" -eq 0 ] && cmp -s expected.md qc/checklists/area-keys.md; then
         say "--set substitutes scope and question at copy time"
     else
@@ -969,7 +1098,7 @@ case_template_syntax() {
     printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: {{area}} / {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{9key}} / {{bad.key}} / {{}} / {{area\n' > qc/templates/area-keys.md
     "$QC" add area-keys --set area=storage --set ' .Values.x =changed' --set '.=changed' --set ' user =changed' > add.out 2>&1
     code=$?
-    printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: storage / {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{9key}} / {{bad.key}} / {{}} / {{area\n' > expected.md
+    printf -- '---\nfrom: local/area-keys\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: storage / {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{9key}} / {{bad.key}} / {{}} / {{area\n' > expected.md
     if [ "$code" -eq 0 ] && cmp -s expected.md qc/checklists/area-keys.md; then
         say "--set substitutes only qc placeholders and preserves other braces, including unclosed text"
     else
@@ -980,7 +1109,7 @@ case_template_syntax() {
     printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: {{area}}\n' > qc/templates/area-keys.md
     "$QC" add area-keys --set 'area={{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{' > add.out 2>&1
     code=$?
-    printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{\n' > expected.md
+    printf -- '---\nfrom: local/area-keys\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{\n' > expected.md
     if [ "$code" -eq 0 ] && cmp -s expected.md qc/checklists/area-keys.md; then
         say "literal replacement values may contain non-qc template syntax and unclosed braces"
     else
@@ -1171,6 +1300,7 @@ run_case STK-REQ-007:AC-002 case_stk007_ac002
 run_case STK-REQ-007:AC-003 case_stk007_ac003
 run_case SW-REQ-001:expiry case_sw001_expiry
 run_case STK-REQ-001:cfg-error case_stk001_cfg_error
+run_case SW-REQ-261103-0004:local-templates case_local_templates
 run_case SW-REQ-261103-7f3a:copy case_template_set
 run_case SW-REQ-261103-7f3a:errors case_template_set_errors
 run_case SW-REQ-261103-7f3a:syntax case_template_syntax

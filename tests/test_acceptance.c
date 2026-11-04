@@ -256,6 +256,10 @@ static int test_sw001_expiry(void) {
 static int test_stk001_cfg_error(void) {
  return run_case("STK-REQ-001:cfg-error"); }
 
+// Verifies: SW-REQ-261103-0004
+static int test_local_templates(void) {
+ return run_case("SW-REQ-261103-0004:local-templates"); }
+
 // Verifies: SW-REQ-261103-7f3a
 static int test_template_set(void) {
  return run_case("SW-REQ-261103-7f3a:copy"); }
@@ -295,6 +299,7 @@ int main(void)
     fails += test_stk007_ac003();
     fails += test_sw001_expiry();
     fails += test_stk001_cfg_error();
+    fails += test_local_templates();
     fails += test_template_set();
     fails += test_template_set_errors();
     fails += test_template_syntax();
