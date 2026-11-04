@@ -212,6 +212,55 @@ static void test_parse_unknown_anno(void) {
     expect(strstr(err, "unknown annotation") != NULL, "parse error names unknown annotation");
 }
 
+// Verifies: SW-REQ-261103-7f3a
+static void test_parse_unresolved_placeholders(void) {
+    char path[] = "tests/qc-placeholder-XXXXXX";
+    const char *bodies[] = {
+        "---\nid: area-keys\nscope: [{{area}}/**]\n---\n- [ ] keys :: Which keys?\n",
+        "---\nid: area-keys\n---\n- [ ] keys :: Which keys does {{area}} write?\n",
+        "---\nid: area-keys\n---\n- [ ] keys :: Which keys? @scope({{area}}/**)\n",
+        "---\nid: area-keys\n---\n- [ ] keys :: Which keys? @evidence({{area}}/keys.c:1)\n",
+        "---\nid: area-keys\n---\nReview {{area}} first.\n- [ ] keys :: Which keys?\n",
+        "---\nid: area-keys\n---\n- [ ] keys :: {{_Key-09}}\n",
+        "---\nid: area-keys\n---\n- [ ] keys :: {{Z}}\n",
+        "---\nid: area-keys\n---\n- [ ] keys :: {{.}} then {{area}}\n",
+        "---\nid: area-keys\n---\n- [ ] keys :: unclosed {{ then {{area}}\n"
+    };
+    const char *literal[] = {
+        "{{.}}", "{{ .Values.image }}", "{{ user }}", "{{ key }}",
+        "{{}}", "{{9key}}", "{{-key}}", "{{bad.key}}", "{{bad/key}}",
+        "{{k!}}", "{{area", "{{", "{{area}", "{{é}}"
+    };
+    QcChecklist cl;
+    char err[256], body[512];
+    int fd = mkstemp(path), i;
+    expect(fd >= 0, "create placeholder parser fixture");
+    if (fd < 0) return;
+    close(fd);
+    for (i = 0; i < (int)(sizeof bodies / sizeof bodies[0]); i++) {
+        qc_write_file(path, bodies[i]);
+        err[0] = 0;
+        expect(qc_parse_checklist_file(path, "area-keys.md", &cl, err, sizeof err) != 0,
+               "unresolved placeholder is a parse error before scope evaluation");
+        expect(strstr(err, "unresolved template placeholder") != NULL,
+               "parse error identifies the unresolved placeholder");
+    }
+    qc_write_file(path,
+        "---\nid: area-keys\nscope: [storage/**]\n---\n"
+        "- [ ] keys :: Which {keys} does storage write? @evidence(file:line)\n");
+    expect(qc_parse_checklist_file(path, "area-keys.md", &cl, err, sizeof err) == 0,
+           "resolved checklist and single braces still parse");
+    for (i = 0; i < (int)(sizeof literal / sizeof literal[0]); i++) {
+        snprintf(body, sizeof body, "---\nid: area-keys\n---\n- [ ] keys :: %s\n", literal[i]);
+        qc_write_file(path, body);
+        expect(qc_parse_checklist_file(path, "area-keys.md", &cl, err, sizeof err) == 0,
+               "non-qc template syntax parses as literal text");
+        expect(!strcmp(cl.items[0].question, literal[i]),
+               "non-qc template syntax is preserved in the question");
+    }
+    unlink(path);
+}
+
 // Verifies: SW-REQ-001
 // SW-REQ-001:boundary:nominal
 // SW-REQ-001:boundary:negative
@@ -684,6 +733,56 @@ static void test_config_and_lists(void) {
     snprintf(cx.lists[1].requires[0], QC_MAX_ID, "a");
     cx.lists[1].nrequires = 1;
     expect(qc_requires_cycles(&cx, err, sizeof err) == 1, "detects cycle");
+}
+
+// Verifies: SW-REQ-261103-9f2a
+static void test_external_checklists(void) {
+    char tmpl[] = "/tmp/qc-extra-XXXXXX";
+    char *dir = mkdtemp(tmpl);
+    char path[QC_MAX_PATH], alpha[QC_MAX_PATH], beta[QC_MAX_PATH];
+    const char *env = getenv("QC_CHECKLIST");
+    char *saved = env ? qc_strdup(env) : NULL;
+    QcCtx cx;
+    int order;
+    expect(dir != NULL, "mkdtemp external checklists");
+    if (!dir) { free(saved); return; }
+    snprintf(path, sizeof path, "%s/qc/checklists/repo.md", dir);
+    qc_write_file(path, "---\nid: repo\n---\n- [ ] r1 :: Repo question?\n");
+    snprintf(alpha, sizeof alpha, "%s/ext/alpha.md", dir);
+    qc_write_file(alpha, "---\nid: alpha\n---\n- [ ] a1 :: Alpha question?\n");
+    snprintf(beta, sizeof beta, "%s/ext/beta.md", dir);
+    qc_write_file(beta, "---\nid: beta\n---\n- [ ] b1 :: Beta question?\n");
+    memset(&cx, 0, sizeof cx);
+    snprintf(cx.root, sizeof cx.root, "%s", dir);
+    qc_note_checklist_arg(NULL);
+    setenv("QC_CHECKLIST", alpha, 1);
+    expect(qc_parse_checklists(&cx) == 0 && cx.nlists == 2
+           && !strcmp(cx.lists[1].id, "alpha"), "QC_CHECKLIST loads without flags");
+    setenv("QC_CHECKLIST", "/no/such/env-checklist.md", 1);
+    for (order = 0; order < 2; order++) {
+        qc_note_checklist_arg(NULL);
+        qc_note_checklist_arg(order ? beta : alpha);
+        qc_note_checklist_arg(order ? alpha : beta);
+        expect(qc_parse_checklists(&cx) == 0 && cx.nlists == 3
+               && !strcmp(cx.lists[0].id, "repo")
+               && !strcmp(cx.lists[1].id, order ? "beta" : "alpha")
+               && !strcmp(cx.lists[2].id, order ? "alpha" : "beta"),
+               "all checklist flags load after repo lists in argument order, overriding env");
+        expect(qc_parse_checklists(&cx) == 0 && cx.nlists == 3,
+               "loading checklists again retains every flag");
+    }
+    qc_note_checklist_arg(NULL);
+    qc_note_checklist_arg(path); /* already loaded from qc/checklists/ */
+    qc_note_checklist_arg(alpha);
+    qc_note_checklist_arg(alpha);
+    qc_note_checklist_arg(beta);
+    expect(qc_parse_checklists(&cx) == 0 && cx.nlists == 3
+           && !strcmp(cx.lists[2].id, "beta"),
+           "same-file deduplication does not skip later checklist flags");
+    qc_note_checklist_arg(NULL);
+    if (saved) setenv("QC_CHECKLIST", saved, 1);
+    else unsetenv("QC_CHECKLIST");
+    free(saved);
 }
 
 static void test_store_and_winner(void) {
@@ -2293,6 +2392,7 @@ int main(void) {
     test_status_json_relpath();
     test_parse_expires();
     test_parse_unknown_anno();
+    test_parse_unresolved_placeholders();
     test_expiry_eval();
     test_util_edges();
     test_find_root_and_git();
@@ -2303,6 +2403,7 @@ int main(void) {
     test_parse_more();
     test_qcs_more();
     test_config_and_lists();
+    test_external_checklists();
     test_store_and_winner();
     test_segment_names();
     test_evidence_more();

@@ -67,7 +67,7 @@ qc verify --checklist docs/release-check.md                        # exit 0 only
 qc report --md --checklist docs/release-check.md                   # the evidence table
 ```
 
-`QC_CHECKLIST=docs/release-check.md` does the same as the flag. To make a checklist part of every `qc verify`, copy it to `qc/checklists/<id>.md` and drop the flag.
+Repeat `--checklist` to combine files, for example `qc verify --checklist org/release.md --checklist org/security.md`. Pass the same paths to every command; every file contributes to the gate. `QC_CHECKLIST=docs/release-check.md` supplies one file when no `--checklist` flags are given. To make a checklist part of every `qc verify`, copy it to `qc/checklists/<id>.md` and drop the flag.
 
 ### What you get back
 
@@ -104,7 +104,7 @@ Each row says who answered, what they cited, and what the checklist asked for. T
 
 ## Install
 
-`qc` is a Cosmopolitan [APE](https://justine.lol/ape.html) universal binary — one release asset runs on Linux, macOS, and Windows from a shell (do not open it from a GUI file manager). Release assets: `qc` and `qc.exe` (same bytes; Windows-friendly name).
+`qc` is a Cosmopolitan [APE](https://justine.lol/ape.html) universal binary — one release asset runs on Linux, macOS, and Windows from a shell (do not open it from a GUI file manager). Release assets: `qc` and `qc.exe` (same bytes; Windows-friendly name), plus `LICENSE`.
 
 ### One-liners
 
@@ -292,13 +292,14 @@ qc init
 
 ### `qc template list` / `qc template show <t>`
 
-Gallery of bundled checklists. `show` prints the minimal file you would copy.
+Gallery of bundled checklists followed by local `qc/templates/*.md` files, marked `local` and sorted by filename. `show` prints a bundled template's minimal file. Bundled names take precedence over matching local names.
 
 ```bash
 qc template list
 #   docs                 claims verified against code
 #   code-quality         quality questions for application code
 #   …
+#   area-keys            local (qc/templates/area-keys.md)
 
 qc template show docs
 # ---
@@ -308,7 +309,9 @@ qc template show docs
 # …
 ```
 
-### `qc add <t> [--full]`
+<!-- Documents: SW-REQ-261103-7f3a -->
+
+### `qc add <t> [--full] [--set key=value]`
 
 Copies a template into `qc/checklists/`. Minimal by default; `--full` keeps every item.
 
@@ -322,9 +325,27 @@ qc add security-review --full
 
 Adapt after copy; there is no runtime `extends` (legibility beats DRY).
 
+Local templates copy with `qc add <name>` and receive `from: local/<name>` in frontmatter, unless the template already has a `from:` line, which is preserved. Bundled copies keep `from: builtin/<name>@1`.
+
+<!-- Documents: SW-REQ-261103-0004 -->
+
+For a template containing `{{area}}`, use `qc add area-keys --set area=storage`.
+Repeat `--set` for more keys; `--set=key=value` also works. Values are copied
+literally into every occurrence, including scopes and questions. Empty values are
+allowed, and the last assignment to a key wins. The source template is unchanged.
+A qc placeholder is exactly `{{key}}` where `key` matches
+`[A-Za-z_][A-Za-z0-9_-]*`, with no spaces, dots or other characters. Only this form
+is substituted. Values are never recursively expanded. Malformed assignments or
+unresolved qc placeholders, including any remaining after substitution, exit 2
+before copying. Loaded checklists containing unresolved qc placeholders also
+exit 2; fill in the values before running `qc plan`. Other brace text, including
+`{{ key }}`, `{{.}}`, `{{ .Values.x }}`, `{{ user }}` and an unclosed `{{`, passes
+through unchanged in templates and replacement values and is never a placeholder
+error.
+
 ### `qc plan [--json] [--checklist <path>]`
 
-Ordered worklist before work: forced items, questions, previous answers, decision requests. Nested items are indented, and each `@evidence(...)` hint is printed under its question as `Evidence -m must name: …`. `--checklist <path>` (or `QC_CHECKLIST`) adds a checklist file that lives outside `qc/checklists/`; every command accepts it.
+Ordered worklist before work: forced items, questions, previous answers, decision requests. Nested items are indented, and each `@evidence(...)` hint is printed under its question as `Evidence -m must name: …`. Every command accepts repeated `--checklist <path>` flags to add files outside `qc/checklists/` in argument order. With no flags, `QC_CHECKLIST` adds one file.
 
 ```bash
 qc plan
@@ -544,4 +565,6 @@ Phase 1 is what this binary implements. Features marked Phase 2 in the spec (tem
 
 ## License
 
-No `LICENSE` file is present in this repository. Treat the code as unlicensed until the maintainers add one — do not assume an SPDX identifier.
+Licensed under the [Apache License 2.0](./LICENSE). SPDX identifier: `Apache-2.0`.
+
+<!-- Documents: SW-REQ-003 -->

@@ -5,7 +5,7 @@ priority: shall
 category: constraint
 req_type: guarantee
 fretish: ""
-description: The build shall produce one Cosmopolitan APE named qc. CI shall invoke that binary. The binary shall not fetch code at run time.
+description: The build shall produce one Cosmopolitan APE named qc. CI shall invoke that binary. The binary shall not fetch code at run time. The repository shall include the unmodified Apache License 2.0 text in LICENSE. README.md shall state the SPDX identifier Apache-2.0. Published releases shall include LICENSE as an asset.
 formalization_strategy: informal
 informal_verification:
     method: ""

@@ -1,0 +1,30 @@
+id: SW-REQ-261103-0004
+version: 1
+status: draft
+priority: shall
+category: functional
+req_type: guarantee
+description: >-
+    qc template list shall list bundled templates followed by the regular,
+    non-hidden qc/templates/*.md files in bytewise filename order, marked as local.
+    A missing local template directory shall leave the bundled gallery available.
+    qc add shall resolve bundled templates before local templates of the same name.
+    A local copy shall preserve an existing frontmatter from: line; otherwise it
+    shall insert from: local/<template-name> into frontmatter, adding a frontmatter
+    block if absent, while preserving the rest of the template bytes. It shall
+    refuse to overwrite an existing checklist.
+formalization_strategy: informal
+informal_verification:
+    method: CLI acceptance tests
+    evidence: tests/acceptance.sh case_local_templates
+    verified: false
+parent: SYS-REQ-002
+component: cli
+rationale: SPEC.md section 11 makes the gallery the agent's prior and provenance the basis for template drift review.
+variables: []
+references:
+    - type: document
+      id: SPEC.md#11-templates
+traces:
+    satisfies:
+        - SYS-REQ-002
