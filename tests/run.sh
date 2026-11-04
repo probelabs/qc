@@ -132,5 +132,19 @@ set -e
 if [ "$c_snake" -eq 0 ] && [ "$c_sha" -eq 0 ] && [ "$c_tok" -eq 2 ]; then
     say "secret filter spares identifiers and shas, refuses mixed-case blobs"; else bad "secret filter $c_snake $c_sha $c_tok"; fi
 
+# --- CamelCase test names, package paths and "sk-" inside prose are evidence; prefixed keys are not ---
+set +e
+"$QC" mark nested/kid --pass -m "TestKnownIssue_DashboardNullBodyNilAPIListPanic and TestFromDashboardServiceNullBody pass, src/a.py" --checklist "$CL" >/dev/null 2>&1
+c_camel=$?
+"$QC" mark nested/kid --pass -m "ee/middleware/upstreambasicauth/middleware reviewed in 1 desk-review and task-42" --checklist "$CL" >/dev/null 2>&1
+c_path=$?
+"$QC" mark nested/kid --pass -m "key sk-${QC_FAKE_SK:-proj0abcDEF1ghiJKL2mnoPQR3} in src/a.py" --checklist "$CL" >/dev/null 2>&1
+c_sk=$?
+"$QC" mark nested/kid --pass -m "token ghp_${QC_FAKE_GHP:-0123456789abcdefABCDEF0123456789abcd} in src/a.py" --checklist "$CL" >/dev/null 2>&1
+c_ghp=$?
+set -e
+if [ "$c_camel" -eq 0 ] && [ "$c_path" -eq 0 ] && [ "$c_sk" -eq 2 ] && [ "$c_ghp" -eq 2 ]; then
+    say "secret filter spares CamelCase names, paths and prose, refuses prefixed keys"; else bad "secret filter camel=$c_camel path=$c_path sk=$c_sk ghp=$c_ghp"; fi
+
 if [ "$fail" -ne 0 ]; then echo "$fail integration failures"; exit 1; fi
 echo "integration tests passed"

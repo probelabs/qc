@@ -763,6 +763,22 @@ static void test_evidence_more(void) {
     expect(qc_evidence_ok(&cx, "sk-abc", why, sizeof why) != 0, "sk-");
     expect(qc_evidence_ok(&cx, "Ab0+_/Ab0+_/Ab0+_/Ab0+_/Ab0+_/Ab0+_/", why, sizeof why) != 0, "entropy");
     expect(qc_evidence_ok(&cx, "AKIA" "not", why, sizeof why) != 0 || qc_evidence_ok(&cx, "AKIAshort", why, sizeof why) != 0, "short AKIA");
+    /* identifier_run: long CamelCase names and paths are evidence; blobs are not */
+    expect(qc_evidence_ok(&cx, "TestKnownIssue_DashboardNullBodyNilAPIListPanic at gateway/x.go:12", why, sizeof why) == 0, "CamelCase test name");
+    expect(qc_evidence_ok(&cx, "APIDefinitionLoaderFromDashboardService line 482", why, sizeof why) == 0, "acronym-led CamelCase");
+    expect(qc_evidence_ok(&cx, "ee/middleware/upstreambasicauth/middleware line 7", why, sizeof why) == 0, "long package path");
+    expect(qc_evidence_ok(&cx, "key QWERTYuiopASDFGHjklZXCVBNm1234567890 line 1", why, sizeof why) != 0, "mixed-case blob with digits");
+    expect(qc_evidence_ok(&cx, "blob xQzRtVbNmKjHgFdSaPoIuYtReWqLkJhGfDs line 1", why, sizeof why) != 0, "mixed-case blob, no digits");
+    expect(qc_evidence_ok(&cx, "blob TestFooBarBazQuxQuuxCorgeGrault+Waldo line 1", why, sizeof why) != 0, "plus sign is base64");
+    expect(qc_evidence_ok(&cx, "blob TestFooBarBazQuxQuuxCorgeGraultWaldo1234 line 1", why, sizeof why) != 0, "four digits");
+    expect(qc_evidence_ok(&cx, "blob BCDFGHJKLMNPQRSTVWXZbcdfghjklmnpqrstvwxz line 1", why, sizeof why) != 0, "vowel-less runs");
+    /* prefixed_token (sk-): only at a token start with a long tail; ghp_ is refused anywhere */
+    expect(qc_evidence_ok(&cx, "1 desk-review and task-42 in README", why, sizeof why) == 0, "sk- inside a word");
+    expect(qc_evidence_ok(&cx, "sk-short in 1 place", why, sizeof why) == 0, "sk- with a short tail");
+    expect(qc_evidence_ok(&cx, "key sk-abcdefghij0123456789xyz line 1", why, sizeof why) != 0, "sk- key");
+    expect(qc_evidence_ok(&cx, "(sk-abcdefghij0123456789xyz) line 1", why, sizeof why) != 0, "sk- after punctuation");
+    expect(qc_evidence_ok(&cx, "ghp_" "0123456789abcdefABCDEF0123456789abcd line 1", why, sizeof why) != 0, "ghp_ token");
+    expect(qc_evidence_ok(&cx, "xghp_" "0123456789abcdefABCDEF0123456789abcd line 1", why, sizeof why) != 0, "ghp_ anywhere is refused");
 }
 
 static void test_eval_applies_requires(void) {

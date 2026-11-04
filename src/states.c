@@ -42,6 +42,42 @@ static int has_repo_path(QcCtx *cx, const char *ev) {
 }
 
 // Implements: SW-REQ-006
+static int has_vowel(const char *s, int n) {
+    int i;
+    for (i = 0; i < n; i++)
+        if (strchr("aeiouyAEIOUY", s[i])) return 1;
+    return 0;
+}
+
+/* A long CamelCase / camelCase / path-like identifier (a Go test name, a package
+ * path) is evidence, not a secret: at most 3 digits, no base64 '+' or '=', and
+ * at least 70% of its letters in word-like segments (2+ lowercase letters with
+ * a vowel, after an optional capital). Random mixed-case blobs fail the word
+ * share, so they stay refused. An all-caps run before a lowercase run is an
+ * acronym (its last capital starts the next word: APIList = API + List). */
+// Implements: SW-REQ-006
+static int identifier_run(const char *s, int n) {
+    int i = 0, letters = 0, wordy = 0, digits = 0;
+    while (i < n) {
+        unsigned char c = (unsigned char)s[i];
+        int j, k;
+        if (c == '+' || c == '=') return 0;
+        if (!isalpha(c)) { if (isdigit(c)) digits++; i++; continue; }
+        j = i;
+        while (j < n && isupper((unsigned char)s[j])) j++;
+        k = j;
+        while (k < n && islower((unsigned char)s[k])) k++;
+        letters += k - i;
+        if (k - j >= 2) {
+            int w = j > i ? j - 1 : j; /* the word starts at its capital, if any */
+            if (has_vowel(s + w, k - w)) wordy += k - w;
+        }
+        i = k;
+    }
+    return digits <= 3 && letters > 0 && wordy * 10 >= letters * 7;
+}
+
+// Implements: SW-REQ-006
 static int benign_run(const char *s, int n) {
     int i, snake = 1, hex = 1, underscore = 0;
     for (i = 0; i < n; i++) {
@@ -50,7 +86,27 @@ static int benign_run(const char *s, int n) {
         if (!(islower(c) || isdigit(c) || c == '_')) snake = 0;
         if (!(isdigit(c) || (c >= 'a' && c <= 'f'))) hex = 0;
     }
-    return (snake && underscore) || hex;
+    return (snake && underscore) || hex || identifier_run(s, n);
+}
+
+/* A credential prefix counts only at the start of a token and followed by a
+ * token-shaped tail of at least min characters: "sk-" inside "task-42" or
+ * "desk-review" is prose, not an API key. */
+// Implements: SW-REQ-006
+static int prefixed_token(const char *ev, const char *pre, int min) {
+    const char *p = ev;
+    size_t pl = strlen(pre);
+    while ((p = strstr(p, pre)) != NULL) {
+        unsigned char b = p > ev ? (unsigned char)p[-1] : ' ';
+        if (!(isalnum(b) || b == '_' || b == '-')) {
+            const char *q = p + pl;
+            int k = 0;
+            while (isalnum((unsigned char)q[k]) || q[k] == '_' || q[k] == '-') k++;
+            if (k >= min) return 1;
+        }
+        p++;
+    }
+    return 0;
 }
 
 static int secret_hit(const char *ev) {
@@ -68,10 +124,11 @@ static int secret_hit(const char *ev) {
         }
     }
     if (strstr(ev, "ghp_")) return 1;
-    if (strstr(ev, "sk-")) return 1;
+    if (prefixed_token(ev, "sk-", 20)) return 1;
     if (strstr(ev, "-----BEGIN") && strstr(ev, "PRIVATE KEY")) return 1;
-    /* high-entropy blob >= 32. Lowercase snake_case identifiers (a long test
-     * name) and lowercase hex (a commit sha, a sha256) are evidence, not secrets. */
+    /* high-entropy blob >= 32. Lowercase snake_case identifiers, CamelCase test
+     * names and package paths (identifier_run), and lowercase hex (a commit sha,
+     * a sha256) are evidence, not secrets. */
     {
         int run = 0;
         const char *start = ev;
