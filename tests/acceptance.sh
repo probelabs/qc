@@ -974,7 +974,7 @@ case_template_set() {
     printf -- '---\nid: area-keys\nscope: [{{area}}/**]\n---\n\n- [ ] keys :: Which keys does {{area}} write? @evidence(file:line)\n' > qc/templates/area-keys.md
     "$QC" add area-keys --set area=storage > add.out 2>&1
     code=$?
-    printf -- '---\nid: area-keys\nscope: [storage/**]\n---\n\n- [ ] keys :: Which keys does storage write? @evidence(file:line)\n' > expected.md
+    printf -- '---\nfrom: local/area-keys\nid: area-keys\nscope: [storage/**]\n---\n\n- [ ] keys :: Which keys does storage write? @evidence(file:line)\n' > expected.md
     if [ "$code" -eq 0 ] && cmp -s expected.md qc/checklists/area-keys.md; then
         say "--set substitutes scope and question at copy time"
     else
@@ -1098,7 +1098,7 @@ case_template_syntax() {
     printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: {{area}} / {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{9key}} / {{bad.key}} / {{}} / {{area\n' > qc/templates/area-keys.md
     "$QC" add area-keys --set area=storage --set ' .Values.x =changed' --set '.=changed' --set ' user =changed' > add.out 2>&1
     code=$?
-    printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: storage / {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{9key}} / {{bad.key}} / {{}} / {{area\n' > expected.md
+    printf -- '---\nfrom: local/area-keys\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: storage / {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{9key}} / {{bad.key}} / {{}} / {{area\n' > expected.md
     if [ "$code" -eq 0 ] && cmp -s expected.md qc/checklists/area-keys.md; then
         say "--set substitutes only qc placeholders and preserves other braces, including unclosed text"
     else
@@ -1109,7 +1109,7 @@ case_template_syntax() {
     printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: {{area}}\n' > qc/templates/area-keys.md
     "$QC" add area-keys --set 'area={{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{' > add.out 2>&1
     code=$?
-    printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{\n' > expected.md
+    printf -- '---\nfrom: local/area-keys\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{\n' > expected.md
     if [ "$code" -eq 0 ] && cmp -s expected.md qc/checklists/area-keys.md; then
         say "literal replacement values may contain non-qc template syntax and unclosed braces"
     else
