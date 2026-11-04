@@ -67,7 +67,7 @@ qc verify --checklist docs/release-check.md                        # exit 0 only
 qc report --md --checklist docs/release-check.md                   # the evidence table
 ```
 
-`QC_CHECKLIST=docs/release-check.md` does the same as the flag. To make a checklist part of every `qc verify`, copy it to `qc/checklists/<id>.md` and drop the flag.
+Repeat `--checklist` to combine files, for example `qc verify --checklist org/release.md --checklist org/security.md`. Pass the same paths to every command; every file contributes to the gate. `QC_CHECKLIST=docs/release-check.md` supplies one file when no `--checklist` flags are given. To make a checklist part of every `qc verify`, copy it to `qc/checklists/<id>.md` and drop the flag.
 
 ### What you get back
 
@@ -104,7 +104,7 @@ Each row says who answered, what they cited, and what the checklist asked for. T
 
 ## Install
 
-`qc` is a Cosmopolitan [APE](https://justine.lol/ape.html) universal binary — one release asset runs on Linux, macOS, and Windows from a shell (do not open it from a GUI file manager). Release assets: `qc` and `qc.exe` (same bytes; Windows-friendly name).
+`qc` is a Cosmopolitan [APE](https://justine.lol/ape.html) universal binary — one release asset runs on Linux, macOS, and Windows from a shell (do not open it from a GUI file manager). Release assets: `qc` and `qc.exe` (same bytes; Windows-friendly name), plus `LICENSE`.
 
 ### One-liners
 
@@ -340,7 +340,7 @@ error.
 
 ### `qc plan [--json] [--checklist <path>]`
 
-Ordered worklist before work: forced items, questions, previous answers, decision requests. Nested items are indented, and each `@evidence(...)` hint is printed under its question as `Evidence -m must name: …`. `--checklist <path>` (or `QC_CHECKLIST`) adds a checklist file that lives outside `qc/checklists/`; every command accepts it.
+Ordered worklist before work: forced items, questions, previous answers, decision requests. Nested items are indented, and each `@evidence(...)` hint is printed under its question as `Evidence -m must name: …`. Every command accepts repeated `--checklist <path>` flags to add files outside `qc/checklists/` in argument order. With no flags, `QC_CHECKLIST` adds one file.
 
 ```bash
 qc plan
@@ -560,4 +560,6 @@ Phase 1 is what this binary implements. Features marked Phase 2 in the spec (tem
 
 ## License
 
-No `LICENSE` file is present in this repository. Treat the code as unlicensed until the maintainers add one — do not assume an SPDX identifier.
+Licensed under the [Apache License 2.0](./LICENSE). SPDX identifier: `Apache-2.0`.
+
+<!-- Documents: SW-REQ-003 -->

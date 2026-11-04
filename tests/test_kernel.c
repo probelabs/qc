@@ -735,6 +735,56 @@ static void test_config_and_lists(void) {
     expect(qc_requires_cycles(&cx, err, sizeof err) == 1, "detects cycle");
 }
 
+// Verifies: SW-REQ-261103-9f2a
+static void test_external_checklists(void) {
+    char tmpl[] = "/tmp/qc-extra-XXXXXX";
+    char *dir = mkdtemp(tmpl);
+    char path[QC_MAX_PATH], alpha[QC_MAX_PATH], beta[QC_MAX_PATH];
+    const char *env = getenv("QC_CHECKLIST");
+    char *saved = env ? qc_strdup(env) : NULL;
+    QcCtx cx;
+    int order;
+    expect(dir != NULL, "mkdtemp external checklists");
+    if (!dir) { free(saved); return; }
+    snprintf(path, sizeof path, "%s/qc/checklists/repo.md", dir);
+    qc_write_file(path, "---\nid: repo\n---\n- [ ] r1 :: Repo question?\n");
+    snprintf(alpha, sizeof alpha, "%s/ext/alpha.md", dir);
+    qc_write_file(alpha, "---\nid: alpha\n---\n- [ ] a1 :: Alpha question?\n");
+    snprintf(beta, sizeof beta, "%s/ext/beta.md", dir);
+    qc_write_file(beta, "---\nid: beta\n---\n- [ ] b1 :: Beta question?\n");
+    memset(&cx, 0, sizeof cx);
+    snprintf(cx.root, sizeof cx.root, "%s", dir);
+    qc_note_checklist_arg(NULL);
+    setenv("QC_CHECKLIST", alpha, 1);
+    expect(qc_parse_checklists(&cx) == 0 && cx.nlists == 2
+           && !strcmp(cx.lists[1].id, "alpha"), "QC_CHECKLIST loads without flags");
+    setenv("QC_CHECKLIST", "/no/such/env-checklist.md", 1);
+    for (order = 0; order < 2; order++) {
+        qc_note_checklist_arg(NULL);
+        qc_note_checklist_arg(order ? beta : alpha);
+        qc_note_checklist_arg(order ? alpha : beta);
+        expect(qc_parse_checklists(&cx) == 0 && cx.nlists == 3
+               && !strcmp(cx.lists[0].id, "repo")
+               && !strcmp(cx.lists[1].id, order ? "beta" : "alpha")
+               && !strcmp(cx.lists[2].id, order ? "alpha" : "beta"),
+               "all checklist flags load after repo lists in argument order, overriding env");
+        expect(qc_parse_checklists(&cx) == 0 && cx.nlists == 3,
+               "loading checklists again retains every flag");
+    }
+    qc_note_checklist_arg(NULL);
+    qc_note_checklist_arg(path); /* already loaded from qc/checklists/ */
+    qc_note_checklist_arg(alpha);
+    qc_note_checklist_arg(alpha);
+    qc_note_checklist_arg(beta);
+    expect(qc_parse_checklists(&cx) == 0 && cx.nlists == 3
+           && !strcmp(cx.lists[2].id, "beta"),
+           "same-file deduplication does not skip later checklist flags");
+    qc_note_checklist_arg(NULL);
+    if (saved) setenv("QC_CHECKLIST", saved, 1);
+    else unsetenv("QC_CHECKLIST");
+    free(saved);
+}
+
 static void test_store_and_winner(void) {
     QcLine a, b, *w, *lines = NULL;
     int n = 0;
@@ -2300,6 +2350,7 @@ int main(void) {
     test_parse_more();
     test_qcs_more();
     test_config_and_lists();
+    test_external_checklists();
     test_store_and_winner();
     test_segment_names();
     test_evidence_more();

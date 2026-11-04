@@ -268,6 +268,10 @@ static int test_template_set_errors(void) {
 static int test_template_syntax(void) {
  return run_case("SW-REQ-261103-7f3a:syntax"); }
 
+// Verifies: SW-REQ-261103-9f2a
+static int test_repeated_checklists(void) {
+ return run_case("SW-REQ-261103-9f2a:repeated-checklists"); }
+
 int main(void)
 {
     int fails = 0;
@@ -294,6 +298,7 @@ int main(void)
     fails += test_template_set();
     fails += test_template_set_errors();
     fails += test_template_syntax();
+    fails += test_repeated_checklists();
     if (fails) {
         fprintf(stderr, "%d acceptance failures\n", fails);
         return 1;
