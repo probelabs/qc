@@ -939,6 +939,22 @@ case_local_templates() {
         bad "leading-blank frontmatter lf=$c_lf crlf=$c_crlf from=$c_from"
         cat qc/checklists/lead-lf.md qc/checklists/lead-crlf.md qc/checklists/lead-from.md
     fi
+    # The opening "---" is the last line, with no newline (LF or CR): the stamp starts a new line once.
+    printf -- '---' > qc/templates/eof-lf.md
+    printf -- '---\r' > qc/templates/eof-cr.md
+    set +e
+    "$QC" add eof-lf > add.out 2>&1; c_eof_lf=$?
+    "$QC" add eof-cr > add.out 2>&1; c_eof_cr=$?
+    set -e
+    if [ "$c_eof_lf" -eq 0 ] && [ "$c_eof_cr" -eq 0 ] &&
+        [ "$(od -An -c qc/checklists/eof-lf.md | tr -s ' \n' ' ')" = "$(printf -- '---\nfrom: local/eof-lf\n' | od -An -c | tr -s ' \n' ' ')" ] &&
+        [ "$(od -An -c qc/checklists/eof-cr.md | tr -s ' \n' ' ')" = "$(printf -- '---\r\nfrom: local/eof-cr\r\n' | od -An -c | tr -s ' \n' ' ')" ]; then
+        say "an opening --- at end of file gets one line break before the stamp"
+    else
+        bad "frontmatter opener at EOF lf=$c_eof_lf cr=$c_eof_cr"
+        od -c qc/checklists/eof-lf.md qc/checklists/eof-cr.md
+    fi
+    rm -f qc/checklists/eof-lf.md qc/checklists/eof-cr.md
     set +e
     "$QC" add area-keys > add.out 2>&1
     code=$?

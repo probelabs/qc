@@ -62,7 +62,7 @@ static char *local_template_body(const char *path, const char *id) {
             fm = 1;
             if (line[3] == '\r') nl = "\r\n";
             offset = (size_t)(end - raw) + (*end ? 1 : 0);
-            if (!*end) sep = nl; /* "---" is the last line, with no newline */
+            if (!*end) sep = "\n"; /* "---" (or "---\r") ends the file: end that line first */
             break;
         }
         if (!*end) break;
