@@ -943,6 +943,28 @@ case_repeated_checklists() {
         bad "checklist capacity full=$full overflow=$overflow combined=$combined"
         cat capacity.out overflow.out combined.out
     fi
+    printf '%s\n' '---' 'id: gamma' 'scope: [README.md]' '---' \
+        '- [ ] g1 :: Which gamma claim did you check?' > external/gamma.md
+    set --
+    i=0
+    dots=external/gamma.md
+    while [ "$i" -lt 70 ]; do
+        set -- "$@" --checklist external/gamma.md --checklist "$dots"
+        dots="./$dots"
+        i=$((i + 1))
+    done
+    set +e
+    "$QC" plan "$@" >aliases.out 2>&1
+    aliases=$?
+    "$QC" plan --checklist external/gamma.md >single.out 2>&1
+    single=$?
+    set -e
+    if [ "$aliases" -eq 1 ] && [ "$single" -eq 1 ] && cmp -s single.out aliases.out && [ "$(grep -c '^[0-9].*gamma/g1' aliases.out)" -eq 1 ]; then
+        say "70 identical flags and 70 spellings of one file load it once"
+    else
+        bad "aliased flags=$aliases single=$single"
+        cat aliases.out single.out
+    fi
     if [ "$repeated" -eq 1 ] && [ "$(grep -c '^[0-9]' repeat.out)" -eq 16 ]; then
         say "repeating a loaded file does not count against the checklist limit"
     else

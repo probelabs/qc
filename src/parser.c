@@ -432,8 +432,9 @@ int cmp_str(const void *a, const void *b) {
     return strcmp(*(char *const *)a, *(char *const *)b);
 }
 
-/* Flags are deduplicated by realpath when they load, and the QC_MAX_LISTS limit
- * applies to the distinct files, so the raw flag list has headroom for repeats. */
+/* Flags are recorded by realpath, so every spelling of one file is one entry, and
+ * the QC_MAX_LISTS limit applies to the distinct files when they load. More
+ * distinct paths than this would exceed that limit anyway. */
 #define QC_MAX_CHECKLIST_ARGS (QC_MAX_LISTS * 4)
 static char qc_checklist_args[QC_MAX_CHECKLIST_ARGS][QC_MAX_PATH];
 static int qc_nchecklist_args;
@@ -449,11 +450,16 @@ void qc_note_checklist_arg(const char *path) {
         qc_die(QC_CONFIG, "--checklist needs a path\nNEXT: write the checklist to a file, then qc plan --checklist <path>");
     if (strlen(path) >= QC_MAX_PATH)
         qc_die(QC_CONFIG, "checklist path is too long\nNEXT: use a shorter path, then qc plan --checklist <path>");
-    for (i = 0; i < qc_nchecklist_args; i++)
-        if (!strcmp(qc_checklist_args[i], path)) return; /* the same flag again */
-    if (qc_nchecklist_args >= QC_MAX_CHECKLIST_ARGS)
-        qc_die(QC_CONFIG, "too many --checklist flags\nNEXT: remove extras, then qc verify");
-    snprintf(qc_checklist_args[qc_nchecklist_args++], QC_MAX_PATH, "%s", path);
+    {
+        char abs[PATH_MAX];
+        /* a missing file keeps its spelling: loading reports it by that name */
+        if (realpath(path, abs) && strlen(abs) < QC_MAX_PATH) path = abs;
+        for (i = 0; i < qc_nchecklist_args; i++)
+            if (!strcmp(qc_checklist_args[i], path)) return; /* the same file again */
+        if (qc_nchecklist_args >= QC_MAX_CHECKLIST_ARGS)
+            qc_die(QC_CONFIG, "too many --checklist flags\nNEXT: remove extras, then qc verify");
+        snprintf(qc_checklist_args[qc_nchecklist_args++], QC_MAX_PATH, "%s", path);
+    }
 }
 
 // Implements: SW-REQ-004
