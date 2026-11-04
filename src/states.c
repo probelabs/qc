@@ -101,7 +101,7 @@ static int identifier_run(const char *s, int n) {
         k = j;
         while (k < n && islower((unsigned char)s[k])) k++;
         letters += k - i;
-        if (k == j + 1 && j - i >= 2 && s[j] == 's') { i = k; continue; } /* plural acronym: IDs, APIs */
+        if (k == j + 1 && j - i >= 2 && j - i <= 8 && s[j] == 's') { i = k; continue; } /* plural acronym: IDs, APIs */
         w = (k > j && j - i >= 2) ? j - 1 : (k > j ? i : j); /* where the word starts */
         if (w - i > 8) return 0;                                /* acronym too long */
         if (k > j && !ident_word_ok(s + w, k - w)) return 0;

@@ -803,6 +803,12 @@ static void test_evidence_more(void) {
     expect(qc_evidence_ok(&cx, "key sk" "-aB1cD2eF3gH4iJ5kL6m line 1", why, sizeof why) == 0, "sk- with a 19-char tail");
     expect(qc_evidence_ok(&cx, "key sk" "-aB1cD2eF3gH4iJ5kL6mN line 1", why, sizeof why) != 0, "sk- with a 20-char tail");
     expect(qc_evidence_ok(&cx, "1 desk-review-of-the-gateway-component-and-docs", why, sizeof why) == 0, "sk- inside a hyphenated word");
+    /* each rule on its own: these would otherwise pass as identifiers, snake_case or short runs */
+    expect(qc_evidence_ok(&cx, "key QWERTYUIOPASDFGHJKLZXCVBNMQWERTYs line 1", why, sizeof why) != 0, "plural acronym over 8 capitals");
+    expect(qc_evidence_ok(&cx, "token gho" "_TestFooBarBazQuxQuuxCorgeGraultWaldo line 1", why, sizeof why) != 0, "gho_ with a word-like tail");
+    expect(qc_evidence_ok(&cx, "key sk" "_live_abcdefghijklmnopqrstuvwx line 1", why, sizeof why) != 0, "snake_case sk_live_");
+    expect(qc_evidence_ok(&cx, "jwt eyJhbGciOiJIUzI1NiJ9" ".eyJzdWIiOiIxIn0.TestFooBarBazQuxQuuxCorgeGraultWaldo line 1", why, sizeof why) != 0, "JWT with a word-like signature");
+    expect(qc_evidence_ok(&cx, "_sk" "-aB1cD2eF3gH4iJ5kL6mN_ line 1", why, sizeof why) != 0, "emphasised generic sk-");
     /* prefixed_token (sk-): only at a token start with a long tail; ghp_ is refused anywhere */
     expect(qc_evidence_ok(&cx, "1 desk-review and task-42 in README", why, sizeof why) == 0, "sk- inside a word");
     expect(qc_evidence_ok(&cx, "sk-short in 1 place", why, sizeof why) == 0, "sk- with a short tail");
