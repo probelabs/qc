@@ -86,6 +86,8 @@ Parser rules that prevent silent damage:
 
 An @word token whose key is unknown is a parse error (exit 2), never question text. @scoep(...) must fail loudly.
 
+A qc placeholder is exactly `{{key}}` where `key` matches `[A-Za-z_][A-Za-z0-9_-]*`, with no spaces, dots or other characters. A loaded checklist containing an unresolved qc placeholder is a parse error (exit 2), before scope evaluation can make an item dormant. Other brace text, including `{{ key }}`, `{{.}}`, `{{ .Values.image }}`, `{{ user }}` and an unclosed `{{`, passes through unchanged and is never a placeholder error.
+
 A literal @ inside the question (a@b.com) is fine — only SP @knownkey parses as an annotation.
 
 The checkbox is display-only. [x] and [ ] parse identically; the state store is the sole source of truth. qc verify warns once per file containing [x] so drift doesn't accumulate.
@@ -94,7 +96,7 @@ Duplicate checklist ids across files, duplicate item ids within a file, and requ
 
 Nested items. An item line may be indented by two spaces per level ("  - [ ] child :: …"). Its parent is the nearest previous item one level up. An odd indent, or an indent with no parent one level up, is an exit-2 config error. Unindented files parse exactly as before. qc mark --pass on a parent is refused (exit 2) while any of its children is not CLEAR: mark the children, then the parent.
 
-Checklist outside qc/checklists/. Every command accepts --checklist <path> (or QC_CHECKLIST=<path>; the flag wins). The file is loaded after qc/checklists/, follows the same grammar, and its stem must equal its id. A missing file is exit 2 with the instruction to write it there first: qc cannot read an agent's memory, so a checklist pasted in chat must be saved before any qc command. A stem that collides with a repo checklist is exit 2. State is written to the repo's .qc/ and qc/state/ as usual; the file is only the definition.
+Checklist outside qc/checklists/. Every command accepts repeated --checklist <path> flags (also --checklist=<path>). All supplied files are loaded after qc/checklists/ in argument order. QC_CHECKLIST=<path> supplies one file only when no flags are given. Each file follows the same grammar, and its stem must equal its id. A missing file is exit 2 with the instruction to write it there first: qc cannot read an agent's memory, so a checklist pasted in chat must be saved before any qc command. Distinct files with the same stem are exit 2; repeated paths to the same file load it once and do not skip later flags. Invalid files or exceeded checklist capacity are exit 2, never silently dropped gates (SW-REQ-261103-9f2a). State is written to the repo's .qc/ and qc/state/ as usual; the files are only definitions.
 
 ### 4.3 A complete example
 
@@ -276,11 +278,15 @@ CI mode is strictly read-only. The report --md table (also posted as a sticky PR
 
 Nested/complex flows: requires chains order the CI verdict identically to local (code-quality → tests-exist → …), and one repo can gate different areas with different checklists purely via scopes — the "complex flows" of the original idea reduce to composition of these primitives, which is the point.
 
+<!-- Documents: SW-REQ-261103-7f3a -->
+
 ## 11. Templates
 
 Copy-paste, permanently — no extends, ever. Rationale (I7): these files are audited in PRs; a checklist resolving three presets can't be read as truth, while a copied-and-edited one shows its edits in the diff. Helm vs. cookiecutter; cookiecutter is right here. cruft's existence proves the failure mode of copying (drift) and its fix (provenance stamp + template diff), which we adopt wholesale.
 
 A template is a checklist file — same grammar, different directory; promoting a good checklist to a template is cp. Resolution order: bundled → qc/templates/ → git URL (org-shared). --set table=orders substitutes {{table}} at copy time, writing literal strings — nothing resolves at runtime; the file on disk stays the truth.
+
+--set key=value (also --set=key=value) may repeat before or after the template id. Each assignment splits at the first =; empty values are allowed and the last assignment to a key wins. A qc placeholder is exactly `{{key}}` where `key` matches `[A-Za-z_][A-Za-z0-9_-]*`, with no spaces, dots or other characters. Only this form is replaced, throughout frontmatter, questions, annotations and prose, without modifying the source template. Values are literal, never recursively expanded. Missing arguments, malformed assignments (no = or empty key), and unresolved qc placeholders (including any remaining after substitution) exit 2 before writing the destination checklist. Other brace text, including `{{ key }}`, `{{.}}`, `{{ .Values.x }}`, `{{ user }}` and an unclosed `{{`, passes through unchanged in both templates and replacement values and is never a placeholder error.
 
 The gallery is the agent's prior: qc template list output is what lands in context, turning checklist generation from free authorship into "copy the closest, adapt" — constraining the non-determinism of the checklist-generation step itself.
 
@@ -312,7 +318,7 @@ The unifying diagnosis: an attestation is a claim about content, and there are t
 
 Phase 1 (the real core, ~700–900 lines): grammar + parsers (checklist + .qcs), digest, three-tier state store with read-model resolution, seal/reset/compact, manifests, init/add/template list|show/plan/decide/mark/baseline/verify(--staged,--ci)/report, evidence layers 1–2, secret scan, CRLF, ignore rules + piercing + self-scope guard, requires-topology, head-SHA CI recipe + compaction job, SKILL.md, bundled templates, release shims (npx/uvx qc-gate init|update) + sha256 release manifest.
 
-Phase 2 (bolts on without rework): template diff + --set, qc diff + --carry, qc update --check, @cache, mtime hash cache, @evidence shapes, qc stats, merge-queue mode, git-URL template sources, scheduled update workflow / Renovate preset.
+Phase 2 (bolts on without rework): template diff, qc diff + --carry, qc update --check, @cache, mtime hash cache, @evidence shapes, qc stats, merge-queue mode, git-URL template sources, scheduled update workflow / Renovate preset.
 
 Why phase 2 is additive, structurally: manifests already persist per-file hashes (the mtime cache sits beside them under .qc/); the .qcs line tolerates unknown fields (carry annotations slot in); @evidence tightens an existing validator; merge-queue mode is plain verify on a different checkout; stats reads data verify already computes. No schema breaks anywhere on the path — this is the "simple UX, proper architecture" contract.
 

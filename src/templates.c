@@ -238,8 +238,9 @@ static void help_root(void) {
 "     a file it can parse. Name the file <id>.md, where id is its frontmatter id.\n"
 "  2. Keep it:      qc/checklists/<id>.md, then qc plan\n"
 "  3. One-off:      $TMPDIR/<id>.md, then qc plan --checklist <path>\n"
-"                   (or QC_CHECKLIST=<path>). Pass the same path to every\n"
-"                   plan, mark, verify and report. State still lands in this\n"
+"                   Repeat --checklist <path> to combine files; pass the same\n"
+"                   paths to every plan, mark, verify and report. With no flags,\n"
+"                   QC_CHECKLIST=<path> supplies one file. State lands in this\n"
 "                   repo's .qc/ and qc/state/.\n"
 "  4. Nested items are indented two spaces. Mark the children, then the parent:\n"
 "     a parent pass is refused while a child is open. @evidence(...) under a\n"
@@ -282,9 +283,15 @@ QcHelpRc qc_print_help(const char *topic) {
             "  qc init\n  qc template list\n");
     else if (!strcmp(topic, "add"))
         help_topic("add",
-            "Copy a bundled or local template into qc/checklists/. Bundled: minimal unless --full. Stamps from:.",
+            "Copy a bundled or local template into qc/checklists/. Bundled: minimal unless --full.\n"
+            "  Stamps from: (builtin/<t>@1, or local/<name> unless the template has a from: key).\n"
+            "  Repeat --set key=value to replace {{key}} literally at copy time. Last assignment wins.\n"
+            "  A qc placeholder is exactly {{key}}, with key matching [A-Za-z_][A-Za-z0-9_-]* (no spaces).\n"
+            "  Other braces, e.g. {{ key }}, {{.}}, {{ .Values.x }} or unclosed {{, pass through unchanged.\n"
+            "  Malformed assignments or unresolved qc placeholders (including in values) exit 2 before copying.\n"
+            "  Loaded checklists with unresolved qc placeholders also exit 2.",
             "Checklists compose by copying. Runtime inheritance would hide the truth in review (I7).",
-            "  qc template list\n  qc add <template>\n  qc add <template> --full\n  qc plan\n");
+            "  qc template list\n  qc add <template>\n  qc add <template> --full\n  qc add <template> --set <key>=<value>\n  qc plan\n");
     else if (!strcmp(topic, "template"))
         help_topic("template",
             "The gallery. list prints bundled and local templates; show prints a bundled minimal file.",
@@ -294,7 +301,7 @@ QcHelpRc qc_print_help(const char *topic) {
         help_topic("plan",
             "The ordered worklist: forced items, questions, previous answers, decision requests.",
             "Questions enter the agent's context BEFORE work. A stop-hook after the fact trains escape.",
-            "  qc plan\n  qc plan --checklist <path>   # a checklist file outside qc/checklists/\n  qc mark <ref> --pass -m \"…\"\n");
+            "  qc plan\n  qc plan --checklist <path>   # repeat for each external checklist\n  qc mark <ref> --pass -m \"…\"\n");
     else if (!strcmp(topic, "decide"))
         help_topic("decide",
             "Record whether a checklist with applies_when applies. Writes scratch only.",

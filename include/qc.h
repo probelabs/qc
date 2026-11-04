@@ -170,7 +170,6 @@ typedef struct {
     time_t      now;
     int         self_scope;     /* set if a scope hit qc/state/ */
     char        self_scope_ref[QC_MAX_REF];
-    char        extra_checklist[QC_MAX_PATH]; /* --checklist or QC_CHECKLIST */
 } QcCtx;
 
 /* ---------- util (util.c) ---------- */
@@ -252,8 +251,9 @@ int  qc_digest_applies(QcCtx *cx, QcChecklist *cl,
 void qc_write_manifest(QcCtx *cx, const char *digest, const QcPair *pairs, int n);
 
 /* ---------- parser ---------- */
+const char *qc_find_placeholder(const char *text); /* first {{key}}, ASCII identifier key */
 int  qc_parse_checklists(QcCtx *cx);              /* load qc/checklists/*.md */
-void qc_note_checklist_arg(const char *path);    /* --checklist <path>; overrides QC_CHECKLIST */
+void qc_note_checklist_arg(const char *path);    /* append --checklist; flags override QC_CHECKLIST; NULL resets */
 int  qc_parse_checklist_file(const char *path, const char *fname, QcChecklist *cl, char *err, size_t errn);
 int  qc_parse_config(QcCtx *cx);
 int  qc_parse_qcs_line(const char *line, QcLine *out);

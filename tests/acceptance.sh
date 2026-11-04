@@ -966,6 +966,319 @@ case_local_templates() {
     fi
 }
 
+# Verifies: SW-REQ-261103-7f3a
+case_template_set() {
+    new_repo
+    mkdir -p storage
+    printf 'keys = 1\n' > storage/keys.c
+    printf -- '---\nid: area-keys\nscope: [{{area}}/**]\n---\n\n- [ ] keys :: Which keys does {{area}} write? @evidence(file:line)\n' > qc/templates/area-keys.md
+    "$QC" add area-keys --set area=storage > add.out 2>&1
+    code=$?
+    printf -- '---\nid: area-keys\nscope: [storage/**]\n---\n\n- [ ] keys :: Which keys does storage write? @evidence(file:line)\n' > expected.md
+    if [ "$code" -eq 0 ] && cmp -s expected.md qc/checklists/area-keys.md; then
+        say "--set substitutes scope and question at copy time"
+    else
+        bad "--set copy differs from the fully substituted checklist (exit $code)"
+        cat add.out qc/checklists/area-keys.md
+    fi
+    if grep -q '{{area}}' qc/templates/area-keys.md; then
+        say "--set leaves the source template unchanged"
+    else
+        bad "--set changed the source template"
+    fi
+    for command in plan verify; do
+        "$QC" "$command" > gate.out 2>&1
+        code=$?
+        if [ "$code" -eq 1 ] && grep -q 'area-keys/keys' gate.out && grep -q 'Which keys does storage write?' gate.out; then
+            say "$command includes the substituted checklist with matching files"
+        else
+            bad "$command lost the substituted checklist (exit $code)"
+            cat gate.out
+        fi
+    done
+    rm qc/checklists/area-keys.md
+    printf '\n- [ ] detail :: {{label}} / {{area}} @scope({{area}}/**) @evidence({{label}})\n' >> qc/templates/area-keys.md
+    "$QC" add --set area=elsewhere --set=area=storage --set 'label=a=b & $HOME \1' area-keys --full > add.out 2>&1
+    code=$?
+    printf '\n- [ ] detail :: a=b & $HOME \\1 / storage @scope(storage/**) @evidence(a=b & $HOME \\1)\n' >> expected.md
+    if [ "$code" -eq 0 ] && cmp -s expected.md qc/checklists/area-keys.md; then
+        say "repeated --set, --set=, --full and literal values substitute every occurrence"
+    else
+        bad "multiple --set assignments were not copied literally (exit $code)"
+        cat add.out qc/checklists/area-keys.md
+    fi
+    rm qc/checklists/area-keys.md
+    "$QC" add area-keys --set area=storage --set label= > add.out 2>&1
+    code=$?
+    if [ "$code" -eq 0 ] && grep -Fq -- '- [ ] detail ::  / storage @scope(storage/**) @evidence()' qc/checklists/area-keys.md; then
+        say "an explicit empty --set value is copied literally"
+    else
+        bad "an explicit empty --set value was not substituted (exit $code)"
+        cat add.out
+    fi
+}
+
+# Verifies: SW-REQ-261103-7f3a
+case_template_set_errors() {
+    new_repo
+    printf -- '---\nid: area-keys\nscope: [{{area}}/**]\n---\n\n- [ ] keys :: Which keys does {{area}} write?\n' > qc/templates/area-keys.md
+    for assignment in area '=storage' ''; do
+        "$QC" add area-keys --set "$assignment" > add.out 2>&1
+        code=$?
+        if [ "$code" -eq 2 ] && [ ! -e qc/checklists/area-keys.md ] && grep -q 'NEXT: qc add' add.out; then
+            say "malformed --set assignment fails before writing a checklist"
+        else
+            bad "malformed --set accepted or left a checklist (exit $code)"
+            cat add.out
+        fi
+        rm -f qc/checklists/area-keys.md
+    done
+    "$QC" add area-keys --set > add.out 2>&1
+    code=$?
+    if [ "$code" -eq 2 ] && [ ! -e qc/checklists/area-keys.md ] && grep -q 'NEXT: qc add' add.out; then
+        say "--set without an argument fails before writing a checklist"
+    else
+        bad "missing --set argument accepted (exit $code)"
+        cat add.out
+    fi
+    rm -f qc/checklists/area-keys.md
+    "$QC" add area-keys > add.out 2>&1
+    code=$?
+    if [ "$code" -eq 2 ] && [ ! -e qc/checklists/area-keys.md ] && grep -q 'NEXT: qc add' add.out; then
+        say "an unset placeholder fails before writing a checklist"
+    else
+        bad "unset placeholder accepted (exit $code)"
+        cat add.out
+    fi
+    rm -f qc/checklists/area-keys.md
+    "$QC" add area-keys --set 'area={{other}}' --set other=storage > add.out 2>&1
+    code=$?
+    if [ "$code" -eq 2 ] && [ ! -e qc/checklists/area-keys.md ]; then
+        say "substitutions are literal; unresolved replacement values fail before writing"
+    else
+        bad "recursive or unresolved replacement accepted (exit $code)"
+        cat add.out
+    fi
+    rm -f qc/checklists/area-keys.md
+    printf '\nReview {{missing}} first.\n' >> qc/templates/area-keys.md
+    "$QC" add area-keys --set area=storage > add.out 2>&1
+    code=$?
+    if [ "$code" -eq 2 ] && [ ! -e qc/checklists/area-keys.md ]; then
+        say "a partially substituted template fails before writing"
+    else
+        bad "partially substituted template accepted (exit $code)"
+        cat add.out
+    fi
+    cp qc/templates/area-keys.md qc/checklists/area-keys.md
+    for command in plan verify; do
+        "$QC" "$command" > gate.out 2>&1
+        code=$?
+        if [ "$code" -eq 2 ] && grep -q 'unresolved template placeholder' gate.out && grep -q 'NEXT:.*qc verify' gate.out; then
+            say "$command rejects an already copied unresolved checklist"
+        else
+            bad "$command silently accepted an unresolved checklist (exit $code)"
+            cat gate.out
+        fi
+    done
+}
+
+# Verifies: SW-REQ-261103-7f3a
+case_template_syntax() {
+    new_repo
+    printf -- '---\nid: template-syntax\nscope: [README.md]\n---\n- [ ] render :: Does the {{.}} template still render with {{ .Values.image }} and {{ user }}?\n' > qc/checklists/template-syntax.md
+    "$QC" plan > gate.out 2>&1
+    code=$?
+    if [ "$code" -eq 1 ] && grep -Fq 'template-syntax/render' gate.out && grep -Fq 'Does the {{.}} template still render with {{ .Values.image }} and {{ user }}?' gate.out; then
+        say "Go, Helm and Jinja syntax loads and plans as literal question text"
+    else
+        bad "non-qc template syntax failed to load or plan (exit $code)"
+        cat gate.out
+    fi
+    rm qc/checklists/template-syntax.md
+    printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: {{area}} / {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{9key}} / {{bad.key}} / {{}} / {{area\n' > qc/templates/area-keys.md
+    "$QC" add area-keys --set area=storage --set ' .Values.x =changed' --set '.=changed' --set ' user =changed' > add.out 2>&1
+    code=$?
+    printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: storage / {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{9key}} / {{bad.key}} / {{}} / {{area\n' > expected.md
+    if [ "$code" -eq 0 ] && cmp -s expected.md qc/checklists/area-keys.md; then
+        say "--set substitutes only qc placeholders and preserves other braces, including unclosed text"
+    else
+        bad "--set changed or rejected non-qc template syntax (exit $code)"
+        cat add.out
+    fi
+    rm -f qc/checklists/area-keys.md
+    printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: {{area}}\n' > qc/templates/area-keys.md
+    "$QC" add area-keys --set 'area={{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{' > add.out 2>&1
+    code=$?
+    printf -- '---\nid: area-keys\nscope: [README.md]\n---\n- [ ] keys :: {{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{\n' > expected.md
+    if [ "$code" -eq 0 ] && cmp -s expected.md qc/checklists/area-keys.md; then
+        say "literal replacement values may contain non-qc template syntax and unclosed braces"
+    else
+        bad "non-qc template syntax in a replacement was rejected (exit $code)"
+        cat add.out
+    fi
+    "$QC" plan > gate.out 2>&1
+    code=$?
+    if [ "$code" -eq 1 ] && grep -Fq '{{ .Values.x }} / {{.}} / {{ user }} / {{ key }} / {{' gate.out; then
+        say "non-qc syntax and unclosed braces still load after copying"
+    else
+        bad "copied literal template syntax failed to plan (exit $code)"
+        cat gate.out
+    fi
+}
+
+# Verifies: SW-REQ-261103-9f2a
+case_repeated_checklists() {
+    new_repo
+    mkdir -p external/other
+    printf '%s\n' '---' 'id: alpha' 'scope: [README.md]' '---' \
+        '- [ ] a1 :: Which alpha claim did you check?' > external/alpha.md
+    printf '%s\n' '---' 'id: beta' 'scope: [README.md]' '---' \
+        '- [ ] b1 :: Which beta claim did you check?' > external/beta.md
+    for first in alpha beta; do
+        if [ "$first" = alpha ]; then last=beta; else last=alpha; fi
+        set +e
+        "$QC" plan --checklist "external/$first.md" --checklist="external/$last.md" >plan.out 2>&1
+        code=$?
+        set -e
+        if [ "$code" -eq 1 ] && grep -q 'alpha/a1.*FORCED (never)' plan.out && grep -q 'beta/b1.*FORCED (never)' plan.out; then
+            say "repeated --checklist plans both files ($first first)"
+        else
+            bad "repeated checklist plan=$code ($first first)"
+            cat plan.out
+        fi
+    done
+    "$QC" mark beta/b1 --pass -m "$EVIDENCE" --checklist external/alpha.md --checklist external/beta.md >/dev/null
+    "$QC" seal --checklist external/alpha.md --checklist external/beta.md >/dev/null
+    for first in alpha beta; do
+        if [ "$first" = alpha ]; then last=beta; else last=alpha; fi
+        set +e
+        "$QC" verify --ci --checklist "external/$first.md" --checklist "external/$last.md" >verify.out 2>&1
+        code=$?
+        set -e
+        if [ "$code" -eq 1 ] && grep -q 'FORCED (never).*alpha/a1' verify.out; then
+            say "CI checks the open checklist with the other sealed ($first first)"
+        else
+            bad "repeated checklist CI verify=$code ($first first)"
+            cat verify.out
+        fi
+    done
+    set +e
+    "$QC" mark alpha/a1 --pass -m "$EVIDENCE" --checklist external/alpha.md --checklist external/beta.md >mark.out 2>&1
+    marked=$?
+    "$QC" verify --checklist=external/alpha.md --checklist external/beta.md >verify.out 2>&1
+    clear=$?
+    "$QC" report --md --checklist external/alpha.md --checklist external/beta.md >report.out 2>&1
+    reported=$?
+    set -e
+    if [ "$marked" -eq 0 ] && [ "$clear" -eq 0 ] && [ "$reported" -eq 0 ] && grep -q '| alpha/a1 | CLEAR |' report.out && grep -q '| beta/b1 | CLEAR |' report.out; then
+        say "mark, verify and report include every external checklist"
+    else
+        bad "repeated checklist mark=$marked verify=$clear report=$reported"
+        cat mark.out verify.out report.out
+    fi
+    set +e
+    "$QC" verify --checklist external/missing.md --checklist external/beta.md >error.out 2>&1
+    missing=$?
+    cp external/alpha.md external/other/alpha.md
+    "$QC" verify --checklist external/alpha.md --checklist external/other/alpha.md >duplicate.out 2>&1
+    duplicate=$?
+    set -e
+    if [ "$missing" -eq 2 ] && grep -q 'external/missing.md' error.out && grep -q 'NEXT:' error.out; then
+        say "a missing earlier checklist fails loudly"
+    else
+        bad "missing earlier checklist=$missing"
+        cat error.out
+    fi
+    if [ "$duplicate" -eq 2 ] && grep -q 'NEXT:' duplicate.out; then
+        say "distinct external files with the same id fail loudly"
+    else
+        bad "duplicate external checklist=$duplicate"
+        cat duplicate.out
+    fi
+    printf '%s\n' '---' 'id: broken' '---' '- [ ] x :: Question? @typo' > external/broken.md
+    set +e
+    "$QC" verify --checklist external/broken.md --checklist external/beta.md >error.out 2>&1
+    malformed=$?
+    "$QC" verify --checklist external/alpha.md --checklist= >empty.out 2>&1
+    empty=$?
+    set -e
+    if [ "$malformed" -eq 2 ] && grep -q 'NEXT:' error.out && [ "$empty" -eq 2 ] && grep -q 'NEXT:' empty.out; then
+        say "malformed earlier files and empty checklist paths fail loudly"
+    else
+        bad "malformed checklist=$malformed empty path=$empty"
+        cat error.out empty.out
+    fi
+    set --
+    i=0
+    while [ "$i" -lt 16 ]; do
+        printf '%s\n' '---' "id: list-$i" 'scope: [README.md]' '---' '- [ ] x :: Question?' > "external/list-$i.md"
+        set -- "$@" --checklist "external/list-$i.md"
+        i=$((i + 1))
+    done
+    set +e
+    "$QC" plan "$@" >capacity.out 2>&1
+    full=$?
+    "$QC" plan "$@" --checklist external/beta.md >overflow.out 2>&1
+    overflow=$?
+    "$QC" plan "$@" --checklist external/list-0.md --checklist "$PWD/external/list-0.md" >repeat.out 2>&1
+    repeated=$?
+    write_attest
+    "$QC" plan "$@" >combined.out 2>&1
+    combined=$?
+    set -e
+    if [ "$full" -eq 1 ] && [ "$(grep -c '^[0-9]' capacity.out)" -eq 16 ] && [ "$overflow" -eq 2 ] && grep -q 'NEXT:' overflow.out && [ "$combined" -eq 2 ] && grep -q 'NEXT:' combined.out; then
+        say "checklist capacity loads all 16 and refuses overflow, including repo files"
+    else
+        bad "checklist capacity full=$full overflow=$overflow combined=$combined"
+        cat capacity.out overflow.out combined.out
+    fi
+    printf '%s\n' '---' 'id: gamma' 'scope: [README.md]' '---' \
+        '- [ ] g1 :: Which gamma claim did you check?' > external/gamma.md
+    set --
+    i=0
+    dots=external/gamma.md
+    while [ "$i" -lt 70 ]; do
+        set -- "$@" --checklist external/gamma.md --checklist "$dots"
+        dots="./$dots"
+        i=$((i + 1))
+    done
+    set +e
+    "$QC" plan "$@" >aliases.out 2>&1
+    aliases=$?
+    "$QC" plan --checklist external/gamma.md >single.out 2>&1
+    single=$?
+    set -e
+    if [ "$aliases" -eq 1 ] && [ "$single" -eq 1 ] && cmp -s single.out aliases.out && [ "$(grep -c '^[0-9].*gamma/g1' aliases.out)" -eq 1 ]; then
+        say "70 identical flags and 70 spellings of one file load it once"
+    else
+        bad "aliased flags=$aliases single=$single"
+        cat aliases.out single.out
+    fi
+    if [ "$repeated" -eq 1 ] && [ "$(grep -c '^[0-9]' repeat.out)" -eq 16 ]; then
+        say "repeating a loaded file does not count against the checklist limit"
+    else
+        bad "repeated flags at capacity=$repeated"
+        cat repeat.out
+    fi
+    for len in 77 78 79; do
+        long=$(printf "%0${len}d" 0 | tr 0 l)
+        printf '%s\n' '---' "id: $long" 'scope: [README.md]' '---' '- [ ] x :: Question?' > "external/$long.md"
+        cp "external/$long.md" "external/other/$long.md"
+        set +e
+        "$QC" plan --checklist "external/$long.md" --checklist "external/other/$long.md" >long-dup.out 2>&1
+        long_dup=$?
+        "$QC" plan --checklist "external/$long.md" --checklist "./external/$long.md" >long-same.out 2>&1
+        long_same=$?
+        set -e
+        if [ "$long_dup" -eq 2 ] && grep -q 'NEXT:' long-dup.out && [ "$long_same" -eq 1 ] && [ "$(grep -c "^[0-9].*$long/x" long-same.out)" -eq 1 ]; then
+            say "a $len-character id collides across directories and loads once from one file"
+        else
+            bad "long id $len dup=$long_dup same=$long_same"
+            cat long-dup.out long-same.out
+        fi
+    done
+}
+
 need_qc
 run_case STK-REQ-001:AC-001 case_stk001_ac001
 run_case STK-REQ-001:AC-002 case_stk001_ac002
@@ -988,6 +1301,10 @@ run_case STK-REQ-007:AC-003 case_stk007_ac003
 run_case SW-REQ-001:expiry case_sw001_expiry
 run_case STK-REQ-001:cfg-error case_stk001_cfg_error
 run_case SW-REQ-261103-0004:local-templates case_local_templates
+run_case SW-REQ-261103-7f3a:copy case_template_set
+run_case SW-REQ-261103-7f3a:errors case_template_set_errors
+run_case SW-REQ-261103-7f3a:syntax case_template_syntax
+run_case SW-REQ-261103-9f2a:repeated-checklists case_repeated_checklists
 if [ -n "$ONLY" ] && [ "$ran" -eq 0 ]; then echo unknown_case >&2; exit 2; fi
 if [ "$fail" -ne 0 ]; then echo "$fail acceptance failures"; exit 1; fi
 echo "acceptance tests passed ($ran cases)"
