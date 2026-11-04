@@ -917,6 +917,28 @@ case_local_templates() {
     else
         bad "bundled template precedence/provenance"
     fi
+    # Frontmatter after leading blank lines (the parser skips them): the stamp goes into that block,
+    # so scope, expiry and an existing from: keep their meaning. LF and CRLF.
+    printf -- '\n\n---\nid: lead-lf\nscope: [storage/**]\nexpires: 1d\n---\n\n- [ ] keys :: Which keys?\n' > qc/templates/lead-lf.md
+    printf -- '\r\n---\r\nid: lead-crlf\r\nscope: [storage/**]\r\n---\r\n\r\n- [ ] keys :: Which keys?\r\n' > qc/templates/lead-crlf.md
+    printf -- '\n---\nid: lead-from\nfrom: org/shared@7\nscope: [storage/**]\n---\n\n- [ ] keys :: Which keys?\n' > qc/templates/lead-from.md
+    set +e
+    "$QC" add lead-lf > add.out 2>&1; c_lf=$?
+    "$QC" add lead-crlf > add.out 2>&1; c_crlf=$?
+    "$QC" add lead-from > add.out 2>&1; c_from=$?
+    set -e
+    after_open() { awk '/^---\r?$/ { getline; print; exit }' "$1"; }
+    if [ "$c_lf" -eq 0 ] && [ "$c_crlf" -eq 0 ] && [ "$c_from" -eq 0 ] &&
+        [ "$(after_open qc/checklists/lead-lf.md)" = 'from: local/lead-lf' ] &&
+        sed '/^from: local\/lead-lf$/d' qc/checklists/lead-lf.md | cmp -s qc/templates/lead-lf.md - &&
+        [ "$(after_open qc/checklists/lead-crlf.md)" = "from: local/lead-crlf${cr}" ] &&
+        sed "/^from: local\/lead-crlf${cr}$/d" qc/checklists/lead-crlf.md | cmp -s qc/templates/lead-crlf.md - &&
+        cmp -s qc/templates/lead-from.md qc/checklists/lead-from.md; then
+        say "frontmatter after leading blank lines gets the stamp in place, LF and CRLF"
+    else
+        bad "leading-blank frontmatter lf=$c_lf crlf=$c_crlf from=$c_from"
+        cat qc/checklists/lead-lf.md qc/checklists/lead-crlf.md qc/checklists/lead-from.md
+    fi
     set +e
     "$QC" add area-keys > add.out 2>&1
     code=$?

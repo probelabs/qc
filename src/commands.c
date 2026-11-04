@@ -44,14 +44,31 @@ static void stamp_from(char *body, size_t n, const char *id) {
 // Implements: SW-REQ-261103-0004
 static char *local_template_body(const char *path, const char *id) {
     char *raw = qc_read_file(path, NULL), *body;
-    const char *line, *end, *key, *nl = "\n";
+    const char *line, *end, *key, *nl = "\n", *sep = "";
     size_t offset = 0, n;
+    int fm = 0;
     if (!raw)
         qc_die(QC_CONFIG, "cannot read %s\nNEXT: check permissions, then qc add %s", path, id);
-    if (qc_startswith(raw, "---\n")) offset = 4;
-    else if (qc_startswith(raw, "---\r\n")) { offset = 5; nl = "\r\n"; }
+    /* The frontmatter opens at the first line that is exactly "---", as in
+     * qc_parse_checklist_file (blank lines before it are skipped there), so the
+     * stamp goes into the block the parser reads, never in front of it. */
+    for (line = raw; *line; line = end + 1) {
+        size_t len;
+        end = strchr(line, '\n');
+        if (!end) end = line + strlen(line);
+        len = (size_t)(end - line);
+        if (len && line[len - 1] == '\r') len--;
+        if (len == 3 && !strncmp(line, "---", 3)) {
+            fm = 1;
+            if (line[3] == '\r') nl = "\r\n";
+            offset = (size_t)(end - raw) + (*end ? 1 : 0);
+            if (!*end) sep = nl; /* "---" is the last line, with no newline */
+            break;
+        }
+        if (!*end) break;
+    }
     /* Only a frontmatter key supplies provenance; prose may mention "from:". */
-    for (line = raw + offset; offset && *line; line = end + 1) {
+    for (line = raw + offset; fm && *line; line = end + 1) {
         size_t len;
         end = strchr(line, '\n');
         if (!end) end = line + strlen(line);
@@ -70,8 +87,8 @@ static char *local_template_body(const char *path, const char *id) {
     n = strlen(raw) + strlen(id) + 32;
     body = malloc(n);
     if (!body) qc_die(QC_CONFIG, "out of memory\nNEXT: free memory, then qc add %s", id);
-    if (offset)
-        snprintf(body, n, "%.*sfrom: local/%s%s%s", (int)offset, raw, id, nl, raw + offset);
+    if (fm)
+        snprintf(body, n, "%.*s%sfrom: local/%s%s%s", (int)offset, raw, sep, id, nl, raw + offset);
     else
         snprintf(body, n, "---\nfrom: local/%s\n---\n%s", id, raw);
     free(raw);
