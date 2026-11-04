@@ -155,7 +155,22 @@ static int parse_item_line(QcChecklist *cl, char *line, char *err, size_t errn) 
     return 0;
 }
 
+// Implements: SW-REQ-261103-7f3a
+const char *qc_find_placeholder(const char *text) {
+    const char *open;
+    while ((open = strstr(text, "{{"))) {
+        const char *key = open + 2;
+        if ((*key >= 'A' && *key <= 'Z') || (*key >= 'a' && *key <= 'z') || *key == '_') {
+            const char *end = key + strspn(key, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789-");
+            if (end[0] == '}' && end[1] == '}') return open;
+        }
+        text = open + 1;
+    }
+    return NULL;
+}
+
 // Implements: SW-REQ-004
+// Implements: SW-REQ-261103-7f3a
 int qc_parse_checklist_file(const char *path, const char *fname, QcChecklist *cl, char *err, size_t errn) {
     char *raw, *line, *save = NULL;
     int in_fm = 0, seen_fm = 0;
@@ -171,6 +186,10 @@ int qc_parse_checklist_file(const char *path, const char *fname, QcChecklist *cl
     snprintf(cl->filename, sizeof cl->filename, "%s", stem);
     raw = qc_read_file(path, &n);
     if (!raw) { snprintf(err, errn, "cannot read %s", path); return -1; }
+    if (qc_find_placeholder(raw)) {
+        snprintf(err, errn, "unresolved template placeholder; replace {{key}} with literal values");
+        free(raw); return -1;
+    }
     for (line = strtok_r(raw, "\n", &save); line; line = strtok_r(NULL, "\n", &save)) {
         if (line[0] && line[strlen(line)-1] == '\r') line[strlen(line)-1] = 0; //mcdc:ignore:defensive strtok never yields an empty token so line[0] is constant T
         if (!strcmp(line, "---")) {

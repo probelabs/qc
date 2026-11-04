@@ -283,9 +283,14 @@ QcHelpRc qc_print_help(const char *topic) {
             "  qc init\n  qc template list\n");
     else if (!strcmp(topic, "add"))
         help_topic("add",
-            "Copy a bundled template into qc/checklists/. Minimal unless --full. Stamps from:.",
+            "Copy a bundled or repo-local template into qc/checklists/. Minimal unless --full. Bundled copies stamp from:.\n"
+            "  Repeat --set key=value to replace {{key}} literally at copy time. Last assignment wins.\n"
+            "  A qc placeholder is exactly {{key}}, with key matching [A-Za-z_][A-Za-z0-9_-]* (no spaces).\n"
+            "  Other braces, e.g. {{ key }}, {{.}}, {{ .Values.x }} or unclosed {{, pass through unchanged.\n"
+            "  Malformed assignments or unresolved qc placeholders (including in values) exit 2 before copying.\n"
+            "  Loaded checklists with unresolved qc placeholders also exit 2.",
             "Checklists compose by copying. Runtime inheritance would hide the truth in review (I7).",
-            "  qc template list\n  qc add <template>\n  qc add <template> --full\n  qc plan\n");
+            "  qc template list\n  qc add <template>\n  qc add <template> --full\n  qc add <template> --set <key>=<value>\n  qc plan\n");
     else if (!strcmp(topic, "template"))
         help_topic("template",
             "The gallery. list prints the menu; show prints the minimal file.",

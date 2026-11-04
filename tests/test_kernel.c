@@ -212,6 +212,55 @@ static void test_parse_unknown_anno(void) {
     expect(strstr(err, "unknown annotation") != NULL, "parse error names unknown annotation");
 }
 
+// Verifies: SW-REQ-261103-7f3a
+static void test_parse_unresolved_placeholders(void) {
+    char path[] = "tests/qc-placeholder-XXXXXX";
+    const char *bodies[] = {
+        "---\nid: area-keys\nscope: [{{area}}/**]\n---\n- [ ] keys :: Which keys?\n",
+        "---\nid: area-keys\n---\n- [ ] keys :: Which keys does {{area}} write?\n",
+        "---\nid: area-keys\n---\n- [ ] keys :: Which keys? @scope({{area}}/**)\n",
+        "---\nid: area-keys\n---\n- [ ] keys :: Which keys? @evidence({{area}}/keys.c:1)\n",
+        "---\nid: area-keys\n---\nReview {{area}} first.\n- [ ] keys :: Which keys?\n",
+        "---\nid: area-keys\n---\n- [ ] keys :: {{_Key-09}}\n",
+        "---\nid: area-keys\n---\n- [ ] keys :: {{Z}}\n",
+        "---\nid: area-keys\n---\n- [ ] keys :: {{.}} then {{area}}\n",
+        "---\nid: area-keys\n---\n- [ ] keys :: unclosed {{ then {{area}}\n"
+    };
+    const char *literal[] = {
+        "{{.}}", "{{ .Values.image }}", "{{ user }}", "{{ key }}",
+        "{{}}", "{{9key}}", "{{-key}}", "{{bad.key}}", "{{bad/key}}",
+        "{{k!}}", "{{area", "{{", "{{area}", "{{é}}"
+    };
+    QcChecklist cl;
+    char err[256], body[512];
+    int fd = mkstemp(path), i;
+    expect(fd >= 0, "create placeholder parser fixture");
+    if (fd < 0) return;
+    close(fd);
+    for (i = 0; i < (int)(sizeof bodies / sizeof bodies[0]); i++) {
+        qc_write_file(path, bodies[i]);
+        err[0] = 0;
+        expect(qc_parse_checklist_file(path, "area-keys.md", &cl, err, sizeof err) != 0,
+               "unresolved placeholder is a parse error before scope evaluation");
+        expect(strstr(err, "unresolved template placeholder") != NULL,
+               "parse error identifies the unresolved placeholder");
+    }
+    qc_write_file(path,
+        "---\nid: area-keys\nscope: [storage/**]\n---\n"
+        "- [ ] keys :: Which {keys} does storage write? @evidence(file:line)\n");
+    expect(qc_parse_checklist_file(path, "area-keys.md", &cl, err, sizeof err) == 0,
+           "resolved checklist and single braces still parse");
+    for (i = 0; i < (int)(sizeof literal / sizeof literal[0]); i++) {
+        snprintf(body, sizeof body, "---\nid: area-keys\n---\n- [ ] keys :: %s\n", literal[i]);
+        qc_write_file(path, body);
+        expect(qc_parse_checklist_file(path, "area-keys.md", &cl, err, sizeof err) == 0,
+               "non-qc template syntax parses as literal text");
+        expect(!strcmp(cl.items[0].question, literal[i]),
+               "non-qc template syntax is preserved in the question");
+    }
+    unlink(path);
+}
+
 // Verifies: SW-REQ-001
 // SW-REQ-001:boundary:nominal
 // SW-REQ-001:boundary:negative
@@ -2290,6 +2339,7 @@ int main(void) {
     test_status_json_relpath();
     test_parse_expires();
     test_parse_unknown_anno();
+    test_parse_unresolved_placeholders();
     test_expiry_eval();
     test_util_edges();
     test_find_root_and_git();

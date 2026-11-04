@@ -308,7 +308,9 @@ qc template show docs
 # …
 ```
 
-### `qc add <t> [--full]`
+<!-- Documents: SW-REQ-261103-7f3a -->
+
+### `qc add <t> [--full] [--set key=value]`
 
 Copies a template into `qc/checklists/`. Minimal by default; `--full` keeps every item.
 
@@ -321,6 +323,20 @@ qc add security-review --full
 ```
 
 Adapt after copy; there is no runtime `extends` (legibility beats DRY).
+
+For a template containing `{{area}}`, use `qc add area-keys --set area=storage`.
+Repeat `--set` for more keys; `--set=key=value` also works. Values are copied
+literally into every occurrence, including scopes and questions. Empty values are
+allowed, and the last assignment to a key wins. The source template is unchanged.
+A qc placeholder is exactly `{{key}}` where `key` matches
+`[A-Za-z_][A-Za-z0-9_-]*`, with no spaces, dots or other characters. Only this form
+is substituted. Values are never recursively expanded. Malformed assignments or
+unresolved qc placeholders, including any remaining after substitution, exit 2
+before copying. Loaded checklists containing unresolved qc placeholders also
+exit 2; fill in the values before running `qc plan`. Other brace text, including
+`{{ key }}`, `{{.}}`, `{{ .Values.x }}`, `{{ user }}` and an unclosed `{{`, passes
+through unchanged in templates and replacement values and is never a placeholder
+error.
 
 ### `qc plan [--json] [--checklist <path>]`
 
