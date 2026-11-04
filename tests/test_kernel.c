@@ -770,8 +770,39 @@ static void test_evidence_more(void) {
     expect(qc_evidence_ok(&cx, "key QWERTYuiopASDFGHjklZXCVBNm1234567890 line 1", why, sizeof why) != 0, "mixed-case blob with digits");
     expect(qc_evidence_ok(&cx, "blob xQzRtVbNmKjHgFdSaPoIuYtReWqLkJhGfDs line 1", why, sizeof why) != 0, "mixed-case blob, no digits");
     expect(qc_evidence_ok(&cx, "blob TestFooBarBazQuxQuuxCorgeGrault+Waldo line 1", why, sizeof why) != 0, "plus sign is base64");
-    expect(qc_evidence_ok(&cx, "blob TestFooBarBazQuxQuuxCorgeGraultWaldo1234 line 1", why, sizeof why) != 0, "four digits");
+    expect(qc_evidence_ok(&cx, "blob TestFooBar1BazQuxQuux2CorgeGrault3Waldo line 1", why, sizeof why) != 0, "three digit groups");
+    expect(qc_evidence_ok(&cx, "blob TestFooBarBazQuxQuuxCorgeGraultWaldo123456789 line 1", why, sizeof why) != 0, "nine digits");
+    expect(qc_evidence_ok(&cx, "TestEDC_RequestBodyTransformSucceedsXorFails_SW1426 line 3", why, sizeof why) == 0, "two digit groups");
     expect(qc_evidence_ok(&cx, "blob BCDFGHJKLMNPQRSTVWXZbcdfghjklmnpqrstvwxz line 1", why, sizeof why) != 0, "vowel-less runs");
+    /* identifier_run: short words, vowel-less abbreviations, plural and compound acronyms */
+    expect(qc_evidence_ok(&cx, "AddCACertificatesFromChainToPool line 3", why, sizeof why) == 0, "two-letter words");
+    expect(qc_evidence_ok(&cx, "ConvertApiDefinitionHeadersToHttpHeaders line 3", why, sizeof why) == 0, "Http");
+    expect(qc_evidence_ok(&cx, "resetJSONRPCRoutingAndProxyUpstream line 3", why, sizeof why) == 0, "compound acronym");
+    expect(qc_evidence_ok(&cx, "TestExtractFileReqIDsExportWithoutDecl line 3", why, sizeof why) == 0, "plural acronym");
+    /* random blobs that look partly word-like stay refused */
+    expect(qc_evidence_ok(&cx, "key wNjIvuf4HIlppdEorZuwdSMSIcqOonavb84Yjtty line 1", why, sizeof why) != 0, "AWS secret key shape");
+    expect(qc_evidence_ok(&cx, "key nVbQmXwErTyUiOpAsDfGhJkLzXcVbNmQwE line 1", why, sizeof why) != 0, "random letters");
+    expect(qc_evidence_ok(&cx, "key qzxwvkjhgfdsamnbpoiuytrewqlkjhgf line 1", why, sizeof why) != 0, "random lowercase");
+    expect(qc_evidence_ok(&cx, "key ZmaHIqmtdeaNWYxveteuCVJBQRSTUVWtaUlkr line 1", why, sizeof why) != 0, "acronym over 8 capitals");
+    expect(qc_evidence_ok(&cx, "key abandonmentabandonmentx line 1 abandonmentabandonmentx", why, sizeof why) == 0, "short runs are not blobs");
+    /* credential families with a fixed prefix are refused before any exemption */
+    expect(qc_evidence_ok(&cx, "token gho" "_AbcdefghijklmnopqrstuvwxyzAbcdefghij line 1", why, sizeof why) != 0, "gho_");
+    expect(qc_evidence_ok(&cx, "token ghu" "_AbcdefghijklmnopqrstuvwxyzAbcdefghij line 1", why, sizeof why) != 0, "ghu_");
+    expect(qc_evidence_ok(&cx, "token ghs" "_AbcdefghijklmnopqrstuvwxyzAbcdefghij line 1", why, sizeof why) != 0, "ghs_");
+    expect(qc_evidence_ok(&cx, "token ghr" "_AbcdefghijklmnopqrstuvwxyzAbcdefghij line 1", why, sizeof why) != 0, "ghr_");
+    expect(qc_evidence_ok(&cx, "token github" "_pat_AbcdefghijklmnopqrstuvwxyzAbcdefghij line 1", why, sizeof why) != 0, "github_pat_");
+    expect(qc_evidence_ok(&cx, "token xox" "b-123456789012-123456789012-AbCdEfGhIjKl line 1", why, sizeof why) != 0, "Slack xoxb-");
+    expect(qc_evidence_ok(&cx, "token xap" "p-1-A0123456789-0123456789-abcdef line 1", why, sizeof why) != 0, "Slack xapp-");
+    expect(qc_evidence_ok(&cx, "xoxb-tokens are revoked in 1 place", why, sizeof why) == 0, "xoxb- in prose");
+    expect(qc_evidence_ok(&cx, "key sk" "_live_AcknwThexyRaax7SjDp8tNti line 1", why, sizeof why) != 0, "Stripe sk_live_");
+    expect(qc_evidence_ok(&cx, "key rk" "_live_AcknwThexyRaax7SjDp8tNti line 1", why, sizeof why) != 0, "Stripe rk_live_");
+    expect(qc_evidence_ok(&cx, "jwt eyJhbGciOiJIUzI1NiJ9" ".eyJzdWIiOiIxIn0.8GutkL3m7m-tKyoug5nadImuB7y9KXcIPohgLoddlxI line 1", why, sizeof why) != 0, "JWT");
+    expect(qc_evidence_ok(&cx, "AKIAnotakey then AKIA" "IOSFODNN7EXAMPLE line 1", why, sizeof why) != 0, "second AKIA");
+    expect(qc_evidence_ok(&cx, "_sk" "-ant-api03-aB1cD2eF3gH4iJ5k-aB1cD2eF3gH4iJ5k-aB1cD2eF3gH4iJ5k_ line 1", why, sizeof why) != 0, "emphasised sk-ant-");
+    expect(qc_evidence_ok(&cx, "x-sk" "-aB1cD2eF3gH4iJ5kL6mN7 line 1", why, sizeof why) != 0, "sk- after a hyphen");
+    expect(qc_evidence_ok(&cx, "key sk" "-aB1cD2eF3gH4iJ5kL6m line 1", why, sizeof why) == 0, "sk- with a 19-char tail");
+    expect(qc_evidence_ok(&cx, "key sk" "-aB1cD2eF3gH4iJ5kL6mN line 1", why, sizeof why) != 0, "sk- with a 20-char tail");
+    expect(qc_evidence_ok(&cx, "1 desk-review-of-the-gateway-component-and-docs", why, sizeof why) == 0, "sk- inside a hyphenated word");
     /* prefixed_token (sk-): only at a token start with a long tail; ghp_ is refused anywhere */
     expect(qc_evidence_ok(&cx, "1 desk-review and task-42 in README", why, sizeof why) == 0, "sk- inside a word");
     expect(qc_evidence_ok(&cx, "sk-short in 1 place", why, sizeof why) == 0, "sk- with a short tail");

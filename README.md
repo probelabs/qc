@@ -446,7 +446,7 @@ Every `pass` / `fail` / `n_a` needs `-m` evidence. Shape check at mark time:
 
 - Rejects empty applause (`done`, `ok`, `lgtm`, … and `deny_evidence`).
 - Requires enough substance **and** at least one falsifiable token: an existing repo path, a digit, a URL, or a ``backticked`` span.
-- Refuses common secret shapes (AWS keys, `ghp_`, `sk-`, PEM blocks, high-entropy blobs).
+- Refuses common secret shapes (AWS keys, GitHub `gh*_` tokens, Slack `xox*-`, Stripe and `sk-` keys, JWTs, PEM blocks, high-entropy blobs). Long CamelCase test names and package paths are evidence, not blobs.
 
 ```bash
 qc mark docs/accuracy --pass -m "lgtm"

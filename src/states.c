@@ -41,40 +41,73 @@ static int has_repo_path(QcCtx *cx, const char *ev) {
     return 0;
 }
 
+/* Two-letter words and vowel-less abbreviations that appear as whole words in
+ * identifiers: AddCACertificatesFromChainToPool, ConvertHeadersToHttpHeaders. */
+static const char *const ident_short_words[] = {
+    "to", "is", "of", "at", "by", "go", "on", "or", "in", "up", "no", "do", "be",
+    "as", "if", "it", "id", "ok", "vs", "my", "we", "an", "me", "us",
+    "http", "https", "grpc", "dns", "ctx", "fmt", "str", "pkg", "cmd", "src", "msg",
+    "mgr", "svc", "xml", "sql", "tcp", "tls", "ssl", "jwt", "jwks", "rpc", "cfg",
+    "db", "fn", "sdk", "ws", "wss", "css", "html", "js", "ts", "tmp", "dst", "ptr",
+    "cnt", "tx", "rx", "kv", "ttl", "crl", "csr", "md", "mtls", "smtp", "ftp", "ssh",
+    "gql", "op", "co", "py", "gz", "cpp", "ui", NULL
+};
+
+/* One word of an identifier: a listed short word, or 2+ lowercase letters with a
+ * vowel, at most 4 consonants in a row and at most 20 letters (from 10 letters on,
+ * a quarter of them vowels). Random letters fail these within a few words. */
 // Implements: SW-REQ-006
-static int has_vowel(const char *s, int n) {
-    int i;
-    for (i = 0; i < n; i++)
-        if (strchr("aeiouyAEIOUY", s[i])) return 1;
-    return 0;
+static int ident_word_ok(const char *w, int n) {
+    char low[24];
+    int i, lower = 0, vowels = 0, run = 0, maxrun = 0;
+    if (n > 20) return 0;
+    for (i = 0; i < n; i++) low[i] = (char)tolower((unsigned char)w[i]);
+    low[n] = 0;
+    for (i = 0; ident_short_words[i]; i++)
+        if (!strcmp(low, ident_short_words[i])) return 1;
+    for (i = 0; i < n; i++) {
+        if (islower((unsigned char)w[i])) lower++;
+        if (strchr("aeiouy", low[i])) { vowels++; run = 0; }
+        else if (++run > maxrun) maxrun = run;
+    }
+    return lower >= 2 && vowels > 0 && maxrun <= 4 && (n < 10 || vowels * 4 >= n);
 }
 
 /* A long CamelCase / camelCase / path-like identifier (a Go test name, a package
- * path) is evidence, not a secret: at most 3 digits, no base64 '+' or '=', and
- * at least 70% of its letters in word-like segments (2+ lowercase letters with
- * a vowel, after an optional capital). Random mixed-case blobs fail the word
- * share, so they stay refused. An all-caps run before a lowercase run is an
- * acronym (its last capital starts the next word: APIList = API + List). */
+ * path) is evidence, not a secret. Every word must pass ident_word_ok, acronyms
+ * are at most 8 capitals (an all-caps run before a lowercase run ends at its last
+ * capital: APIList = API + List; a trailing s is a plural: IDs), there are at most
+ * 2 groups of digits (8 digits in all), and base64 '+' or '=' rules it out. In
+ * simulation about 0.02% of random 32-char base62 strings and 0.08% of random
+ * 32-letter strings still pass (none at 64), and about 1.3% of 30k real Go
+ * function names and import paths are still refused. */
 // Implements: SW-REQ-006
 static int identifier_run(const char *s, int n) {
-    int i = 0, letters = 0, wordy = 0, digits = 0;
+    int i = 0, letters = 0, digits = 0, groups = 0;
     while (i < n) {
         unsigned char c = (unsigned char)s[i];
-        int j, k;
+        int j, k, w;
         if (c == '+' || c == '=') return 0;
-        if (!isalpha(c)) { if (isdigit(c)) digits++; i++; continue; }
+        if (!isalpha(c)) {
+            if (isdigit(c)) {
+                digits++;
+                if (i == 0 || !isdigit((unsigned char)s[i - 1])) groups++;
+            }
+            i++;
+            continue;
+        }
         j = i;
         while (j < n && isupper((unsigned char)s[j])) j++;
         k = j;
         while (k < n && islower((unsigned char)s[k])) k++;
         letters += k - i;
-        if (k - j >= 2) {
-            int w = j > i ? j - 1 : j; /* the word starts at its capital, if any */
-            if (has_vowel(s + w, k - w)) wordy += k - w;
-        }
+        if (k == j + 1 && j - i >= 2 && s[j] == 's') { i = k; continue; } /* plural acronym: IDs, APIs */
+        w = (k > j && j - i >= 2) ? j - 1 : (k > j ? i : j); /* where the word starts */
+        if (w - i > 8) return 0;                                /* acronym too long */
+        if (k > j && !ident_word_ok(s + w, k - w)) return 0;
         i = k;
     }
-    return digits <= 3 && letters > 0 && wordy * 10 >= letters * 7;
+    return letters > 0 && digits <= 8 && groups <= 2;
 }
 
 // Implements: SW-REQ-006
@@ -89,16 +122,15 @@ static int benign_run(const char *s, int n) {
     return (snake && underscore) || hex || identifier_run(s, n);
 }
 
-/* A credential prefix counts only at the start of a token and followed by a
- * token-shaped tail of at least min characters: "sk-" inside "task-42" or
- * "desk-review" is prose, not an API key. */
+/* pre followed by at least min token characters ([A-Za-z0-9_-]). With word_start
+ * the prefix must not follow a letter or digit: "sk-" inside "task-42" or
+ * "desk-review" is prose, while "_sk-…" (markdown emphasis) is still a key. */
 // Implements: SW-REQ-006
-static int prefixed_token(const char *ev, const char *pre, int min) {
+static int prefixed_token(const char *ev, const char *pre, int min, int word_start) {
     const char *p = ev;
     size_t pl = strlen(pre);
     while ((p = strstr(p, pre)) != NULL) {
-        unsigned char b = p > ev ? (unsigned char)p[-1] : ' ';
-        if (!(isalnum(b) || b == '_' || b == '-')) {
+        if (!word_start || p == ev || !isalnum((unsigned char)p[-1])) {
             const char *q = p + pl;
             int k = 0;
             while (isalnum((unsigned char)q[k]) || q[k] == '_' || q[k] == '-') k++;
@@ -109,22 +141,55 @@ static int prefixed_token(const char *ev, const char *pre, int min) {
     return 0;
 }
 
+/* Credential families with a fixed prefix, refused before any identifier
+ * exemption applies: GitHub, Slack, Stripe, OpenAI/Anthropic keys. */
+static const struct { const char *pre; int min, word_start; } token_prefixes[] = {
+    { "gho_", 30, 0 }, { "ghu_", 30, 0 }, { "ghs_", 30, 0 }, { "ghr_", 30, 0 },
+    { "github_pat_", 30, 0 },
+    { "xoxb-", 10, 0 }, { "xoxp-", 10, 0 }, { "xoxa-", 10, 0 }, { "xoxr-", 10, 0 },
+    { "xoxs-", 10, 0 }, { "xoxe-", 10, 0 }, { "xapp-", 10, 0 },
+    { "sk_live_", 16, 0 }, { "rk_live_", 16, 0 }, { "sk_test_", 16, 0 }, { "rk_test_", 16, 0 },
+    { "sk-ant-", 20, 0 }, { "sk-proj-", 20, 0 }, { "sk-svcacct-", 20, 0 }, { "sk-admin-", 20, 0 },
+    { "sk-", 20, 1 },
+    { NULL, 0, 0 }
+};
+
+/* A JWT: eyJ<base64url>.eyJ<base64url>. — header and payload are base64 JSON
+ * objects, so both start with eyJ. The '-' in base64url splits the blob scan. */
+// Implements: SW-REQ-006
+static int jwt_hit(const char *ev) {
+    const char *p = ev;
+    while ((p = strstr(p, "eyJ")) != NULL) {
+        const char *q = p;
+        int a = 0, b = 0;
+        while (isalnum((unsigned char)*q) || *q == '_' || *q == '-') { q++; a++; }
+        if (a >= 10 && *q == '.' && !strncmp(q + 1, "eyJ", 3)) {
+            q++;
+            while (isalnum((unsigned char)*q) || *q == '_' || *q == '-') { q++; b++; }
+            if (b >= 10 && *q == '.') return 1;
+        }
+        p++;
+    }
+    return 0;
+}
+
 static int secret_hit(const char *ev) {
     /* common credential shapes — refuse, never print the token */
     const char *p;
-    if (strstr(ev, "AKIA")) {
-        p = strstr(ev, "AKIA");
-        if (p && strlen(p) >= 20) { //mcdc:ignore:defensive p is the strstr hit just proven non-NULL
-            int i, ok = 1;
-            for (i = 4; i < 20; i++) {
-                char c = p[i];
-                if (!(isdigit((unsigned char)c) || (c >= 'A' && c <= 'Z'))) { ok = 0; break; }
-            }
-            if (ok) return 1;
+    int t;
+    /* every AKIA, so a short decoy before a real key id does not hide it */
+    for (p = strstr(ev, "AKIA"); p; p = strstr(p + 1, "AKIA")) {
+        int i, ok = 1;
+        for (i = 4; i < 20; i++) { /* stops at the NUL of a short tail */
+            char c = p[i];
+            if (!(isdigit((unsigned char)c) || (c >= 'A' && c <= 'Z'))) { ok = 0; break; }
         }
+        if (ok) return 1;
     }
     if (strstr(ev, "ghp_")) return 1;
-    if (prefixed_token(ev, "sk-", 20)) return 1;
+    for (t = 0; token_prefixes[t].pre; t++)
+        if (prefixed_token(ev, token_prefixes[t].pre, token_prefixes[t].min, token_prefixes[t].word_start)) return 1;
+    if (jwt_hit(ev)) return 1;
     if (strstr(ev, "-----BEGIN") && strstr(ev, "PRIVATE KEY")) return 1;
     /* high-entropy blob >= 32. Lowercase snake_case identifiers, CamelCase test
      * names and package paths (identifier_run), and lowercase hex (a commit sha,

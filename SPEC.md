@@ -232,7 +232,7 @@ Validation stops at shape, deliberately. Judging content teaches agents to produ
 
 Evidence is normalized to a single line at mark time (§4.4.1) and may contain any characters — the .qcs format never requires escaping, so backticked commands, pipes, and quotes pass through verbatim.
 
-Secret scan: mark refuses evidence matching common credential shapes (AKIA[0-9A-Z]{16}, ghp_…, sk-…, -----BEGIN … PRIVATE KEY, ≥ 32-char high-entropy blobs). Evidence eventually becomes committed text; a pasted token is forever.
+Secret scan: mark refuses evidence matching common credential shapes (AKIA[0-9A-Z]{16}, ghp_… anywhere, gho_/ghu_/ghs_/ghr_/github_pat_, Slack xox*-/xapp-, Stripe sk_/rk_ live and test keys, sk-… at a token start and sk-ant-/sk-proj-… anywhere, JWTs, -----BEGIN … PRIVATE KEY, ≥ 32-char high-entropy blobs). A blob is spared only as lowercase hex (a sha), lowercase snake_case, or an identifier whose every word is word-like (CamelCase test names, package paths). Evidence eventually becomes committed text; a pasted token is forever.
 
 Statuses: --pass, --fail, --na — all with mandatory -m. @strict refuses --na. by is taken from --by, else $QC_BY, else the OS user. @human items refuse by=agent — a convention with teeth only via blame + CI (§16), and the spec says so.
 
